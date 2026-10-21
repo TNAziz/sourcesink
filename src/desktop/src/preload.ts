@@ -18,6 +18,7 @@ const api: DesktopApi = {
   confirmDiscard: (message, detail) => ipcRenderer.invoke("sourcesink:confirm", message, detail),
   setDocumentState: (state) => ipcRenderer.send("sourcesink:document-state", state),
   closeWindow: () => ipcRenderer.send("sourcesink:close-window"),
+  openManual: (url) => ipcRenderer.send("sourcesink:open-manual", url),
   onMenu(listener) {
     const h = (_e: IpcRendererEvent, action: MenuAction) => listener(action);
     ipcRenderer.on("sourcesink:menu", h);

@@ -16,7 +16,8 @@ export type MenuAction =
   | "undo"
   | "redo"
   | "run"
-  | "toggleTheme";
+  | "toggleTheme"
+  | "manual";
 
 export interface OpenedFile {
   path: string;
@@ -70,4 +71,7 @@ export interface DesktopApi {
   onMenu(listener: (action: MenuAction) => void): () => void;
   /** Subscribe to files opened by the OS while running (second launch). */
   onOpenPath(listener: (file: OpenedFile) => void): () => void;
+  /** Show the bundled user manual (a URL of the app's own PDF asset, with an
+   * optional `#nameddest=` fragment) in a separate window. */
+  openManual(url: string): void;
 }

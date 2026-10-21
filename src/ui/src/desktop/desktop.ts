@@ -44,6 +44,7 @@ export interface DesktopHandlers {
   openPath(name: string, content: string | Uint8Array, path: string): void;
   showExamples(): void;
   toggleTheme(): void;
+  openManual(): void;
 }
 
 /**
@@ -89,6 +90,8 @@ export function useDesktopIntegration(h: DesktopHandlers): void {
           return s.run();
         case "toggleTheme":
           return h.toggleTheme();
+        case "manual":
+          return h.openManual();
       }
     };
     const offMenu = api.onMenu(run);

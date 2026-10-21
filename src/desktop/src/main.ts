@@ -15,6 +15,7 @@ import { app, BrowserWindow, dialog, ipcMain, Menu, shell } from "electron";
 import type { MenuItemConstructorOptions } from "electron";
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 import type { MenuAction, OpenedFile, SaveRequest, SavedFile } from "./api.js";
 import { checkOpencode, createServerComplete, listModels } from "@sourcesink/assistant/node";
@@ -103,6 +104,8 @@ function buildMenu(): Menu {
     {
       label: "&Help",
       submenu: [
+        { label: "User Manual", accelerator: "F1", click: () => send("manual") },
+        { type: "separator" },
         {
           label: "About SourceSink",
           click: () =>
@@ -219,6 +222,50 @@ ipcMain.handle("sourcesink:confirm", async (_e, message: string, detail?: string
 ipcMain.on("sourcesink:document-state", (_e, state: { dirty: boolean; title: string }) => {
   dirty = state.dirty;
   win?.setTitle(state.title);
+});
+
+// The manual is a PDF bundled with the UI. Only the app's own PDFs may be
+// opened, in a separate window with Chromium's PDF viewer.
+let manualWin: BrowserWindow | null = null;
+
+function isOwnPdf(raw: string): boolean {
+  let url: URL;
+  try {
+    url = new URL(raw);
+  } catch {
+    return false;
+  }
+  if (!url.pathname.toLowerCase().endsWith(".pdf")) return false;
+  if (DEV_URL) return url.origin === new URL(DEV_URL).origin;
+  if (url.protocol !== "file:") return false;
+  const uiDir = path.resolve(__dirname, "../ui");
+  const file = path.resolve(fileURLToPath(url));
+  return file.startsWith(uiDir + path.sep);
+}
+
+ipcMain.on("sourcesink:open-manual", (_e, url: string) => {
+  if (typeof url !== "string" || !isOwnPdf(url)) return;
+  if (manualWin && !manualWin.isDestroyed()) {
+    void manualWin.loadURL(url);
+    manualWin.focus();
+    return;
+  }
+  manualWin = new BrowserWindow({
+    width: 980,
+    height: 1000,
+    title: "SourceSink manual",
+    icon: path.join(__dirname, "../build/icon.png"),
+    autoHideMenuBar: true,
+    webPreferences: { plugins: true, contextIsolation: true, nodeIntegration: false, sandbox: true },
+  });
+  manualWin.webContents.setWindowOpenHandler(({ url: target }) => {
+    if (/^https?:\/\//.test(target)) void shell.openExternal(target);
+    return { action: "deny" };
+  });
+  manualWin.on("closed", () => {
+    manualWin = null;
+  });
+  void manualWin.loadURL(url);
 });
 
 ipcMain.on("sourcesink:close-window", () => {
