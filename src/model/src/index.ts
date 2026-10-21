@@ -193,6 +193,21 @@ export interface Model {
   layout?: Record<string, Point>;
   metadata?: ModelMetadata;
   scenarios?: Scenario[];
+  /** Named groups of elements ("sectors"), drawn as frames that fold into a
+   * single box. Purely a view of the model: they never change results. */
+  sectors?: Sector[];
+}
+
+/** A named group of stocks, flows, converters and graph functions. An element
+ * belongs to at most one sector. */
+export interface Sector {
+  id: string;
+  name: string;
+  /** Element names, in display order. */
+  members: string[];
+  /** Folded into one box on the diagram. */
+  collapsed?: boolean;
+  documentation?: string;
 }
 
 /** A diagram coordinate (XMILE view units, y grows downward). */
@@ -276,6 +291,21 @@ export function validate(m: Model): string[] {
         if (other && other !== st.name) errors.push(`flow '${f}' is ${verb} of both '${other}' and '${st.name}'`);
         seenBy.set(f, st.name);
       }
+    }
+  }
+  // Sectors group existing elements, each element in at most one sector.
+  const sectorOf = new Map<string, string>();
+  const sectorNames = new Set<string>();
+  for (const sector of m.sectors ?? []) {
+    if (sectorNames.has(sector.name)) errors.push(`duplicate sector name: ${sector.name}`);
+    sectorNames.add(sector.name);
+    for (const member of sector.members) {
+      if (!seen.has(member)) errors.push(`sector '${sector.name}' lists unknown element '${member}'`);
+      const other = sectorOf.get(member);
+      if (other !== undefined && other !== sector.name) {
+        errors.push(`element '${member}' is in both sector '${other}' and '${sector.name}'`);
+      }
+      sectorOf.set(member, sector.name);
     }
   }
   const r = m.run;

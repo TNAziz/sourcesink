@@ -12,6 +12,7 @@ import type {
   Provenance,
   RunSpec,
   Scenario,
+  Sector,
   Stock,
 } from "@sourcesink/model";
 
@@ -228,6 +229,27 @@ export function readXmile(xml: string): Model {
     }
   }
 
+  // Sectors are standard XMILE groups: <group name><entity name/>...</group>.
+  const sectors: Sector[] = [];
+  for (const g of arr(vars.group)) {
+    const name = text(g?.["@_name"]).trim();
+    if (!name) continue;
+    const members: string[] = [];
+    for (const e of arr(g?.entity)) {
+      const member = resolveName(e?.["@_name"]);
+      if (member && !members.includes(member)) members.push(member);
+    }
+    const id = text(g?.["@_ss:id"]).trim() || `sector-${sectors.length + 1}`;
+    const doc = optional(text(g?.doc));
+    sectors.push({
+      id,
+      name,
+      members,
+      ...(bool(g?.["@_ss:collapsed"]) ? { collapsed: true } : {}),
+      ...(doc ? { documentation: doc } : {}),
+    });
+  }
+
   return {
     name: text(header.name) || "Untitled",
     stocks,
@@ -241,6 +263,7 @@ export function readXmile(xml: string): Model {
     ...(Object.keys(layout).length > 0 ? { layout } : {}),
     ...(metadata ? { metadata } : {}),
     ...(scenarios ? { scenarios } : {}),
+    ...(sectors.length > 0 ? { sectors } : {}),
   };
 }
 
@@ -288,6 +311,7 @@ export function writeXmile(model: Model): string {
   for (const f of model.flows) out.push(...elementLines(f, [], model));
   for (const c of model.converters) out.push(...elementLines(c, [], model));
   for (const g of model.graphFunctions) out.push(...gfLines(g, model));
+  for (const sector of model.sectors ?? []) out.push(...sectorLines(sector));
   out.push(indent(2, "</variables>"));
   out.push(...scenarioLines(model));
   out.push(...viewLines(model));
@@ -633,6 +657,16 @@ function esc(s: string): string {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&apos;");
+}
+
+function sectorLines(sector: Sector): string[] {
+  const attrs: Record<string, string> = { name: sector.name, "ss:id": sector.id };
+  if (sector.collapsed) attrs["ss:collapsed"] = "true";
+  const out = [indent(3, open("group", attrs))];
+  if (sector.documentation) out.push(indent(4, leaf("doc", {}, sector.documentation)));
+  for (const member of sector.members) out.push(indent(4, leaf("entity", { name: member })));
+  out.push(indent(3, "</group>"));
+  return out;
 }
 
 function open(name: string, attrs: Record<string, string>): string {

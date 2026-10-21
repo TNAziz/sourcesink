@@ -12,6 +12,8 @@ export const SIZES = {
   converter: { w: 128, h: 28 },
   valve: { w: 128, h: 26 },
   cloud: { w: 34, h: 24 },
+  /** A folded sector's card. */
+  sector: { w: 240, h: 92 },
 } as const;
 
 /** The box a layout entry refers to. Layout entries (saved files, legacy
@@ -23,6 +25,7 @@ export const ANCHORS = {
   converter: { w: 56, h: 56 },
   valve: { w: 30, h: 30 },
   cloud: { w: 48, h: 36 },
+  sector: { w: 240, h: 92 },
 } as const;
 
 /** Distance a derived cloud sits from its valve (center-to-center). */

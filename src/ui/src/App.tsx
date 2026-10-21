@@ -22,6 +22,7 @@ import {
   Redo2,
   Save,
   Spline,
+  Boxes,
   LayoutGrid,
   Link2,
   Sun,
@@ -126,6 +127,9 @@ function Palette() {
   const connectAll = useEditor((s) => s.connectAll);
   const showConstants = useEditor((s) => s.showConstants);
   const setShowConstants = useEditor((s) => s.setShowConstants);
+  const sectorCount = useEditor((s) => s.model.sectors?.length ?? 0);
+  const allFolded = useEditor((s) => Boolean(s.model.sectors?.length) && s.model.sectors!.every((x) => x.collapsed));
+  const setAllSectorsCollapsed = useEditor((s) => s.setAllSectorsCollapsed);
   return (
     <nav className="app-palette" aria-label="Tools">
       {PALETTE.map(({ tool: t, icon: Icon, label, key }) => (
@@ -170,6 +174,18 @@ function Palette() {
       >
         <Variable size={17} />
       </button>
+      {sectorCount > 0 ? (
+        <button
+          type="button"
+          className={`app-tool${allFolded ? " active" : ""}`}
+          data-tip={allFolded ? "Unfold all sectors · O" : "Overview: fold all sectors · O"}
+          aria-label={allFolded ? "Unfold all sectors (O)" : "Fold all sectors (O)"}
+          aria-pressed={allFolded}
+          onClick={() => setAllSectorsCollapsed(!allFolded)}
+        >
+          <Boxes size={17} />
+        </button>
+      ) : null}
     </nav>
   );
 }

@@ -3,18 +3,18 @@
  *
  * Counts pairs of drawn shapes (stocks, valve chips, converter pills) whose
  * boxes overlap, using the same positions the canvas draws (layout entries
- * plus auto-layout for anything without one). Pure, so it is cheap to test.
+ * plus auto-layout for anything without one, per sector when grouped). Pure, so it is cheap to test.
  */
 
 import type { Model, Point } from "@sourcesink/model";
-import { autoLayout } from "./autoLayout.js";
+import { diagramPositions } from "./sectorLayout.js";
 import { centerOf, SIZES } from "./geometry.js";
 
 type Kind = "stock" | "valve" | "converter";
 
 /** Overlapping element pairs (by name), at most `limit` of them. */
 export function overlappingPairs(m: Model, limit = 50): Array<[string, string]> {
-  const layout: Record<string, Point> = { ...(m.layout ?? {}), ...autoLayout(m) };
+  const layout: Record<string, Point> = diagramPositions(m);
   const boxes: Array<{ name: string; kind: Kind; c: Point }> = [];
   const add = (name: string, kind: Kind) => {
     const pos = layout[name];

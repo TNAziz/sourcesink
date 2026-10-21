@@ -532,3 +532,53 @@
   font-size: 11.5px;
   white-space: nowrap;
 }
+
+/* --- structure: arrays and sectors ------------------------------------------ */
+
+.insp-array-plan {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.insp-array-families {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+}
+
+.insp-array-families .insp-toggle span {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.insp-sector-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  align-items: center;
+  gap: 6px;
+}
+
+.insp-sector-row .insp-error {
+  grid-column: 1 / -1;
+}
+
+.insp-sector-count {
+  min-width: 2ch;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.insp-btn-small {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.insp-error {
+  color: var(--danger);
+  font-size: 12px;
+}

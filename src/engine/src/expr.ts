@@ -34,7 +34,7 @@ export interface EvalContext {
 
 export type Expr =
   | { type: "number"; value: number }
-  | { type: "ident"; name: string }
+  | { type: "ident"; name: string; subscript?: string[] }
   | { type: "unary"; op: "neg" | "pos" | "not"; operand: Expr }
   | { type: "binary"; op: BinaryOp; left: Expr; right: Expr }
   | { type: "if"; cond: Expr; then: Expr; els: Expr }
@@ -81,7 +81,7 @@ const IDENT_START = /[A-Za-z_]/;
 const IDENT_CHAR = /[A-Za-z0-9_]/;
 const NUMBER_RE = /\d+(\.\d*)?([eE][+-]?\d+)?|\.\d+([eE][+-]?\d+)?/y;
 const TWO_CHAR_OPS = new Set(["<=", ">=", "<>", "==", "!="]);
-const SINGLE_CHAR_OPS = new Set(["<", ">", "=", "+", "-", "*", "/", "^", "(", ")", ","]);
+const SINGLE_CHAR_OPS = new Set(["<", ">", "=", "+", "-", "*", "/", "^", "(", ")", ",", "[", "]"]);
 
 function tokenize(src: string): Token[] {
   const tokens: Token[] = [];
@@ -394,6 +394,28 @@ class Parser {
       }
 
       this.next();
+      // An array subscript: `Population[North]`, `rate[Region]`, `x[*, 2]`.
+      // Arrays are compiled to scalars before simulation (see arrays.ts), so
+      // this form matters to the analyses that read equations as written.
+      if (this.isOp("[")) {
+        this.next();
+        const subscript: string[] = [];
+        let item = "";
+        for (;;) {
+          const s = this.next();
+          if (s.type === "eof") this.fail("missing ']' after subscript");
+          if (s.type === "op" && s.value === "]") break;
+          if (s.type === "op" && s.value === ",") {
+            subscript.push(item.trim());
+            item = "";
+            continue;
+          }
+          item += s.value;
+        }
+        subscript.push(item.trim());
+        if (subscript.some((x) => x === "")) this.fail(`empty subscript in '${t.value}[...]'`);
+        return { type: "ident", name: t.value, subscript };
+      }
       return { type: "ident", name: t.value };
     }
 
@@ -425,7 +447,8 @@ export function evaluate(node: Expr, ctx: EvalContext): number {
     case "number":
       return node.value;
     case "ident":
-      return ctx.resolve(node.name);
+      // One array element by label resolves under its element name.
+      return ctx.resolve(node.subscript ? `${node.name}[${node.subscript.join(",")}]` : node.name);
     case "unary": {
       const v = evaluate(node.operand, ctx);
       if (node.op === "neg") return -v;

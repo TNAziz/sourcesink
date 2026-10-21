@@ -13,14 +13,15 @@
  */
 
 import { create } from "zustand";
-import type { Converter, Flow, Model, Point, Scenario, Stock } from "@sourcesink/model";
+import type { Converter, Flow, Model, Point, Scenario, Sector, Stock } from "@sourcesink/model";
 import { emptyModel } from "@sourcesink/model";
 import { simulate, type SimulationResult } from "@sourcesink/engine";
-import { applyScenario } from "@sourcesink/analysis";
-import { withInferredConnectors } from "@sourcesink/explain";
+import { applyScenario, convertToArrays, type ArrayDimensionPlan } from "@sourcesink/analysis";
+import { suggestSectors, withInferredConnectors } from "@sourcesink/explain";
 
 import { uniqueScenarioId, uniqueScenarioName } from "../inspector/scenarios";
 import { autoLayout } from "../canvas/autoLayout";
+import { placementAt } from "../canvas/sectorLayout";
 
 export type ElementKind = "stock" | "flow" | "converter";
 export type Tool = "select" | ElementKind | "connector";
@@ -78,6 +79,30 @@ export interface EditorState {
    * lacks, as one undo step; returns how many were added. */
   connectAll(): number;
   setShowConstants(show: boolean): void;
+
+  /** Turn families of repeated elements into arrays (one undo step); the
+   * results are unchanged. Returns an error message if the plan cannot be
+   * applied. */
+  convertToArrays(plans: ArrayDimensionPlan[]): string | null;
+
+  // --- sectors (named groups drawn as folding frames) ---
+  /** Replace every sector at once (one undo step). */
+  setSectors(sectors: Sector[]): void;
+  /** Group the model into suggested sectors, laid out afresh; returns how
+   * many sectors were made. */
+  suggestSectors(): number;
+  /** Fold or unfold one sector. */
+  toggleSector(id: string): void;
+  /** Fold (true) or unfold every sector, and refit the view. */
+  setAllSectorsCollapsed(collapsed: boolean): void;
+  /** Make a sector of `ids` (taking them out of any other); returns its id. */
+  addSector(name: string, ids: string[]): string;
+  /** Move elements into a sector (`null` = no sector). */
+  moveToSector(ids: string[], sectorId: string | null): void;
+  /** Returns an error message if the name is empty or taken. */
+  renameSector(id: string, name: string): string | null;
+  /** Remove the sector; its elements stay, ungrouped. */
+  deleteSector(id: string): void;
   newModel(): void;
   markSaved(fileName: string): void;
 
@@ -164,6 +189,19 @@ function replaceRef(eq: string, from: string, to: string): string {
 
 const clone = (m: Model): Model => structuredClone(m);
 
+/** Put element `name` into sector `sectorId` (or none), out of any other. */
+function joinSector(d: Model, name: string, sectorId: string | null): void {
+  for (const sector of d.sectors ?? []) {
+    sector.members = sector.members.filter((n) => n !== name);
+    if (sector.id === sectorId) sector.members.push(name);
+  }
+}
+
+function uniqueSectorId(m: Model): string {
+  const taken = new Set((m.sectors ?? []).map((s) => s.id));
+  for (let i = 1; ; i += 1) if (!taken.has(`sector-${i}`)) return `sector-${i}`;
+}
+
 export const useEditor = create<EditorState>()((set, get) => {
   /** Apply `fn` to a copy of the model as one undoable step. */
   const commit = (fn: (m: Model) => void, coalesceKey: string | null = null): void => {
@@ -241,6 +279,112 @@ export const useEditor = create<EditorState>()((set, get) => {
     setShowConstants(show) {
       set({ showConstants: show });
     },
+
+    convertToArrays(plans) {
+      const before = get().model;
+      let after: Model;
+      try {
+        after = convertToArrays(before, plans);
+      } catch (e) {
+        return e instanceof Error ? e.message : String(e);
+      }
+      // Sector members follow their family into the merged element.
+      const merged = new Map<string, string>();
+      for (const plan of plans) {
+        for (const fam of plan.families) for (const mem of fam.members) merged.set(mem.name, fam.base);
+      }
+      if (after.sectors) {
+        after = {
+          ...after,
+          sectors: after.sectors.map((sector) => ({
+            ...sector,
+            members: [...new Set(sector.members.map((n) => merged.get(n) ?? n))],
+          })),
+        };
+      }
+      get().applyModel(after);
+      set({ layoutVersion: get().layoutVersion + 1 });
+      return null;
+    },
+
+    setSectors(sectors) {
+      commit((d) => {
+        d.sectors = structuredClone(sectors);
+        if (d.sectors.length === 0) delete d.sectors;
+      });
+    },
+    suggestSectors() {
+      const sectors = suggestSectors(get().model);
+      // A new grouping starts from a fresh layout inside each sector.
+      commit((d) => {
+        d.sectors = sectors;
+        d.layout = {};
+      });
+      set({ layoutVersion: get().layoutVersion + 1 });
+      return sectors.length;
+    },
+    toggleSector(id) {
+      commit((d) => {
+        const sector = d.sectors?.find((s) => s.id === id);
+        if (!sector) return;
+        if (sector.collapsed) delete sector.collapsed;
+        else sector.collapsed = true;
+      });
+    },
+    setAllSectorsCollapsed(collapsed) {
+      commit((d) => {
+        for (const sector of d.sectors ?? []) {
+          if (collapsed) sector.collapsed = true;
+          else delete sector.collapsed;
+        }
+      });
+      set({ layoutVersion: get().layoutVersion + 1 });
+    },
+    addSector(name, ids) {
+      const m = get().model;
+      const id = uniqueSectorId(m);
+      const names = ids.map((x) => findEl(m, x)?.name).filter((n): n is string => Boolean(n));
+      commit((d) => {
+        for (const sector of d.sectors ?? []) sector.members = sector.members.filter((n) => !names.includes(n));
+        d.sectors = [...(d.sectors ?? []).filter((s) => s.members.length > 0), { id, name, members: names }];
+        // Positions were relative to the old blocks; re-place in the new one.
+        if (d.layout) for (const n of names) delete d.layout[n];
+      });
+      return id;
+    },
+    moveToSector(ids, sectorId) {
+      const m = get().model;
+      const names = ids.map((x) => findEl(m, x)?.name).filter((n): n is string => Boolean(n));
+      commit((d) => {
+        for (const n of names) {
+          joinSector(d, n, sectorId);
+          if (d.layout) delete d.layout[n];
+        }
+        if (d.sectors) d.sectors = d.sectors.filter((s) => s.members.length > 0);
+      });
+    },
+    renameSector(id, name) {
+      const trimmed = name.trim();
+      if (!trimmed) return "A sector needs a name";
+      const sectors = get().model.sectors ?? [];
+      if (sectors.some((s) => s.id !== id && s.name.toLowerCase() === trimmed.toLowerCase())) {
+        return "Another sector already has that name";
+      }
+      commit((d) => {
+        const sector = d.sectors?.find((s) => s.id === id);
+        if (sector) sector.name = trimmed;
+      }, `rename-sector:${id}`);
+      return null;
+    },
+    deleteSector(id) {
+      commit((d) => {
+        const sector = d.sectors?.find((s) => s.id === id);
+        if (!sector) return;
+        if (d.layout) for (const n of sector.members) delete d.layout[n];
+        d.sectors = d.sectors!.filter((s) => s.id !== id);
+        if (d.sectors.length === 0) delete d.sectors;
+      });
+    },
     applyModel(model) {
       const { model: current, past } = get();
       lastCoalesceKey = null;
@@ -269,6 +413,7 @@ export const useEditor = create<EditorState>()((set, get) => {
       const id = newId(kind);
       const base = kind === "stock" ? "Stock" : kind === "flow" ? "flow" : "converter";
       const name = uniqueName(m, base);
+      const place = placementAt(m, at);
       commit((d) => {
         if (kind === "stock") {
           d.stocks.push({ kind, id, name, equation: "0", inflows: [], outflows: [] });
@@ -277,7 +422,8 @@ export const useEditor = create<EditorState>()((set, get) => {
         } else {
           d.converters.push({ kind, id, name, equation: "0" });
         }
-        d.layout = { ...(d.layout ?? {}), [name]: at };
+        d.layout = { ...(d.layout ?? {}), [name]: place.at };
+        joinSector(d, name, place.sectorId);
       });
       set({ selection: [id], tool: "select" });
       return id;
@@ -286,13 +432,15 @@ export const useEditor = create<EditorState>()((set, get) => {
     addFlow(fromStockId, toStockId, at) {
       const id = newId("flow");
       const name = uniqueName(get().model, "flow");
+      const place = placementAt(get().model, at);
       commit((d) => {
         d.flows.push({ kind: "flow", id, name, equation: "0" });
         for (const st of d.stocks) {
           if (st.id === fromStockId) st.outflows = [...(st.outflows ?? []), id];
           if (st.id === toStockId) st.inflows = [...(st.inflows ?? []), id];
         }
-        d.layout = { ...(d.layout ?? {}), [name]: at };
+        d.layout = { ...(d.layout ?? {}), [name]: place.at };
+        joinSector(d, name, place.sectorId);
       });
       set({ selection: [id], tool: "select" });
       return id;
@@ -337,6 +485,9 @@ export const useEditor = create<EditorState>()((set, get) => {
           d.layout[name] = d.layout[old];
           delete d.layout[old];
         }
+        for (const sector of d.sectors ?? []) {
+          sector.members = sector.members.map((n) => (n === old ? name : n));
+        }
         if (old in d.arrayed) {
           d.arrayed[name] = d.arrayed[old];
           delete d.arrayed[old];
@@ -366,6 +517,10 @@ export const useEditor = create<EditorState>()((set, get) => {
           s.outflows = (s.outflows ?? []).filter((f) => !drop.has(f));
         }
         if (d.layout) for (const n of names) delete d.layout[n];
+        if (d.sectors) {
+          for (const sector of d.sectors) sector.members = sector.members.filter((n) => !names.has(n));
+          d.sectors = d.sectors.filter((sector) => sector.members.length > 0);
+        }
       });
       set({ selection: get().selection.filter((s) => !drop.has(s)) });
     },

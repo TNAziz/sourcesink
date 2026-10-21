@@ -32,6 +32,7 @@ import { ProvenanceField } from "./ProvenanceField";
 import { UnitWarnings } from "./UnitWarnings";
 import { ScenariosPanel } from "./ScenariosPanel";
 import { MissingLinksNote, ParametersPanel } from "./ParametersPanel";
+import { ArraySuggestionPanel, GroupAsSector, SectorField, SectorsPanel } from "./StructurePanels";
 import "./inspector.css";
 
 /** The three element kinds the inspector can edit. */
@@ -96,6 +97,8 @@ function ModelOverview({ model }: { model: Model }) {
       ) : null}
 
       <MissingLinksNote />
+      <ArraySuggestionPanel />
+      <SectorsPanel />
       <RunSpecPanel />
       <ParametersPanel />
       <DimensionsPanel />
@@ -126,6 +129,7 @@ function MultiSelection({ ids }: { ids: string[] }) {
   return (
     <div className="insp-panel">
       <p className="insp-multi">{ids.length} elements selected</p>
+      <GroupAsSector ids={ids} />
       <button
         type="button"
         className="insp-btn insp-delete"
@@ -185,6 +189,7 @@ function ElementEditor({ el }: { el: Editable }) {
         onCommit={(units) => updateElement(el.id, { units })}
       />
       <UnitWarnings element={el.name} />
+      <SectorField id={el.id} name={el.name} />
       <TextField
         label="Documentation"
         value={el.documentation ?? ""}

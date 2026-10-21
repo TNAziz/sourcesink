@@ -161,8 +161,9 @@ structure and long crossing links.
 | Show or hide constants; parameter table | Done | Plain constants collapse to small tags or a side table, decluttering the diagram |
 | Validator warning for unlinked models | Done | Models (including AI-built ones) with no connectors are flagged |
 | Focus mode | Idea | Highlight what feeds and is fed by the selected element; dim the rest |
-| Sectors | Idea | Named, colored regions that collapse to one box; suggested automatically from clusters of tightly linked elements |
-| Array suggestions | Idea | Detect repeated per-unit structure (`Area_1` … `Area_4`) and offer to convert it to arrays |
+| Sectors | Done | Named frames (XMILE groups) that fold into one card, with a fold-all overview; suggested from material chains and the links around them |
+| Array suggestions | Done | Detects repeated per-unit structure (`Area_1` … `Area_4`) and converts it to arrays with unchanged results |
+| Better sector suggestions | Idea | Smarter grouping for models whose material chains are tightly coupled (one large sector today) |
 | Ghost copies | Idea | Duplicate a widely used value next to each consumer instead of drawing long lines |
 | Multiple views | Idea | Separate diagram pages for parts of one model (XMILE supports this) |
 | Zoom-dependent detail and a minimap | Idea | Sector boxes and main flows when zoomed out; detail when zoomed in |

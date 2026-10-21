@@ -15,6 +15,19 @@ function twoTanks(): Model {
 }
 
 describe("validate", () => {
+  it("checks sectors: known members, one sector per element, unique names", () => {
+    const m = twoTanks();
+    m.sectors = [{ id: "s1", name: "Upstream", members: ["A", "move"] }];
+    expect(validate(m)).toEqual([]);
+    m.sectors.push({ id: "s2", name: "Upstream", members: ["A", "ghost"] });
+    expect(validate(m)).toEqual([
+      "duplicate sector name: Upstream",
+      "sector 'Upstream' lists unknown element 'ghost'",
+    ]);
+    m.sectors[1].name = "Downstream";
+    expect(validate(m)).toContain("element 'A' is in both sector 'Upstream' and 'Downstream'");
+  });
+
   it("accepts a well-formed model", () => {
     expect(validate(twoTanks())).toEqual([]);
   });

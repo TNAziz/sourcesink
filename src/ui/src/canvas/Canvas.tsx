@@ -27,7 +27,7 @@ import {
 } from "@xyflow/react";
 import type { Point } from "@sourcesink/model";
 import { useEditor } from "../state/store";
-import { CloudNode, ConverterNode, StockNode, ValveNode } from "./nodes";
+import { CloudNode, ConverterNode, SectorCardNode, SectorFrameNode, StockNode, ValveNode } from "./nodes";
 import { BowEdge, PipeEdge } from "./edges";
 import { edgeElementId, isCloudId, selectionIds, toFlow } from "./toFlow";
 import { layoutFromNode, mid, topLeftOf } from "./geometry";
@@ -39,6 +39,8 @@ import "./canvas.css";
 const nodeTypes: NodeTypes = {
   "sd-stock": StockNode,
   "sd-converter": ConverterNode,
+  "sd-sector-frame": SectorFrameNode,
+  "sd-sector-card": SectorCardNode,
   "sd-valve": ValveNode,
   "sd-cloud": CloudNode,
 };
@@ -119,10 +121,17 @@ function TidyHint() {
   );
 }
 
-/** A dragged node's position as a layout entry (see ANCHORS in geometry). */
+/** Offsets of elements drawn inside sector blocks (see sectorLayout); the
+ * latest projection's, read by the drag handlers. */
+let currentOffsets: Record<string, Point> = {};
+
+/** A dragged node's position as a layout entry (see ANCHORS in geometry);
+ * relative to its sector block when it has one. */
 function layoutPoint(node: Node): { x: number; y: number } {
   const kind = node.type === "sd-stock" ? "stock" : node.type === "sd-converter" ? "converter" : "valve";
-  return layoutFromNode(node.position, kind);
+  const p = layoutFromNode(node.position, kind);
+  const o = currentOffsets[node.id];
+  return o ? { x: p.x - o.x, y: p.y - o.y } : p;
 }
 
 export function Canvas({ colorMode = "system" }: { colorMode?: "light" | "dark" | "system" }) {
@@ -134,10 +143,11 @@ export function Canvas({ colorMode = "system" }: { colorMode?: "light" | "dark" 
 
   const { toasts, push } = useToasts();
 
-  const { nodes, edges } = useMemo(
+  const { nodes, edges, offsets } = useMemo(
     () => toFlow(model, { selection, result, hideConstants: !showConstants }),
     [model, selection, result, showConstants],
   );
+  currentOffsets = offsets;
 
   const wrapRef = useRef<HTMLDivElement>(null);
   const rfRef = useRef<ReactFlowInstance | null>(null);

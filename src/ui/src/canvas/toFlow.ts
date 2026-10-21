@@ -12,6 +12,7 @@ import { MarkerType, type Edge, type Node } from "@xyflow/react";
 import type { Model, Point } from "@sourcesink/model";
 import type { SimulationResult } from "@sourcesink/engine";
 import { autoLayout } from "./autoLayout.js";
+import { liveSectors, sectorLayout } from "./sectorLayout.js";
 import { withoutConstants } from "../inspector/parameters.js";
 import {
   CLOUD_OFFSET,
@@ -55,6 +56,20 @@ export interface ValveNodeData extends Record<string, unknown> {
 export interface CloudNodeData extends Record<string, unknown> {
   flow: string;
 }
+/** An open sector's frame, drawn behind its elements. */
+export interface SectorFrameData extends Record<string, unknown> {
+  sectorId: string;
+  name: string;
+  count: number;
+}
+/** A folded sector: one card standing for all its elements. */
+export interface SectorCardData extends Record<string, unknown> {
+  sectorId: string;
+  name: string;
+  stocks: number;
+  flows: number;
+  converters: number;
+}
 /** Exact pipe endpoints (flow coordinates), boundary to boundary. */
 export interface PipeEdgeData extends Record<string, unknown> {
   a: Point;
@@ -77,6 +92,18 @@ export interface ToFlowOptions {
 export interface FlowDiagram {
   nodes: Node[];
   edges: Edge[];
+  /** Element id → offset between its drawn and saved position (sector
+   * blocks); subtract it when saving a dragged position. */
+  offsets: Record<string, Point>;
+}
+
+/** Node id of a folded sector's card. */
+export function sectorCardId(sectorId: string): string {
+  return `sector:${sectorId}`;
+}
+
+export function isSectorNodeId(id: string): boolean {
+  return id.startsWith("sector:") || id.startsWith("frame:");
 }
 
 /** Derived cloud node id for the stock-less end of a flow. */
@@ -130,19 +157,72 @@ export function toFlow(model: Model, opts: ToFlowOptions = {}): FlowDiagram {
   const m = opts.hideConstants ? withoutConstants(model) : model;
   const sel = new Set(opts.selection ?? []);
   const result = opts.result ?? null;
-  const positions: Record<string, Point> = { ...(m.layout ?? {}), ...autoLayout(m) };
+  const grouped = liveSectors(m).length > 0 ? sectorLayout(m) : null;
+  const positions: Record<string, Point> = grouped ? grouped.positions : { ...(m.layout ?? {}), ...autoLayout(m) };
   const posOf = (name: string): Point => positions[name] ?? { x: 0, y: 0 };
+  const hiddenBy = grouped?.hiddenBy ?? new Map<string, string>();
+  const isHidden = (name: string): boolean => hiddenBy.has(name);
 
   const idByName = new Map<string, string>();
   for (const e of [...m.stocks, ...m.flows, ...m.converters]) idByName.set(e.name, e.id);
 
   const nodes: Node[] = [];
   const edges: Edge[] = [];
+  const offsets: Record<string, Point> = {};
+  const cardCenter = new Map<string, Point>();
+
+  // --- sectors: frames behind open ones, a card for each folded one ------------
+  for (const block of grouped?.blocks ?? []) {
+    if (block.id === null) continue;
+    const size = { width: block.w, height: block.h, style: { width: `${block.w}px`, height: `${block.h}px` } };
+    if (block.collapsed) {
+      const id = sectorCardId(block.id);
+      cardCenter.set(id, { x: block.x + block.w / 2, y: block.y + block.h / 2 });
+      const count = (pred: (n: string) => boolean) => block.members.filter(pred).length;
+      nodes.push({
+        id,
+        type: "sd-sector-card",
+        position: { x: block.x, y: block.y },
+        ...size,
+        draggable: false,
+        selectable: false,
+        data: {
+          sectorId: block.id,
+          name: block.name,
+          stocks: count((n) => m.stocks.some((s) => s.name === n)),
+          flows: count((n) => m.flows.some((f) => f.name === n)),
+          converters: count((n) => m.converters.some((c) => c.name === n)),
+        } satisfies SectorCardData,
+      });
+    } else {
+      nodes.push({
+        id: `frame:${block.id}`,
+        type: "sd-sector-frame",
+        position: { x: block.x, y: block.y },
+        ...size,
+        zIndex: -1,
+        draggable: false,
+        selectable: false,
+        focusable: false,
+        data: { sectorId: block.id, name: block.name, count: block.members.length } satisfies SectorFrameData,
+      });
+    }
+  }
+  for (const [name, offset] of Object.entries(grouped?.offsets ?? {})) {
+    const id = idByName.get(name);
+    if (id) offsets[id] = offset;
+  }
+  /** The node standing for an element: itself, or its folded sector's card. */
+  const nodeFor = (name: string): string => {
+    const s = hiddenBy.get(name);
+    return s !== undefined ? sectorCardId(s) : idByName.get(name)!;
+  };
   /** Pipe segments (boundary to boundary) for connector clearance checks. */
   const pipeSegments: Segment[] = [];
 
   const kindOf = (id: string): keyof typeof SIZES => {
     if (isCloudId(id)) return "cloud";
+    if (id.startsWith("sector:")) return "sector";
     const el = m.stocks.find((s) => s.id === id) ?? m.flows.find((f) => f.id === id) ?? m.converters.find((c) => c.id === id);
     return el?.kind === "stock" ? "stock" : el?.kind === "converter" ? "converter" : "valve";
   };
@@ -154,6 +234,7 @@ export function toFlow(model: Model, opts: ToFlowOptions = {}): FlowDiagram {
 
   // --- stocks ---------------------------------------------------------------
   for (const s of m.stocks) {
+    if (isHidden(s.name)) continue;
     const b = box("stock");
     nodes.push({
       id: s.id,
@@ -176,6 +257,7 @@ export function toFlow(model: Model, opts: ToFlowOptions = {}): FlowDiagram {
 
   // --- converters -------------------------------------------------------------
   for (const c of m.converters) {
+    if (isHidden(c.name)) continue;
     const b = box("converter");
     nodes.push({
       id: c.id,
@@ -195,64 +277,10 @@ export function toFlow(model: Model, opts: ToFlowOptions = {}): FlowDiagram {
   }
 
   // --- flows: valve node + derived clouds + pipe segments ---------------------
+  const crossing = new Set<string>();
   for (const f of m.flows) {
-    const valvePos = posOf(f.name);
-    const vc = centerOf(valvePos, "valve");
-    const vb = box("valve");
-    nodes.push({
-      id: f.id,
-      type: "sd-valve",
-      position: nodeTopLeft(vc, "valve"),
-      width: vb.width,
-      height: vb.height,
-      style: vb.style,
-      data: { name: f.name, biflow: f.biflow ?? false } satisfies ValveNodeData,
-      selected: sel.has(f.id),
-    });
-
     const src = m.stocks.find((s) => (s.outflows ?? []).includes(f.id)) ?? null;
     const snk = m.stocks.find((s) => (s.inflows ?? []).includes(f.id)) ?? null;
-    const srcC = src ? centerOf(posOf(src.name), "stock") : null;
-    const snkC = snk ? centerOf(posOf(snk.name), "stock") : null;
-
-    // A cloud sits CLOUD_OFFSET beyond the valve on the axis pointing away
-    // from the attached stock (straight up/down for a valve above/below it,
-    // straight left/right otherwise), so cloud pipes never run diagonally
-    // across each other. Left/right when there is no stock.
-    const cloudAt = (anchor: Point | null, sign: number): Point => {
-      if (anchor) {
-        const dx = vc.x - anchor.x;
-        const dy = vc.y - anchor.y;
-        if (Math.abs(dy) > Math.abs(dx)) return { x: vc.x, y: vc.y + Math.sign(dy) * CLOUD_OFFSET };
-        if (Math.abs(dx) > 1) return { x: vc.x + Math.sign(dx) * CLOUD_OFFSET, y: vc.y };
-      }
-      return { x: vc.x + sign * CLOUD_OFFSET, y: vc.y };
-    };
-
-    const srcId = src ? src.id : cloudId("src", f.id);
-    const snkId = snk ? snk.id : cloudId("snk", f.id);
-    const srcCenter = srcC ?? cloudAt(snkC, -1);
-    const snkCenter = snkC ?? cloudAt(srcC, 1);
-
-    for (const side of ["src", "snk"] as const) {
-      if (side === "src" ? src : snk) continue;
-      const center = side === "src" ? srcCenter : snkCenter;
-      const b = box("cloud");
-      nodes.push({
-        id: cloudId(side, f.id),
-        type: "sd-cloud",
-        position: nodeTopLeft(center, "cloud"),
-        width: b.width,
-        height: b.height,
-        style: b.style,
-        draggable: false,
-        selectable: false,
-        deletable: false,
-        focusable: false,
-        data: { flow: f.name } satisfies CloudNodeData,
-      });
-    }
-
     const pipe = (
       id: string,
       fromId: string,
@@ -303,6 +331,81 @@ export function toFlow(model: Model, opts: ToFlowOptions = {}): FlowDiagram {
         interactionWidth: 16,
       };
     };
+    // A flow inside a folded sector: only the pipes that cross the card's
+    // edge are drawn, once per pair of nodes.
+    if (isHidden(f.name)) {
+      const card = nodeFor(f.name);
+      const cc = cardCenter.get(card)!;
+      const endCenter = (s: { name: string }): Point =>
+        isHidden(s.name) ? cardCenter.get(nodeFor(s.name))! : centerOf(posOf(s.name), "stock");
+      if (src && nodeFor(src.name) !== card && !crossing.has(`${nodeFor(src.name)}>${card}`)) {
+        crossing.add(`${nodeFor(src.name)}>${card}`);
+        edges.push(pipe(`pipe:${f.id}:a`, nodeFor(src.name), endCenter(src), card, cc, true));
+      }
+      if (snk && nodeFor(snk.name) !== card && !crossing.has(`${card}>${nodeFor(snk.name)}`)) {
+        crossing.add(`${card}>${nodeFor(snk.name)}`);
+        edges.push(pipe(`pipe:${f.id}:b`, card, cc, nodeFor(snk.name), endCenter(snk), true));
+      }
+      continue;
+    }
+
+    const valvePos = posOf(f.name);
+    const vc = centerOf(valvePos, "valve");
+    const vb = box("valve");
+    nodes.push({
+      id: f.id,
+      type: "sd-valve",
+      position: nodeTopLeft(vc, "valve"),
+      width: vb.width,
+      height: vb.height,
+      style: vb.style,
+      data: { name: f.name, biflow: f.biflow ?? false } satisfies ValveNodeData,
+      selected: sel.has(f.id),
+    });
+
+    const stockCenter = (st: { name: string }): Point =>
+      isHidden(st.name) ? cardCenter.get(nodeFor(st.name))! : centerOf(posOf(st.name), "stock");
+    const srcC = src ? stockCenter(src) : null;
+    const snkC = snk ? stockCenter(snk) : null;
+
+    // A cloud sits CLOUD_OFFSET beyond the valve on the axis pointing away
+    // from the attached stock (straight up/down for a valve above/below it,
+    // straight left/right otherwise), so cloud pipes never run diagonally
+    // across each other. Left/right when there is no stock.
+    const cloudAt = (anchor: Point | null, sign: number): Point => {
+      if (anchor) {
+        const dx = vc.x - anchor.x;
+        const dy = vc.y - anchor.y;
+        if (Math.abs(dy) > Math.abs(dx)) return { x: vc.x, y: vc.y + Math.sign(dy) * CLOUD_OFFSET };
+        if (Math.abs(dx) > 1) return { x: vc.x + Math.sign(dx) * CLOUD_OFFSET, y: vc.y };
+      }
+      return { x: vc.x + sign * CLOUD_OFFSET, y: vc.y };
+    };
+
+    const srcId = src ? nodeFor(src.name) : cloudId("src", f.id);
+    const snkId = snk ? nodeFor(snk.name) : cloudId("snk", f.id);
+    const srcCenter = srcC ?? cloudAt(snkC, -1);
+    const snkCenter = snkC ?? cloudAt(srcC, 1);
+
+    for (const side of ["src", "snk"] as const) {
+      if (side === "src" ? src : snk) continue;
+      const center = side === "src" ? srcCenter : snkCenter;
+      const b = box("cloud");
+      nodes.push({
+        id: cloudId(side, f.id),
+        type: "sd-cloud",
+        position: nodeTopLeft(center, "cloud"),
+        width: b.width,
+        height: b.height,
+        style: b.style,
+        draggable: false,
+        selectable: false,
+        deletable: false,
+        focusable: false,
+        data: { flow: f.name } satisfies CloudNodeData,
+      });
+    }
+
     edges.push(pipe(`pipe:${f.id}:a`, srcId, srcCenter, f.id, vc, false));
     // The sink segment carries the direction arrow where it enters the stock/cloud.
     edges.push(pipe(`pipe:${f.id}:b`, f.id, vc, snkId, snkCenter, true));
@@ -314,12 +417,17 @@ export function toFlow(model: Model, opts: ToFlowOptions = {}): FlowDiagram {
   for (const f of m.flows) centerByName.set(f.name, centerOf(posOf(f.name), "valve"));
   for (const c of m.converters) centerByName.set(c.name, centerOf(posOf(c.name), "converter"));
 
+  // Links into or out of a folded sector attach to its card, once per pair.
+  const drawnLinks = new Set<string>();
   for (const c of m.connectors) {
-    const fromId = idByName.get(c.from);
-    const toId = idByName.get(c.to);
-    const fromC = centerByName.get(c.from);
-    const toC = centerByName.get(c.to);
-    if (!fromId || !toId || !fromC || !toC || fromId === toId) continue;
+    if (!idByName.has(c.from) || !idByName.has(c.to)) continue;
+    const fromId = nodeFor(c.from);
+    const toId = nodeFor(c.to);
+    const fromC = cardCenter.get(fromId) ?? centerByName.get(c.from);
+    const toC = cardCenter.get(toId) ?? centerByName.get(c.to);
+    if (!fromC || !toC || fromId === toId) continue;
+    if (drawnLinks.has(`${fromId}>${toId}`)) continue;
+    drawnLinks.add(`${fromId}>${toId}`);
     const h = pickHandle(fromC, toC);
     const fromSide = h.sourceHandle.slice(2) as "l" | "r" | "t" | "b";
     const toSide = h.targetHandle.slice(2) as "l" | "r" | "t" | "b";
@@ -345,5 +453,5 @@ export function toFlow(model: Model, opts: ToFlowOptions = {}): FlowDiagram {
     });
   }
 
-  return { nodes, edges };
+  return { nodes, edges, offsets };
 }

@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  collectReferences,
+  evaluate,
   evaluateExpression,
   ParseError,
   parse,
@@ -169,5 +171,27 @@ describe("IF with a parenthesised condition", () => {
     expect(evaluateExpression("if (2 > 1 AND 3 > 2) then 10 else 20", ctx())).toBe(10);
     expect(evaluateExpression("IF (1 > 2) THEN 10 ELSE 20", ctx())).toBe(20);
     expect(evaluateExpression("IF(1 > 2, 10, 20)", ctx())).toBe(20);
+  });
+});
+
+describe("array subscripts", () => {
+  it("parse labels, dimension names and wildcards as references", () => {
+    expect(collectReferences(parse("beta[4] * Area[Firm] + SUM(x[*, North])"))).toEqual([
+      { name: "beta", isFunction: false },
+      { name: "Area", isFunction: false },
+      { name: "SUM", isFunction: true },
+      { name: "x", isFunction: false },
+    ]);
+    expect(parse("pop[North, Old]")).toEqual({ type: "ident", name: "pop", subscript: ["North", "Old"] });
+  });
+
+  it("resolve a single element by its element name", () => {
+    const c = ctx({ resolve: (n) => (n === "pop[North]" ? 7 : NaN) });
+    expect(evaluate(parse("pop[North] * 2"), c)).toBe(14);
+  });
+
+  it("reject unfinished or empty subscripts", () => {
+    expect(() => parse("pop[North")).toThrow(ParseError);
+    expect(() => parse("pop[]")).toThrow(ParseError);
   });
 });

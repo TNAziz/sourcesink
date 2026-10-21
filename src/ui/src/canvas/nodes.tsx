@@ -4,7 +4,16 @@
  */
 
 import { Handle, Position, type Node, type NodeProps } from "@xyflow/react";
-import type { CloudNodeData, ConverterNodeData, StockNodeData, ValveNodeData } from "./toFlow";
+import { ChevronDown, ChevronRight } from "lucide-react";
+import { useEditor } from "../state/store";
+import type {
+  CloudNodeData,
+  ConverterNodeData,
+  SectorCardData,
+  SectorFrameData,
+  StockNodeData,
+  ValveNodeData,
+} from "./toFlow";
 
 /**
  * Every node exposes hidden anchor handles on its four sides (a source and a
@@ -30,6 +39,8 @@ type StockNode = Node<StockNodeData, "sd-stock">;
 type ConverterNode = Node<ConverterNodeData, "sd-converter">;
 type ValveNode = Node<ValveNodeData, "sd-valve">;
 type CloudNode = Node<CloudNodeData, "sd-cloud">;
+type SectorFrameNode = Node<SectorFrameData, "sd-sector-frame">;
+type SectorCardNode = Node<SectorCardData, "sd-sector-card">;
 
 /** Small corner marker for AI-proposed elements (imports stay unmarked). */
 function AiBadge() {
@@ -98,5 +109,53 @@ export function CloudNode(_props: NodeProps<CloudNode>) {
         />
       </svg>
     </div>
+  );
+}
+
+/** An open sector: a quiet titled frame behind its elements. The title's
+ * chevron folds it into a card. */
+export function SectorFrameNode({ data }: NodeProps<SectorFrameNode>) {
+  const toggle = useEditor((s) => s.toggleSector);
+  return (
+    <div className="cv-sector-frame">
+      <button
+        type="button"
+        className="cv-sector-title nodrag"
+        title="Fold this sector"
+        onClick={() => toggle(data.sectorId)}
+      >
+        <ChevronDown size={14} aria-hidden="true" />
+        <span>{data.name}</span>
+        <span className="cv-sector-count">{data.count}</span>
+      </button>
+    </div>
+  );
+}
+
+const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
+
+/** A folded sector: one card for all its elements; links and pipes that
+ * cross the sector attach to it. Click to unfold. */
+export function SectorCardNode({ data }: NodeProps<SectorCardNode>) {
+  const toggle = useEditor((s) => s.toggleSector);
+  const parts = [
+    data.stocks ? plural(data.stocks, "stock") : null,
+    data.flows ? plural(data.flows, "flow") : null,
+    data.converters ? plural(data.converters, "converter") : null,
+  ].filter(Boolean);
+  return (
+    <button
+      type="button"
+      className="cv-sector-card nodrag"
+      title="Unfold this sector"
+      onClick={() => toggle(data.sectorId)}
+    >
+      <NodeHandles />
+      <span className="cv-sector-card-name">
+        <ChevronRight size={15} aria-hidden="true" />
+        {data.name}
+      </span>
+      <span className="cv-sector-card-meta">{parts.join(" · ")}</span>
+    </button>
   );
 }

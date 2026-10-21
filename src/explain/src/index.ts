@@ -6,3 +6,4 @@ export { describeModel, coverage } from "./describe.js";
 export type { ModelDescription } from "./describe.js";
 export { missingConnectors, withInferredConnectors } from "./wiring.js";
 export type { ImpliedLink } from "./wiring.js";
+export { suggestSectors, sectorTitle } from "./sectors.js";
