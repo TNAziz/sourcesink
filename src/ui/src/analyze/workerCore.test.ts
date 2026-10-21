@@ -27,6 +27,24 @@ const params: ParameterSpec[] = [
 ];
 
 describe("workerCore.handle", () => {
+  it("sweeps a parameter and keeps the requested trajectories", () => {
+    const response = handle({
+      id: 9,
+      kind: "sweep",
+      model: decayModel(),
+      axes: [{ name: "k", min: 0.1, max: 0.4, steps: 4 }],
+      metric: { series: "S", stat: "final" },
+      series: ["S"],
+    });
+    if (response.type !== "result" || response.kind !== "sweep") throw new Error(JSON.stringify(response));
+    response.result.axes[0].values.forEach((k, i) =>
+      expect(response.result.outputs[i]).toBeCloseTo(100 * Math.exp(-10 * k), 4),
+    );
+    expect(response.result.traces.S).toHaveLength(4);
+    expect(progressStage("sweep")).toBe("Sweeping…");
+  });
+
+
   it("fits parameters through the calibration request", () => {
     const request: WorkerRequest = {
       id: 1,

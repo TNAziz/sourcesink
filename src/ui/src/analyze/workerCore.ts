@@ -13,6 +13,7 @@ import {
   simulateEnsemble,
   sobol,
   summarize,
+  sweep,
 } from "@sourcesink/analysis";
 import type {
   CalibrationOptions,
@@ -26,10 +27,12 @@ import type {
   SobolOptions,
   SobolResult,
   SummaryStats,
+  SweepAxis,
+  SweepResult,
 } from "@sourcesink/analysis";
 import type { Model } from "@sourcesink/model";
 
-export type AnalysisKind = "calibrate" | "morris" | "sobol" | "uncertainty";
+export type AnalysisKind = "calibrate" | "morris" | "sobol" | "uncertainty" | "sweep";
 
 export interface CalibrateRequest {
   id: number;
@@ -68,7 +71,17 @@ export interface UncertaintyRequest {
   seed?: number;
 }
 
-export type WorkerRequest = CalibrateRequest | MorrisRequest | SobolRequest | UncertaintyRequest;
+export interface SweepRequest {
+  id: number;
+  kind: "sweep";
+  model: Model;
+  axes: [SweepAxis] | [SweepAxis, SweepAxis];
+  metric: OutputMetric;
+  /** Trajectories to keep (1-D sweeps). */
+  series: string[];
+}
+
+export type WorkerRequest = CalibrateRequest | MorrisRequest | SobolRequest | UncertaintyRequest | SweepRequest;
 
 export interface UncertaintyResult {
   time: number[];
@@ -83,6 +96,7 @@ export type WorkerResponse =
   | { id: number; type: "result"; kind: "morris"; result: MorrisResult }
   | { id: number; type: "result"; kind: "sobol"; result: SobolResult }
   | { id: number; type: "result"; kind: "uncertainty"; result: UncertaintyResult }
+  | { id: number; type: "result"; kind: "sweep"; result: SweepResult }
   | { id: number; type: "error"; kind: AnalysisKind; error: string };
 
 /** Progress message shape (exported for the worker shell). */
@@ -169,6 +183,13 @@ export function handle(request: WorkerRequest): WorkerResponse {
           kind: "uncertainty",
           result: uncertaintyResult(request),
         };
+      case "sweep":
+        return {
+          id: request.id,
+          type: "result",
+          kind: "sweep",
+          result: sweep(request.model, { axes: request.axes, metric: request.metric, series: request.series }),
+        };
       default: {
         const exhaustive: never = request;
         throw new Error(`unknown request ${JSON.stringify(exhaustive)}`);
@@ -190,6 +211,8 @@ export function progressStage(kind: AnalysisKind): string {
       return "Running Sobol decomposition…";
     case "uncertainty":
       return "Running ensemble…";
+    case "sweep":
+      return "Sweeping…";
     default:
       return "Running…";
   }

@@ -126,3 +126,118 @@ export function readBands(point: BandPoint): string[] {
     `Middle 90% of runs: ${f(point.p5)} to ${f(point.p95)} (light band).`,
   ];
 }
+
+// ----- sweeps ----------------------------------------------------------------
+
+/** What a response-curve feature list says, as short sentences. */
+export interface CurveReading {
+  lines: string[];
+  /** A narrower range worth sweeping next, if one stands out. */
+  zoom?: { min: number; max: number; reason: string };
+}
+
+export interface CurveFeaturesLike {
+  min: { at: number; value: number };
+  max: { at: number; value: number };
+  trend: "up" | "down" | "flat" | "mixed";
+  steepest?: { from: number; to: number; fromValue: number; toValue: number; share: number };
+  threshold: boolean;
+  interior?: { kind: "peak" | "trough"; at: number; value: number };
+  levelsOff?: { side: "high" | "low"; beyond: number };
+}
+
+export function readCurve(
+  features: CurveFeaturesLike,
+  parameter: string,
+  metric: string,
+  levels: readonly number[],
+): CurveReading {
+  const f = formatNumber;
+  const lines: string[] = [];
+  let zoom: CurveReading["zoom"];
+  const first = levels[0];
+  const last = levels[levels.length - 1];
+  const around = (value: number): { min: number; max: number } => {
+    const i = levels.findIndex((v) => v >= value);
+    const lo = levels[Math.max(0, i - 1)] ?? first;
+    const hi = levels[Math.min(levels.length - 1, i + 1)] ?? last;
+    return { min: lo, max: hi };
+  };
+
+  if (features.trend === "flat") {
+    lines.push(
+      `${metric} hardly changes as ${parameter} goes from ${f(first)} to ${f(last)}. In this range ${parameter} does not matter; try a wider range or another parameter.`,
+    );
+    return { lines };
+  }
+
+  if (features.trend === "up" || features.trend === "down") {
+    const verb = features.trend === "up" ? "rises" : "falls";
+    const [a, b] = features.trend === "up" ? [features.min.value, features.max.value] : [features.max.value, features.min.value];
+    lines.push(`${metric} ${verb} steadily as ${parameter} increases, from ${f(a)} to ${f(b)}.`);
+  } else {
+    lines.push(
+      `${metric} ranges from ${f(features.min.value)} (at ${parameter} = ${f(features.min.at)}) to ${f(features.max.value)} (at ${parameter} = ${f(features.max.at)}), and changes direction along the way.`,
+    );
+  }
+
+  if (features.interior) {
+    const word = features.interior.kind === "peak" ? "highest" : "lowest";
+    lines.push(
+      `It is ${word} inside the range, at ${parameter} ≈ ${f(features.interior.at)} (${f(features.interior.value)}): an optimum or a worst case worth a closer look.`,
+    );
+    zoom = { ...around(features.interior.at), reason: `around the ${word} point` };
+  }
+
+  const steep = features.steepest;
+  if (steep && features.threshold) {
+    lines.push(
+      `A threshold: between ${parameter} = ${f(steep.from)} and ${f(steep.to)} the output jumps from ${f(steep.fromValue)} to ${f(steep.toValue)}, ${Math.round(steep.share * 100)}% of the whole change in one step.`,
+    );
+    const i = levels.findIndex((v) => v >= steep.from);
+    zoom = {
+      min: levels[Math.max(0, i - 1)] ?? steep.from,
+      max: levels[Math.min(levels.length - 1, i + 2)] ?? steep.to,
+      reason: "across the threshold",
+    };
+  } else if (steep && steep.share > 0.15) {
+    lines.push(`It is most sensitive between ${parameter} = ${f(steep.from)} and ${f(steep.to)}.`);
+  }
+
+  if (features.levelsOff) {
+    lines.push(
+      features.levelsOff.side === "high"
+        ? `Above ${parameter} ≈ ${f(features.levelsOff.beyond)} it levels off: raising ${parameter} further buys almost nothing.`
+        : `Below ${parameter} ≈ ${f(features.levelsOff.beyond)} it levels off: lowering ${parameter} further changes almost nothing.`,
+    );
+  }
+  return { lines, zoom };
+}
+
+export interface SurfaceFeaturesLike {
+  min: { at: [number, number]; value: number };
+  max: { at: [number, number]; value: number };
+  spread: [number, number];
+  dominant: 0 | 1 | -1;
+}
+
+export function readSurface(features: SurfaceFeaturesLike, names: [string, string], metric: string): string[] {
+  const f = formatNumber;
+  const lines = [
+    `${metric} is highest, ${f(features.max.value)}, at ${names[0]} = ${f(features.max.at[0])}, ${names[1]} = ${f(features.max.at[1])}.`,
+    `It is lowest, ${f(features.min.value)}, at ${names[0]} = ${f(features.min.at[0])}, ${names[1]} = ${f(features.min.at[1])}.`,
+  ];
+  if (features.dominant === -1) {
+    lines.push(`${names[0]} and ${names[1]} move the output by similar amounts over these ranges.`);
+  } else {
+    const strong = names[features.dominant];
+    const weak = names[1 - features.dominant];
+    const ratio = features.spread[features.dominant] / Math.max(features.spread[1 - features.dominant], 1e-300);
+    lines.push(
+      Number.isFinite(ratio) && ratio < 1000
+        ? `${strong} matters more: it moves the output about ${f(ratio)}× as much as ${weak} does.`
+        : `${strong} drives the output; ${weak} hardly moves it over this range.`,
+    );
+  }
+  return lines;
+}

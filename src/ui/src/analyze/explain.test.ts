@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { morrisShape, readBands, readMorris, readSobol } from "./explain";
+import { morrisShape, readBands, readCurve, readMorris, readSobol, readSurface } from "./explain";
 
 describe("morrisShape", () => {
   it("classifies effects by the sigma / mu* ratio", () => {
@@ -65,5 +65,71 @@ describe("readBands", () => {
     expect(lines[0]).toContain("Median 3");
     expect(lines[1]).toContain("2 to 4");
     expect(lines[2]).toContain("1 to 5");
+  });
+});
+
+describe("readCurve", () => {
+  const levels = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6];
+
+  it("describes a threshold and offers to zoom across it", () => {
+    const reading = readCurve(
+      {
+        min: { at: 0.6, value: 5 },
+        max: { at: 0.1, value: 250 },
+        trend: "down",
+        steepest: { from: 0.2, to: 0.3, fromValue: 240, toValue: 20, share: 0.9 },
+        threshold: true,
+        levelsOff: { side: "high", beyond: 0.4 },
+      },
+      "SRT",
+      "S · final value",
+      levels,
+    );
+    const text = reading.lines.join(" ");
+    expect(text).toContain("S · final value falls steadily");
+    expect(text).toContain("A threshold: between SRT = 0.2 and 0.3");
+    expect(text).toContain("90% of the whole change");
+    expect(text).toContain("Above SRT ≈ 0.4 it levels off");
+    expect(reading.zoom).toEqual({ min: 0.1, max: 0.4, reason: "across the threshold" });
+  });
+
+  it("calls a flat response irrelevant and suggests a wider range", () => {
+    const reading = readCurve(
+      { min: { at: 0.1, value: 1 }, max: { at: 0.1, value: 1 }, trend: "flat", threshold: false },
+      "k",
+      "y",
+      levels,
+    );
+    expect(reading.lines[0]).toMatch(/does not matter; try a wider range/);
+    expect(reading.zoom).toBeUndefined();
+  });
+
+  it("points at an interior optimum", () => {
+    const reading = readCurve(
+      {
+        min: { at: 0.1, value: 1 },
+        max: { at: 0.3, value: 9 },
+        trend: "mixed",
+        threshold: false,
+        interior: { kind: "peak", at: 0.3, value: 9 },
+      },
+      "k",
+      "y",
+      levels,
+    );
+    expect(reading.lines.join(" ")).toContain("highest inside the range, at k ≈ 0.3");
+    expect(reading.zoom).toEqual({ min: 0.2, max: 0.4, reason: "around the highest point" });
+  });
+});
+
+describe("readSurface", () => {
+  it("names the extremes and the dominant parameter", () => {
+    const lines = readSurface(
+      { min: { at: [1, 2], value: 0 }, max: { at: [3, 4], value: 10 }, spread: [8, 2], dominant: 0 },
+      ["SRT", "HRT"],
+      "S",
+    );
+    expect(lines[0]).toContain("highest, 10, at SRT = 3, HRT = 4");
+    expect(lines[2]).toContain("SRT matters more: it moves the output about 4× as much as HRT");
   });
 });

@@ -12,6 +12,8 @@ import uPlot from "uplot";
 import "uplot/dist/uPlot.min.css";
 
 import { formatNumber } from "../results/csv.js";
+import { exportChart, downloadBlob, safeFileName, type ExportChartSpec } from "../results/exportChart.js";
+import { ExportMenu, type ExportFormat } from "../results/ExportMenu.js";
 import { useChartTheme } from "../results/useChartTheme.js";
 
 export interface AnalyzeSeriesSpec {
@@ -38,6 +40,14 @@ export interface AnalyzeChartProps {
   /** Lines shown under the plot for the hovered sample; defaults to each
    * visible series' value. */
   readout?: (index: number) => ReactNode;
+  /** X axis label when it is not time (e.g. a swept parameter). */
+  xLabel?: string;
+  xLog?: boolean;
+  yLog?: boolean;
+  /** Y axis label for exports. */
+  yLabel?: string;
+  /** Show an Export button; the name is the file's base name. */
+  exportName?: string;
 }
 
 const AXIS_FONT = "11px Inter, system-ui, sans-serif";
@@ -88,6 +98,11 @@ export function AnalyzeChart({
   timeUnits,
   height = 190,
   readout,
+  xLabel,
+  xLog,
+  yLog,
+  yLabel,
+  exportName,
 }: AnalyzeChartProps) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   const theme = useChartTheme();
@@ -130,11 +145,14 @@ export function AnalyzeChart({
           },
         ],
       },
-      scales: { x: { time: false } },
+      scales: {
+        x: xLog ? { time: false, distr: 3 } : { time: false },
+        y: yLog ? { distr: 3 } : {},
+      },
       bands: uplotBands(series),
       axes: [
         {
-          label: timeUnits,
+          label: xLabel ?? timeUnits,
           labelSize: 12,
           labelGap: 2,
           stroke: theme.muted,
@@ -142,6 +160,7 @@ export function AnalyzeChart({
           labelFont: AXIS_FONT,
           grid: { stroke: theme.border },
           ticks: { stroke: theme.border },
+          values: (_self, splits) => splits.map((v) => (v == null ? "" : formatNumber(v))),
         },
         {
           stroke: theme.muted,
@@ -187,7 +206,7 @@ export function AnalyzeChart({
       plot.destroy();
       plotRef.current = null;
     };
-  }, [theme, seriesKey, timeUnits]);
+  }, [theme, seriesKey, timeUnits, xLabel, xLog, yLog]);
 
   useEffect(() => {
     plotRef.current?.setData(data);
@@ -207,9 +226,51 @@ export function AnalyzeChart({
         );
       });
 
+  const onExport = async (format: ExportFormat): Promise<void> => {
+    const base = exportName ?? title ?? "chart";
+    const visible = series.filter((spec) => spec.lineWidth !== 0 || spec.points);
+    if (format === "csv") {
+      const header = [xLabel ?? (timeUnits ? `time (${timeUnits})` : "time"), ...series.map((s) => s.name)];
+      const rows = time.map((t, i) =>
+        [t, ...series.map((s) => s.values[i] ?? "")].map((v) => (typeof v === "number" ? String(v) : v)).join(","),
+      );
+      const csv = [header.map((h) => (/[",]/.test(h) ? `"${h.replace(/"/g, '""')}"` : h)).join(","), ...rows].join("\n");
+      downloadBlob(new Blob([`${csv}\n`], { type: "text/csv;charset=utf-8" }), `${safeFileName(base)}.csv`);
+      return;
+    }
+    const spec: ExportChartSpec = {
+      title,
+      x: time,
+      xLabel: xLabel ?? (timeUnits || "time"),
+      yLabel,
+      xLog,
+      yLog,
+      series: visible.map((s) => ({
+        name: s.name,
+        color: s.color,
+        values: s.values,
+        dash: s.dash,
+        points: s.points,
+        width: s.lineWidth === undefined ? undefined : Math.max(1, s.lineWidth * 1.25),
+        legend: visible.length <= 12,
+      })),
+      bands: series.flatMap((s) =>
+        s.bandTo === undefined
+          ? []
+          : [{ upper: s.values, lower: series[s.bandTo - 1]?.values ?? [], fill: s.bandFill ?? alphaColor(s.color, 0.18) }],
+      ),
+    };
+    await exportChart(spec, format, base);
+  };
+
   return (
     <figure className="ana-chart" aria-label={title}>
-      {title ? <figcaption className="ana-chart-title">{title}</figcaption> : null}
+      {title || exportName ? (
+        <figcaption className="ana-chart-head">
+          {title ? <span className="ana-chart-title">{title}</span> : <span />}
+          {exportName ? <ExportMenu onExport={onExport} className="ana-export" /> : null}
+        </figcaption>
+      ) : null}
       <div
         className="ana-chart-canvas"
         ref={containerRef}
@@ -219,8 +280,9 @@ export function AnalyzeChart({
       {hoverIndex != null && hoverTime !== undefined ? (
         <div className="ana-readout" aria-live="polite">
           <span className="ana-readout-time">
-            t = {formatNumber(hoverTime)}
-            {timeUnits ? ` ${timeUnits}` : ""}
+            {xLabel ? `${xLabel} = ` : "t = "}
+            {formatNumber(hoverTime)}
+            {!xLabel && timeUnits ? ` ${timeUnits}` : ""}
           </span>
           {(readout ?? defaultReadout)(hoverIndex)}
         </div>

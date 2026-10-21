@@ -214,6 +214,34 @@ export function makeOutputMetric(series: string, stat: Statistic, at = "0"): Out
   return { series, stat };
 }
 
+/** Output statistics offered by the Sensitivity and Sweep tabs. */
+export const STAT_LABELS: Array<{ value: Statistic; label: string }> = [
+  { value: "final", label: "Final value" },
+  { value: "max", label: "Maximum" },
+  { value: "min", label: "Minimum" },
+  { value: "mean", label: "Time-average" },
+  { value: "integral", label: "Integral" },
+  { value: "at", label: "Value at time…" },
+];
+
+/** "DO · minimum" */
+export function describeMetric(metric: OutputMetric): string {
+  switch (metric.stat) {
+    case "final":
+      return `${metric.series} · final value`;
+    case "max":
+      return `${metric.series} · maximum`;
+    case "min":
+      return `${metric.series} · minimum`;
+    case "mean":
+      return `${metric.series} · time-average`;
+    case "integral":
+      return `${metric.series} · integral`;
+    case "at":
+      return `${metric.series} · at t = ${formatNumber(metric.time)}`;
+  }
+}
+
 /** Fitted value with its standard error: "0.3 ± 0.012". Non-finite SEs are
  * shown as ∞ (or — when NaN). */
 export function formatEstimate(value: number, se: number | undefined): string {

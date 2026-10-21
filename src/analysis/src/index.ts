@@ -40,3 +40,6 @@ export { calibrate } from "./calibrate.js";
 
 export { convertToArrays, findArrayFamilies } from "./arrayize.js";
 export type { ArrayDimensionPlan, ArrayFamily } from "./arrayize.js";
+
+export { curveFeatures, surfaceFeatures, sweep, sweepLevels } from "./sweep.js";
+export type { CurveFeatures, SurfaceFeatures, SweepAxis, SweepResult, SweepSpec } from "./sweep.js";

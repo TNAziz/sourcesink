@@ -51,6 +51,8 @@ function BandChartBlock({
       time={band.time}
       timeUnits={timeUnits}
       title={`${name} — median and uncertainty bands`}
+      exportName={`${name}-uncertainty`}
+      yLabel={name}
       note="Median line; darker band 25–75%, lighter band 5–95%. Hover the chart to read the spread."
       readout={(i) =>
         readBands({

@@ -7,7 +7,7 @@
 import { useMemo, useState } from "react";
 import { CircleCheck, Loader2, Play, Square, TriangleAlert } from "lucide-react";
 
-import type { MorrisResult, OutputMetric, SobolResult } from "@sourcesink/analysis";
+import type { MorrisResult, SobolResult } from "@sourcesink/analysis";
 import type { Model } from "@sourcesink/model";
 
 import { formatNumber } from "../results/csv.js";
@@ -16,7 +16,9 @@ import { BarChart, type BarGroup } from "./BarChart.js";
 import { readMorris, readSobol } from "./explain.js";
 import { InfoTip } from "./InfoTip.js";
 import {
+  describeMetric,
   makeOutputMetric,
+  STAT_LABELS,
   morrisRequest,
   sobolRequest,
   validateParameterRows,
@@ -32,32 +34,6 @@ export interface SensitivityTabProps {
   onParamsChange(rows: ParameterRow[]): void;
   /** Run lifecycle, so the shell can show background progress. */
   events?: AnalyzeWorkerEvents;
-}
-
-const STAT_LABELS: Array<{ value: Statistic; label: string }> = [
-  { value: "final", label: "Final value" },
-  { value: "max", label: "Maximum" },
-  { value: "min", label: "Minimum" },
-  { value: "mean", label: "Time-average" },
-  { value: "integral", label: "Integral" },
-  { value: "at", label: "Value at time…" },
-];
-
-function describeMetric(metric: OutputMetric): string {
-  switch (metric.stat) {
-    case "final":
-      return `${metric.series} · final value`;
-    case "max":
-      return `${metric.series} · maximum`;
-    case "min":
-      return `${metric.series} · minimum`;
-    case "mean":
-      return `${metric.series} · time-average`;
-    case "integral":
-      return `${metric.series} · integral`;
-    case "at":
-      return `${metric.series} · at t = ${formatNumber(metric.time)}`;
-  }
 }
 
 export function SensitivityTab({ model, params, onParamsChange, events }: SensitivityTabProps) {

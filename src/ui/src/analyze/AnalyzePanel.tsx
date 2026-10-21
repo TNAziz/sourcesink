@@ -17,12 +17,13 @@ import { FlaskConical, X } from "lucide-react";
 import { useEditor } from "../state/store.js";
 import { CalibrateTab } from "./CalibrateTab.js";
 import { SensitivityTab } from "./SensitivityTab.js";
+import { SweepTab } from "./SweepTab.js";
 import { UncertaintyTab } from "./UncertaintyTab.js";
 import { initialParameterRows, parameterRowFor, type ParameterRow } from "./helpers.js";
 import type { AnalyzeWorkerEvents, RunOutcome } from "./useAnalyzeWorker.js";
 import "./analyze.css";
 
-export type Tab = "calibrate" | "sensitivity" | "uncertainty";
+export type Tab = "calibrate" | "sensitivity" | "uncertainty" | "sweep";
 
 /** Starting tab and parameters when another panel (the assistant) opens this one. */
 export interface AnalyzeInitial {
@@ -34,6 +35,7 @@ const TABS: Array<{ id: Tab; label: string; hint: string }> = [
   { id: "calibrate", label: "Calibrate", hint: "Fit parameters to observations" },
   { id: "sensitivity", label: "Sensitivity", hint: "Rank parameters with Morris or Sobol" },
   { id: "uncertainty", label: "Uncertainty", hint: "Ensemble median and percentile bands" },
+  { id: "sweep", label: "Sweep", hint: "Vary one or two parameters and see how the output responds" },
 ];
 
 export interface AnalyzePanelProps {
@@ -96,7 +98,12 @@ export function AnalyzePanel({
       onSettle: (outcome) =>
         callbacks.current.onFinished?.(id, TABS.find((t) => t.id === id)!.label, outcome),
     });
-    return { calibrate: make("calibrate"), sensitivity: make("sensitivity"), uncertainty: make("uncertainty") };
+    return {
+      calibrate: make("calibrate"),
+      sensitivity: make("sensitivity"),
+      uncertainty: make("uncertainty"),
+      sweep: make("sweep"),
+    };
   }, []);
 
   useEffect(() => {
@@ -159,6 +166,9 @@ export function AnalyzePanel({
           </div>
           <div className={tab === "uncertainty" ? "ana-pane" : "ana-pane ana-pane-hidden"}>
             <UncertaintyTab model={model} params={params} onParamsChange={setParams} events={events.uncertainty} />
+          </div>
+          <div className={tab === "sweep" ? "ana-pane" : "ana-pane ana-pane-hidden"}>
+            <SweepTab model={model} events={events.sweep} />
           </div>
         </div>
       </aside>

@@ -59,6 +59,8 @@ function FitChartBlock({ alignment, timeUnits }: { alignment: Alignment; timeUni
       time={alignment.time}
       timeUnits={timeUnits}
       title={`${alignment.series} — observations and fitted model`}
+      exportName={`${alignment.series}-fit`}
+      yLabel={alignment.series}
       note="Dots are observed values; the line is the simulation at the best parameters."
       series={[
         {
