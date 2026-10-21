@@ -31,6 +31,7 @@ import { ArrayFields, DimensionsPanel } from "./ArrayPanels";
 import { ProvenanceField } from "./ProvenanceField";
 import { UnitWarnings } from "./UnitWarnings";
 import { ScenariosPanel } from "./ScenariosPanel";
+import { MissingLinksNote, ParametersPanel } from "./ParametersPanel";
 import "./inspector.css";
 
 /** The three element kinds the inspector can edit. */
@@ -94,7 +95,9 @@ function ModelOverview({ model }: { model: Model }) {
         </section>
       ) : null}
 
+      <MissingLinksNote />
       <RunSpecPanel />
+      <ParametersPanel />
       <DimensionsPanel />
       <ScenariosPanel />
     </div>

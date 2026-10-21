@@ -33,6 +33,7 @@ import { edgeElementId, isCloudId, selectionIds, toFlow } from "./toFlow";
 import { layoutFromNode, mid, topLeftOf } from "./geometry";
 import { ToastStack, useToasts } from "./toasts";
 import { overlappingPairs } from "./overlaps";
+import { MIN_READABLE_ZOOM, readableViewport } from "./fit";
 import "./canvas.css";
 
 const nodeTypes: NodeTypes = {
@@ -62,9 +63,18 @@ interface Ghost {
   y1: number;
 }
 
+/** Fit the diagram to the canvas, but never below a readable zoom (a huge
+ * diagram then opens at its top-left instead of as specks). */
+function fitReadable(inst: ReactFlowInstance, el: HTMLElement | null, duration: number): void {
+  const nodes = inst.getNodes();
+  if (!el || nodes.length === 0) return;
+  const vp = readableViewport(inst.getNodesBounds(nodes), el.clientWidth, el.clientHeight);
+  void inst.setViewport(vp, { duration });
+}
+
 /** Refit the view whenever a different document is loaded (not on edits). */
-function AutoFit() {
-  const fitView = useReactFlow().fitView;
+function AutoFit({ wrapRef }: { wrapRef: React.RefObject<HTMLDivElement | null> }) {
+  const inst = useReactFlow();
   const pristine = useEditor((s) => (s.past.length === 0 && s.future.length === 0 ? s.model : null));
   const layoutVersion = useEditor((s) => s.layoutVersion);
   const prev = useRef<unknown>(null);
@@ -75,9 +85,9 @@ function AutoFit() {
     prev.current = pristine;
     prevLayout.current = layoutVersion;
     if (!changed && !tidied) return;
-    const t = setTimeout(() => fitView({ padding: 0.25, duration: 400, maxZoom: 1.3 }), 60);
+    const t = setTimeout(() => fitReadable(inst, wrapRef.current, 400), 60);
     return () => clearTimeout(t);
-  }, [pristine, layoutVersion, fitView]);
+  }, [pristine, layoutVersion, inst, wrapRef]);
   return null;
 }
 
@@ -120,12 +130,13 @@ export function Canvas({ colorMode = "system" }: { colorMode?: "light" | "dark" 
   const selection = useEditor((s) => s.selection);
   const tool = useEditor((s) => s.tool);
   const result = useEditor((s) => s.result);
+  const showConstants = useEditor((s) => s.showConstants);
 
   const { toasts, push } = useToasts();
 
   const { nodes, edges } = useMemo(
-    () => toFlow(model, { selection, result }),
-    [model, selection, result],
+    () => toFlow(model, { selection, result, hideConstants: !showConstants }),
+    [model, selection, result, showConstants],
   );
 
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -400,7 +411,7 @@ export function Canvas({ colorMode = "system" }: { colorMode?: "light" | "dark" 
       }
       if (timer) clearTimeout(timer);
       timer = setTimeout(() => {
-        rfRef.current?.fitView({ padding: 0.15, duration: 200 });
+        if (rfRef.current) fitReadable(rfRef.current, el, 200);
       }, 120);
     });
     ro.observe(el);
@@ -433,7 +444,7 @@ export function Canvas({ colorMode = "system" }: { colorMode?: "light" | "dark" 
           rfRef.current = inst;
         }}
         fitView
-        fitViewOptions={{ padding: 0.25, maxZoom: 1.3 }}
+        fitViewOptions={{ padding: 0.25, maxZoom: 1.3, minZoom: MIN_READABLE_ZOOM }}
         minZoom={0.15}
         maxZoom={2.5}
         selectionOnDrag={tool === "select"}
@@ -458,7 +469,7 @@ export function Canvas({ colorMode = "system" }: { colorMode?: "light" | "dark" 
       >
         <Background variant={BackgroundVariant.Dots} gap={22} size={1.4} />
         <Controls showInteractive={false} position="bottom-left" />
-        <AutoFit />
+        <AutoFit wrapRef={wrapRef} />
       </ReactFlow>
 
       {ghost ? (

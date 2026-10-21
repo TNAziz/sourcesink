@@ -12,7 +12,8 @@
  *   the left, outflows on the right) and then fan out above (inflows) or
  *   below (outflows) the stock, so pipes never run on top of each other;
  * - converters float beside the element they feed, on the side away from the
- *   row, so information links stay short.
+ *   row, so information links stay short;
+ * - whatever nothing anchors fills a compact grid below the diagram.
  *
  * Collision-free by construction: every placement checks the drawn boxes
  * (with a margin) and slides to the nearest free spot.
@@ -34,6 +35,10 @@ const FAN_DY = 120;
 const FAN_DX = 150;
 /** How far a converter floats from the element it feeds. */
 const CONVERTER_GAP = 72;
+/** Grid cell for elements nothing anchors (no stock, no connector). */
+const GRID_DX = 170;
+const GRID_DY = 110;
+const GRID_MIN_COLUMNS = 4;
 /** Clearance kept around every drawn box. */
 const MARGIN = 16;
 
@@ -245,11 +250,8 @@ export function autoLayout(m: Model): Record<string, Point> {
     fan(cloudOutflows, 1, 1);
   }
 
-  // Flows with no stock at all.
-  for (const f of m.flows) {
-    if (known[f.name] || out[f.name]) continue;
-    place(f.name, { x: 0, y: bottomY() }, "valve", 1);
-  }
+  // Flows with no stock at all go to the grid at the end.
+  const stockless = m.flows.filter((f) => !known[f.name] && !out[f.name]).map((f) => f.name);
 
   // --- 3. converters: beside the element they feed --------------------------
   const rowYs = m.stocks.map((s) => centerByName(s.name)?.y).filter((y): y is number => y !== undefined);
@@ -300,7 +302,24 @@ export function autoLayout(m: Model): Record<string, Point> {
       if (progress) break;
     }
   }
-  for (const name of pending) place(name, { x: 0, y: bottomY() }, "converter");
+
+  // --- 4. anything with no anchor: a compact grid below the diagram ----------
+  // (A single column would make a model without connectors a tall strip that
+  // fit-to-screen can only show as specks.)
+  const loose: Array<[string, Kind]> = [
+    ...stockless.map((n) => [n, "valve"] as [string, Kind]),
+    ...pending.map((n) => [n, "converter"] as [string, Kind]),
+  ];
+  if (loose.length > 0) {
+    const columns = Math.max(GRID_MIN_COLUMNS, Math.ceil(Math.sqrt(loose.length * 2)));
+    const left = occupied.length === 0 ? 0 : Math.min(...occupied.map((p) => p.center.x));
+    const top = bottomY();
+    loose.forEach(([name, kind], i) => {
+      const col = i % columns;
+      const row = Math.floor(i / columns);
+      place(name, { x: left + col * GRID_DX, y: top + row * GRID_DY }, kind, 1);
+    });
+  }
 
   return out;
 }

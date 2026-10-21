@@ -9,6 +9,7 @@
 
 import { collectReferences, parse, CLOCK_VARIABLES, CONSTANTS } from "@sourcesink/engine";
 import { BUILTIN_FUNCTIONS, validate, type Model } from "@sourcesink/model";
+import { missingConnectors } from "@sourcesink/explain";
 
 import {
   canonicalName,
@@ -144,6 +145,26 @@ export function structuralFindings(m: Model): Finding[] {
   for (const stock of m.stocks) {
     if ((stock.inflows?.length ?? 0) === 0 && (stock.outflows?.length ?? 0) === 0) {
       findings.push(warning(`stock '${stock.name}' has no flows`, stock.name));
+    }
+  }
+
+  // Links an equation uses but the diagram does not draw. Without them a
+  // converter has nothing to sit beside and the map cannot be read. A model
+  // with no connectors at all gets one summary instead of one per element.
+  const missing = missingConnectors(m);
+  if (missing.length > 0 && m.connectors.length === 0) {
+    findings.push(
+      warning(
+        `the model draws no connectors although its equations use ${missing.length} links; add them (the editor's Connect all does this)`,
+      ),
+    );
+  } else {
+    const byTarget = new Map<string, string[]>();
+    for (const l of missing) byTarget.set(l.to, [...(byTarget.get(l.to) ?? []), l.from]);
+    for (const [to, froms] of byTarget) {
+      findings.push(
+        warning(`'${to}' uses ${froms.map((f) => `'${f}'`).join(", ")} without a connector`, to),
+      );
     }
   }
 

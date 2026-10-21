@@ -17,6 +17,7 @@ import type { Converter, Flow, Model, Point, Scenario, Stock } from "@sourcesink
 import { emptyModel } from "@sourcesink/model";
 import { simulate, type SimulationResult } from "@sourcesink/engine";
 import { applyScenario } from "@sourcesink/analysis";
+import { withInferredConnectors } from "@sourcesink/explain";
 
 import { uniqueScenarioId, uniqueScenarioName } from "../inspector/scenarios";
 import { autoLayout } from "../canvas/autoLayout";
@@ -60,6 +61,10 @@ export interface EditorState {
   future: Model[];
   /** Bumped by `tidyLayout` so the canvas can refit the view. */
   layoutVersion: number;
+  /** Draw constant converters (plain numbers) on the canvas. When off they
+   * are edited in the parameter table instead. A view setting, not a model
+   * edit. */
+  showConstants: boolean;
 
   // --- document ---
   loadModel(model: Model, fileName?: string | null): void;
@@ -69,6 +74,10 @@ export interface EditorState {
   /** Re-lay out the whole diagram from scratch (auto-layout), as one undo
    * step. Keeps the last run: positions do not change results. */
   tidyLayout(): void;
+  /** Add a connector for every link an equation implies but the diagram
+   * lacks, as one undo step; returns how many were added. */
+  connectAll(): number;
+  setShowConstants(show: boolean): void;
   newModel(): void;
   markSaved(fileName: string): void;
 
@@ -184,11 +193,16 @@ export const useEditor = create<EditorState>()((set, get) => {
     past: [],
     future: [],
     layoutVersion: 0,
+    showConstants: true,
 
     loadModel(model, fileName = null) {
       lastCoalesceKey = null;
+      // A model saved without any connectors (hand-written or generated) is
+      // drawn with the links its equations imply, so converters have
+      // something to sit beside. Models that draw some links are left alone.
+      const wired = model.connectors.length === 0 ? withInferredConnectors(model) : model;
       set({
-        model: clone(model),
+        model: clone(wired),
         fileName,
         dirty: false,
         selection: [],
@@ -214,6 +228,18 @@ export const useEditor = create<EditorState>()((set, get) => {
         dirty: true,
         layoutVersion: layoutVersion + 1,
       });
+    },
+    connectAll() {
+      const before = get().model;
+      const after = withInferredConnectors(before);
+      const added = after.connectors.length - before.connectors.length;
+      if (added > 0) commit((d) => {
+        d.connectors = structuredClone(after.connectors);
+      });
+      return added;
+    },
+    setShowConstants(show) {
+      set({ showConstants: show });
     },
     applyModel(model) {
       const { model: current, past } = get();

@@ -23,7 +23,9 @@ import {
   Save,
   Spline,
   LayoutGrid,
+  Link2,
   Sun,
+  Variable,
   Undo2,
 } from "lucide-react";
 import { ChevronDown, ChevronUp } from "lucide-react";
@@ -121,6 +123,9 @@ function Palette() {
   const tool = useEditor((s) => s.tool);
   const setTool = useEditor((s) => s.setTool);
   const tidyLayout = useEditor((s) => s.tidyLayout);
+  const connectAll = useEditor((s) => s.connectAll);
+  const showConstants = useEditor((s) => s.showConstants);
+  const setShowConstants = useEditor((s) => s.setShowConstants);
   return (
     <nav className="app-palette" aria-label="Tools">
       {PALETTE.map(({ tool: t, icon: Icon, label, key }) => (
@@ -145,6 +150,25 @@ function Palette() {
         onClick={tidyLayout}
       >
         <LayoutGrid size={17} />
+      </button>
+      <button
+        type="button"
+        className="app-tool"
+        data-tip="Connect all: draw every link the equations use"
+        aria-label="Connect all"
+        onClick={() => connectAll()}
+      >
+        <Link2 size={17} />
+      </button>
+      <button
+        type="button"
+        className={`app-tool${showConstants ? "" : " active"}`}
+        data-tip={showConstants ? "Hide constants · H" : "Show constants · H"}
+        aria-label={showConstants ? "Hide constants (H)" : "Show constants (H)"}
+        aria-pressed={!showConstants}
+        onClick={() => setShowConstants(!showConstants)}
+      >
+        <Variable size={17} />
       </button>
     </nav>
   );

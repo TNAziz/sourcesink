@@ -25,7 +25,8 @@ export type ShortcutAction =
   | "tool:flow"
   | "tool:converter"
   | "tool:connector"
-  | "tidy";
+  | "tidy"
+  | "toggle-constants";
 
 /** The subset of a KeyboardEvent the mapping needs (keeps it pure/testable). */
 export interface KeyLike {
@@ -88,6 +89,8 @@ export function shortcutFor(event: KeyLike): ShortcutAction | null {
       return "tool:connector";
     case "l":
       return "tidy";
+    case "h":
+      return "toggle-constants";
     default:
       return null;
   }
@@ -127,6 +130,9 @@ function runAction(action: ShortcutAction): void {
       return;
     case "tidy":
       store.tidyLayout();
+      return;
+    case "toggle-constants":
+      store.setShowConstants(!store.showConstants);
       return;
     default: {
       const tool = TOOL_ACTIONS[action];

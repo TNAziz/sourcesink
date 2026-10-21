@@ -156,10 +156,10 @@ structure and long crossing links.
 
 | Item | Status | What it adds |
 |---|---|---|
-| Infer connectors from equations | Planned | Files with missing or no links still draw (and lay out) correctly; one action connects everything an equation uses |
-| Grid fallback and minimum zoom | Planned | Elements with no anchor form a compact grid, never a single column; fit-to-screen stays legible |
-| Show or hide constants; parameter table | Planned | Plain constants collapse to small tags or a side table, decluttering the diagram |
-| Validator warning for unlinked models | Planned | Models (including AI-built ones) with no connectors are flagged |
+| Infer connectors from equations | Done | Files with missing or no links still draw (and lay out) correctly; one action connects everything an equation uses |
+| Grid fallback and minimum zoom | Done | Elements with no anchor form a compact grid, never a single column; fit-to-screen stays legible |
+| Show or hide constants; parameter table | Done | Plain constants collapse to small tags or a side table, decluttering the diagram |
+| Validator warning for unlinked models | Done | Models (including AI-built ones) with no connectors are flagged |
 | Focus mode | Idea | Highlight what feeds and is fed by the selected element; dim the rest |
 | Sectors | Idea | Named, colored regions that collapse to one box; suggested automatically from clusters of tightly linked elements |
 | Array suggestions | Idea | Detect repeated per-unit structure (`Area_1` … `Area_4`) and offer to convert it to arrays |

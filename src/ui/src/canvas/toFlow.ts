@@ -12,6 +12,7 @@ import { MarkerType, type Edge, type Node } from "@xyflow/react";
 import type { Model, Point } from "@sourcesink/model";
 import type { SimulationResult } from "@sourcesink/engine";
 import { autoLayout } from "./autoLayout.js";
+import { withoutConstants } from "../inspector/parameters.js";
 import {
   CLOUD_OFFSET,
   boundaryPoint,
@@ -69,6 +70,8 @@ export interface ToFlowOptions {
   selection?: string[];
   /** Last simulation result (enables final values on stocks). */
   result?: SimulationResult | null;
+  /** Leave constant converters (and their connectors) off the diagram. */
+  hideConstants?: boolean;
 }
 
 export interface FlowDiagram {
@@ -122,7 +125,9 @@ function finalValue(result: SimulationResult | null, name: string): string | nul
 }
 
 /** Project the model into React Flow nodes/edges. */
-export function toFlow(m: Model, opts: ToFlowOptions = {}): FlowDiagram {
+export function toFlow(model: Model, opts: ToFlowOptions = {}): FlowDiagram {
+  // Hidden constants are dropped before layout, so the rest closes up.
+  const m = opts.hideConstants ? withoutConstants(model) : model;
   const sel = new Set(opts.selection ?? []);
   const result = opts.result ?? null;
   const positions: Record<string, Point> = { ...(m.layout ?? {}), ...autoLayout(m) };

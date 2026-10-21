@@ -261,3 +261,28 @@ describe("autoLayout", () => {
     expect(dist(a, b)).toBeGreaterThanOrEqual(80);
   });
 });
+
+describe("autoLayout — unanchored elements", () => {
+  it("puts converters with no connectors in a compact grid, not a column", () => {
+    const converters = Array.from({ length: 30 }, (_, i) => ({ id: `c${i}`, name: `c${i}` }));
+    const out = autoLayout(mkModel({ stocks: [{ name: "A" }], converters }));
+    const centers = converters.map((c) => centerOf(out[c.name], "converter"));
+    const xs = new Set(centers.map((p) => Math.round(p.x)));
+    const ys = new Set(centers.map((p) => Math.round(p.y)));
+    expect(xs.size).toBeGreaterThanOrEqual(6);
+    expect(ys.size).toBeLessThanOrEqual(6);
+    const width = Math.max(...centers.map((p) => p.x)) - Math.min(...centers.map((p) => p.x));
+    const height = Math.max(...centers.map((p) => p.y)) - Math.min(...centers.map((p) => p.y));
+    expect(height).toBeLessThan(width);
+    // Below the stock row, clear of it.
+    const a = centerOf(out["A"], "stock");
+    for (const p of centers) expect(p.y).toBeGreaterThan(a.y + SIZES.stock.h);
+  });
+
+  it("puts flows with no stock in the same grid", () => {
+    const out = autoLayout(mkModel({ flows: [{ name: "f1" }, { name: "f2" }], converters: [{ id: "k", name: "k" }] }));
+    const ys = new Set(["f1", "f2"].map((n) => Math.round(centerOf(out[n], "valve").y)));
+    expect(ys.size).toBe(1);
+    expect(out["k"]).toBeDefined();
+  });
+});
