@@ -65,4 +65,4 @@ tests/          integration tests: example library, evaluation corpus, guides
 - `docs/architecture.md`: component and API boundaries.
 - `docs/analysis.md`, `docs/assistant.md`: the analysis layer and the assistant.
 - `docs/format/stm.md`: legacy file-format notes for the importer.
-- `docs/FUTURE.md`, `docs/plans/`: the roadmap and feature plans.
+- `docs/ROADMAP.md`, `docs/plans/`: the roadmap and feature plans.

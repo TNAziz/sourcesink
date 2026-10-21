@@ -15,7 +15,7 @@ export * from "./functions.js";
  */
 
 /** Where an element or model came from — an audit trail for research use
- * and for anything an AI proposed (docs/FUTURE.md §5.2 A). */
+ * and for anything an AI proposed (see docs/ROADMAP.md, principle 4). */
 export interface Provenance {
   author: "human" | "ai" | "import";
   /** Tool or model identifier, e.g. "sourcesink-legacy-import", a model id. */

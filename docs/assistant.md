@@ -1,7 +1,6 @@
 # Modeling assistant: plan
 
-**Status:** built (2026-10-18/19). Corresponds to `docs/FUTURE.md` §5.3 item 1
-("structured natural-language authoring") and the grounded explainer/tutor.
+**Status:** built (2026-10-18/19). Part of the assistant track in `docs/ROADMAP.md`.
 
 What exists now, beyond the plan below:
 

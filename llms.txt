@@ -20,4 +20,4 @@
 ## Optional
 
 - [Architecture](docs/architecture.md): package boundaries and the model/engine contracts.
-- [Future work](docs/FUTURE.md): the roadmap.
+- [Roadmap](docs/ROADMAP.md): where SourceSink is headed.

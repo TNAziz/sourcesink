@@ -1,6 +1,6 @@
 /**
  * SourceSink — shared types for calibration and sensitivity analysis
- * (docs/FUTURE.md Phase B). Implementations live in data.ts, calibrate.ts,
+ * (see docs/analysis.md). Implementations live in data.ts, calibrate.ts,
  * optimize.ts, sensitivity.ts and sobol.ts.
  */
 

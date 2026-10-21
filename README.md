@@ -12,7 +12,7 @@ We think a modeling tool for teaching and research should be open. Students shou
 
 ## What you can do with it
 
-1. **Draw and run models.** The editor provides stocks, flows, converters, connectors, and graphical functions on a canvas. Simulation uses Euler, Runge-Kutta 2 and 4, or adaptive Runge-Kutta 4/5. Arrays, scenarios, conveyors, queues, ovens, and about 30 built-in functions (e.g., `SMTH1`, `DELAY3`, `PULSE`, `RANDOM`) are supported. SourceSink also checks units, so a flow in mg/L where the stock needs mg/L per day is flagged before it causes trouble.
+1. **Draw and run models.** The editor provides stocks, flows, converters, connectors, and graphical functions on a canvas. Simulation uses Euler, Runge-Kutta 2 and 4, or adaptive Runge-Kutta 4/5. Arrays, scenarios, conveyors, queues, ovens, and more than 60 built-in functions (e.g., `SMTH1`, `DELAY3`, `PULSE`, `RANDOM`) are supported. SourceSink also checks units, so a flow in mg/L where the stock needs mg/L per day is flagged before it causes trouble.
 2. **Use open, portable files.** Models are saved as XMILE, the open standard for system dynamics models. SourceSink can also import older models saved in the `.stm` and `.itm` formats.
 3. **Fit a model to field data.** Load a CSV of observations and choose which parameters to estimate. SourceSink fits them and reports a standard error for each one. It also flags parameters that the data cannot tell apart.
 4. **Find out which parameters matter.** Morris screening gives a quick ranking. Sobol indices then show how much of the output variance each parameter explains, with confidence intervals.
@@ -144,7 +144,7 @@ Run the tests with `npm test` and the type checker with `npm run typecheck`. Eve
 
 ## Where it is headed
 
-The plan lives in [`docs/FUTURE.md`](docs/FUTURE.md), and a shorter list of candidate upgrades is in [`docs/FutureFeatures.md`](docs/FutureFeatures.md). The near-term work is Bayesian calibration with priors, residual diagnostics, and loop dominance analysis, which shows which feedback loop is driving the behavior at each point in time. For the assistant, we will measure how often it can rebuild known models from a conversation (`npm run eval:assistant`) and improve it where it falls short. The goal is not to have AI build models on its own, but to make it easier for a person to get from an idea to a model they understand and trust.
+The roadmap is in [`docs/ROADMAP.md`](docs/ROADMAP.md), with detailed plans in [`docs/plans/`](docs/plans/). Next come design and policy analysis (comparing policies under uncertainty, then optimizing designs and tracing trade-offs), loop dominance analysis, which shows which feedback loop drives the behavior at each point in time, and Bayesian calibration. After that we plan a teaching layer built on the same foundations: predict-then-run exercises and a tutor that asks questions about the model in front of the student. The goal is not to have AI build models on its own, but to make it easier for a person to get from an idea to a model they understand and trust.
 
 Some behavior is still inferred rather than confirmed. Oven settings in legacy files are the main example, and we will correct them if better reference outputs turn up. Bug reports and models that do not import correctly are very welcome.
 
