@@ -30,7 +30,7 @@ import { useEditor } from "../state/store";
 import { CloudNode, ConverterNode, SectorCardNode, SectorFrameNode, StockNode, ValveNode } from "./nodes";
 import { BowEdge, PipeEdge } from "./edges";
 import { edgeElementId, isCloudId, selectionIds, toFlow } from "./toFlow";
-import { layoutFromNode, mid, topLeftOf } from "./geometry";
+import { GRID, layoutFromNode, mid, snapToGrid, topLeftOf } from "./geometry";
 import { ToastStack, useToasts } from "./toasts";
 import { overlappingPairs } from "./overlaps";
 import { MIN_READABLE_ZOOM, readableViewport } from "./fit";
@@ -127,11 +127,18 @@ let currentOffsets: Record<string, Point> = {};
 
 /** A dragged node's position as a layout entry (see ANCHORS in geometry);
  * relative to its sector block when it has one. */
-function layoutPoint(node: Node): { x: number; y: number } {
+function layoutPoint(node: Node, snap = false): { x: number; y: number } {
   const kind = node.type === "sd-stock" ? "stock" : node.type === "sd-converter" ? "converter" : "valve";
-  const p = layoutFromNode(node.position, kind);
+  const raw = layoutFromNode(node.position, kind);
+  const p = snap ? snapToGrid(raw, kind) : raw;
   const o = currentOffsets[node.id];
   return o ? { x: p.x - o.x, y: p.y - o.y } : p;
+}
+
+/** Ctrl (Cmd on a Mac) held during a drag: snap to the grid. */
+function snapping(event: unknown): boolean {
+  const e = event as { ctrlKey?: boolean; metaKey?: boolean } | null;
+  return Boolean(e?.ctrlKey || e?.metaKey);
 }
 
 export function Canvas({ colorMode = "system" }: { colorMode?: "light" | "dark" | "system" }) {
@@ -317,16 +324,17 @@ export function Canvas({ colorMode = "system" }: { colorMode?: "light" | "dark" 
   }, []);
 
   // --- node dragging → moveElement --------------------------------------------
-  const onNodeDrag = useCallback((_e: unknown, node: Node, dragged: Node[]) => {
+  const onNodeDrag = useCallback((e: unknown, node: Node, dragged: Node[]) => {
     if (dragged.length === 1) {
-      useEditor.getState().moveElement(node.id, layoutPoint(node), true);
+      useEditor.getState().moveElement(node.id, layoutPoint(node, snapping(e)), true);
     }
   }, []);
 
-  const onNodeDragStop = useCallback((_e: unknown, _node: Node, dragged: Node[]) => {
+  const onNodeDragStop = useCallback((e: unknown, _node: Node, dragged: Node[]) => {
     const st = useEditor.getState();
     const coalesce = dragged.length === 1;
-    for (const n of dragged) st.moveElement(n.id, layoutPoint(n), coalesce);
+    const snap = snapping(e);
+    for (const n of dragged) st.moveElement(n.id, layoutPoint(n, snap), coalesce);
   }, []);
 
   // --- selection sync -----------------------------------------------------------
@@ -477,7 +485,7 @@ export function Canvas({ colorMode = "system" }: { colorMode?: "light" | "dark" 
         onNodeDragStop={onNodeDragStop}
         onNodeDoubleClick={onNodeDoubleClick}
       >
-        <Background variant={BackgroundVariant.Dots} gap={22} size={1.4} />
+        <Background variant={BackgroundVariant.Dots} gap={GRID} size={1.4} />
         <Controls showInteractive={false} position="bottom-left" />
         <AutoFit wrapRef={wrapRef} />
       </ReactFlow>

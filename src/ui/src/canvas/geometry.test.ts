@@ -101,3 +101,14 @@ describe("formatValue", () => {
     expect(formatValue(2e7)).toBe("2.00e+7");
   });
 });
+
+describe("snapToGrid", () => {
+  it("puts the element's centre on the nearest grid point, whatever its size", async () => {
+    const { centerOf, snapToGrid, GRID } = await import("./geometry");
+    for (const kind of ["stock", "converter", "valve"] as const) {
+      const c = centerOf(snapToGrid({ x: 101.3, y: 47.9 }, kind), kind);
+      expect(c.x % GRID).toBeCloseTo(0, 9);
+      expect(c.y % GRID).toBeCloseTo(0, 9);
+    }
+  });
+});

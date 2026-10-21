@@ -210,3 +210,14 @@ export function formatValue(n: number): string {
   if (abs !== 0 && (abs >= 1e6 || abs < 1e-3)) return n.toExponential(2);
   return String(Number(n.toPrecision(4)));
 }
+
+/** Spacing of the canvas dot grid; Ctrl-dragging snaps centres to it. */
+export const GRID = 22;
+
+/** Move a layout point so the element's centre sits on the nearest grid
+ * point (centres, not corners, so stocks, valves and converters of different
+ * sizes line up with each other). */
+export function snapToGrid(point: Point, kind: keyof typeof SIZES, grid = GRID): Point {
+  const c = centerOf(point, kind);
+  return topLeftOf({ x: Math.round(c.x / grid) * grid, y: Math.round(c.y / grid) * grid }, kind);
+}

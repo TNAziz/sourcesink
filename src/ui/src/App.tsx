@@ -115,11 +115,11 @@ function ThemeToggle({ mode, onChange }: { mode: ThemeMode; onChange: (m: ThemeM
   );
 }
 
-const PALETTE: { tool: Tool; icon: typeof MousePointer2; label: string; key: string }[] = [
-  { tool: "select", icon: MousePointer2, label: "Select", key: "V" },
+const PALETTE: { tool: Tool; icon: typeof MousePointer2; label: string; key: string; hint?: string }[] = [
+  { tool: "select", icon: MousePointer2, label: "Select", key: "V", hint: "hold Ctrl while dragging to snap to the grid" },
   { tool: "stock", icon: Database, label: "Stock", key: "S" },
   { tool: "flow", icon: ArrowRight, label: "Flow", key: "F" },
-  { tool: "converter", icon: CircleDashed, label: "Converter", key: "C" },
+  { tool: "converter", icon: CircleDashed, label: "Converter", key: "C", hint: "a constant (type a number, e.g. 0.3) or an equation" },
   { tool: "connector", icon: Spline, label: "Connector", key: "K" },
 ];
 
@@ -135,12 +135,12 @@ function Palette() {
   const setAllSectorsCollapsed = useEditor((s) => s.setAllSectorsCollapsed);
   return (
     <nav className="app-palette" aria-label="Tools">
-      {PALETTE.map(({ tool: t, icon: Icon, label, key }) => (
+      {PALETTE.map(({ tool: t, icon: Icon, label, key, hint }) => (
         <button
           key={t}
           type="button"
           className={`app-tool${tool === t ? " active" : ""}`}
-          data-tip={`${label} · ${key}`}
+          data-tip={hint ? `${label} · ${key} — ${hint}` : `${label} · ${key}`}
           aria-label={`${label} (${key})`}
           aria-pressed={tool === t}
           onClick={() => setTool(t)}
