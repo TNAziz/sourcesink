@@ -10,6 +10,19 @@ We think a modeling tool for teaching and research should be open. Students shou
 
 **The objective of SourceSink is to provide a free, open, and modern place to build, run, calibrate, and explain stock-and-flow models.**
 
+## A first look
+
+![SourceSink running the SIR epidemic model: three stocks (Susceptible, Infectious, Recovered) joined by infection and recovery flows, with the epidemic curves plotted below](docs/images/sir-epidemic-tutorial.png)
+
+The screenshot shows the classic SIR epidemic model (Kermack and McKendrick, 1927), one of the cited examples that ship with SourceSink. You can reproduce it in four steps:
+
+1. Open **Examples** and choose **SIR epidemic** under Ecology.
+2. Read the diagram. People move from **Susceptible** to **Infectious** through the *infection* flow (`beta * Susceptible * Infectious / N`) and on to **Recovered** through the *recovery* flow (`gamma * Infectious`). The converters hold the contact rate `beta = 0.3`, the recovery rate `gamma = 0.1` and the population `N = 10000`, so `R0 = beta / gamma = 3`.
+3. Press **Run**. The results drawer plots the three stocks over 160 days. Infections peak near day 38 at about 3,000 people, and roughly 6% of the population is never infected.
+4. Change `beta` or `gamma` in the inspector and run again to see how the peak moves. **Analyze** ranks which parameter matters most, and **Describe** explains the feedback loops in plain language.
+
+The user manual walks through seven tutorials like this one, from building a first model to calibration and sensitivity analysis ([PDF](docs/manual/sourcesink-manual.pdf)).
+
 ## What you can do with it
 
 1. **Draw and run models.** The editor provides stocks, flows, converters, connectors, and graphical functions on a canvas. Simulation uses Euler, Runge-Kutta 2 and 4, or adaptive Runge-Kutta 4/5. Arrays, scenarios, conveyors, queues, ovens, and more than 60 built-in functions (e.g., `SMTH1`, `DELAY3`, `PULSE`, `RANDOM`) are supported. SourceSink also checks units, so a flow in mg/L where the stock needs mg/L per day is flagged before it causes trouble.
