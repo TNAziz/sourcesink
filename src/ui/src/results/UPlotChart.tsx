@@ -22,6 +22,10 @@ export interface UPlotChartProps {
   series: ChartSeries[];
   theme: ChartTheme;
   timeUnits?: string;
+  /** Logarithmic y axis; values at or below zero are left out. */
+  yLog?: boolean;
+  /** Charts with the same key share one cursor (stacked panels). */
+  syncKey?: string;
 }
 
 const AXIS_FONT = "11px Inter, system-ui, sans-serif";
@@ -31,13 +35,16 @@ const MIN_CHART_HEIGHT = 1;
 const SETTLE_FRAMES = 40;
 
 /** uPlot wants one aligned array per series: equal lengths, nulls for gaps. */
-function alignData(time: readonly number[], series: readonly ChartSeries[]): uPlot.AlignedData {
+function alignData(time: readonly number[], series: readonly ChartSeries[], positive = false): uPlot.AlignedData {
   const n = time.length;
   return [
     Array.from(time),
     ...series.map((s) => {
       const values = new Array<number | null>(n).fill(null);
-      for (let i = 0; i < n && i < s.values.length; i++) values[i] = s.values[i] ?? null;
+      for (let i = 0; i < n && i < s.values.length; i++) {
+        const v = s.values[i] ?? null;
+        values[i] = positive && v != null && v <= 0 ? null : v;
+      }
       return values;
     }),
   ];
@@ -51,13 +58,13 @@ function legendValue(self: uPlot, raw: number, seriesIdx: number): string {
   return last == null ? "--" : formatNumber(last);
 }
 
-export function UPlotChart({ time, series, theme, timeUnits }: UPlotChartProps) {
+export function UPlotChart({ time, series, theme, timeUnits, yLog, syncKey }: UPlotChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const legendRef = useRef<HTMLDivElement>(null);
   const plotRef = useRef<uPlot | null>(null);
   const dataRef = useRef<uPlot.AlignedData>([]);
 
-  const data = useMemo(() => alignData(time, series), [time, series]);
+  const data = useMemo(() => alignData(time, series, yLog), [time, series, yLog]);
   dataRef.current = data;
 
   // Only names + colors define the chart skeleton; values flow in via setData.
@@ -88,7 +95,8 @@ export function UPlotChart({ time, series, theme, timeUnits }: UPlotChartProps) 
           legendRef.current?.appendChild(legendEl);
         },
       },
-      scales: { x: { time: false } },
+      scales: { x: { time: false }, y: yLog ? { distr: 3 } : {} },
+      cursor: syncKey ? { sync: { key: syncKey } } : {},
       axes: [
         {
           label: timeUnits,
@@ -148,7 +156,7 @@ export function UPlotChart({ time, series, theme, timeUnits }: UPlotChartProps) 
       plotRef.current = null;
       legendRef.current?.replaceChildren();
     };
-  }, [theme, seriesKey, timeUnits, dense]);
+  }, [theme, seriesKey, timeUnits, dense, yLog, syncKey]);
 
   useEffect(() => {
     const plot = plotRef.current;

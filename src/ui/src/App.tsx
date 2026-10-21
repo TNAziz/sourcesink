@@ -29,7 +29,7 @@ import {
   Variable,
   Undo2,
 } from "lucide-react";
-import { ChevronDown, ChevronUp, CircleHelp, Loader2 } from "lucide-react";
+import { ChevronDown, ChevronUp, CircleHelp, Loader2, Maximize2, Minimize2 } from "lucide-react";
 import { useEditor, type Tool } from "./state/store";
 import { loadInitialModel } from "./files/startup";
 import { useShortcuts } from "./files/shortcuts";
@@ -213,6 +213,22 @@ function ResultsDrawer() {
   const [open, setOpen] = useState(false);
   const [height, setHeight] = useState(defaultDrawerHeight);
   const [resizing, setResizing] = useState(false);
+  // Full screen: the drawer covers everything below the toolbar.
+  const [full, setFull] = useState(false);
+
+  useEffect(() => {
+    if (!full) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setFull(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [full]);
+
+  const toggleFull = () => {
+    setOpen(true);
+    setFull((f) => !f);
+  };
 
   useEffect(() => {
     if (result) setOpen(true);
@@ -251,22 +267,34 @@ function ResultsDrawer() {
 
   return (
     <section
-      className="app-drawer"
+      className={full ? "app-drawer app-drawer-full" : "app-drawer"}
       data-open={open ? "true" : undefined}
-      style={{ height: open ? height : 37, transition: resizing ? "none" : undefined }}
+      style={full ? undefined : { height: open ? height : 37, transition: resizing ? "none" : undefined }}
     >
-      <div className="app-drawer-grip" onPointerDown={startResize} title="Drag to resize" />
-      <header className="app-drawer-head">
+      {full ? null : <div className="app-drawer-grip" onPointerDown={startResize} title="Drag to resize" />}
+      <header className="app-drawer-head" onDoubleClick={toggleFull}>
         <button
           type="button"
           className="app-iconbtn app-drawer-toggle"
           title={open ? "Collapse results" : "Expand results"}
-          onClick={() => setOpen((o) => !o)}
+          onClick={() => {
+            setFull(false);
+            setOpen((o) => !o);
+          }}
         >
           {open ? <ChevronDown size={15} /> : <ChevronUp size={15} />}
         </button>
         <span className="app-drawer-title">Results</span>
         {runError ? <span className="app-drawer-error">{runError}</span> : null}
+        <button
+          type="button"
+          className="app-iconbtn app-drawer-full-btn"
+          title={full ? "Exit full screen (Esc)" : "Full screen (or double-click this bar)"}
+          aria-pressed={full}
+          onClick={toggleFull}
+        >
+          {full ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+        </button>
       </header>
       {open ? (
         <div className="app-drawer-body">

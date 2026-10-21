@@ -1,0 +1,65 @@
+/* SourceSink — Export dropdown. */
+
+.exp-menu {
+  position: relative;
+  display: inline-flex;
+}
+
+.exp-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  width: 270px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+}
+
+.exp-item {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+}
+
+.exp-item:hover,
+.exp-item:focus-visible {
+  background: var(--surface-2);
+}
+
+.exp-item-label {
+  font-size: 12.5px;
+  font-weight: 550;
+}
+
+.exp-item-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.ana-export {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 7px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.ana-export:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}

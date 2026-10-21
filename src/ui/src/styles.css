@@ -380,3 +380,20 @@ button:disabled {
   transform: none;
   align-items: flex-end;
 }
+
+/* Results full screen: covers the canvas and inspector below the toolbar. */
+.app-drawer-full {
+  position: fixed;
+  top: 48px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 26;
+  height: auto;
+  border-top: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+}
+
+.app-drawer-full-btn {
+  margin-left: auto;
+}
