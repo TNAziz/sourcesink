@@ -37,3 +37,6 @@ export { nelderMead, differentialEvolution } from "./optimize.js";
 export type { OptimizeResult } from "./optimize.js";
 
 export { calibrate } from "./calibrate.js";
+
+export { convertToArrays, findArrayFamilies } from "./arrayize.js";
+export type { ArrayDimensionPlan, ArrayFamily } from "./arrayize.js";

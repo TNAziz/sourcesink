@@ -32,7 +32,8 @@ const toEquation = (value: string | number): string => (typeof value === "string
  * Names match case-insensitively with spaces ≡ underscores (use
  * `canonicalName` from @sourcesink/engine). Unknown names throw. A number
  * becomes its decimal string as the equation. Stocks: the equation is the
- * initial value. Graph functions cannot be overridden (throw). */
+ * initial value. Graph functions cannot be overridden (throw). A key
+ * `name[labels]` overrides one element of an arrayed element. */
 export function applyOverrides(model: Model, overrides: Overrides, run?: Partial<RunSpec>): Model {
   const m = clone(model);
 
@@ -52,7 +53,10 @@ export function applyOverrides(model: Model, overrides: Overrides, run?: Partial
   for (const [name, value] of Object.entries(overrides)) {
     const key = canonicalName(name);
     const target = targets.get(key);
-    if (target) {
+    const indexed = /^(.+?)\s*\[([^\]]*)\]\s*$/.exec(name);
+    if (!target && indexed) {
+      setArrayElement(m, indexed[1], indexed[2], toEquation(value));
+    } else if (target) {
       target.set(toEquation(value));
     } else if (graphs.has(key)) {
       throw new Error(`cannot override graph function '${name}'`);
@@ -65,6 +69,25 @@ export function applyOverrides(model: Model, overrides: Overrides, run?: Partial
 
   if (run) m.run = { ...m.run, ...run };
   return m;
+}
+
+/** Override one element of an arrayed element: `name[labels]` sets that
+ * element's own equation (labels matched like names). */
+function setArrayElement(m: Model, name: string, inner: string, equation: string): void {
+  const specName = Object.keys(m.arrayed ?? {}).find((k) => canonicalName(k) === canonicalName(name));
+  const spec = specName ? m.arrayed[specName] : undefined;
+  if (!spec || spec.dimensions.length === 0) throw new Error(`'${name}' is not arrayed`);
+  const items = inner.split(",").map((s) => s.trim());
+  if (items.length !== spec.dimensions.length) {
+    throw new Error(`'${name}' has ${spec.dimensions.length} dimension(s) but the override gives ${items.length}`);
+  }
+  const labels = items.map((item, i) => {
+    const dim = m.dimensions.find((d) => canonicalName(d.name) === canonicalName(spec.dimensions[i]));
+    const hit = dim?.values.find((v) => canonicalName(v) === canonicalName(item));
+    if (!hit) throw new Error(`'${item}' is not a label of ${spec.dimensions[i]}`);
+    return hit;
+  });
+  spec.elements = { ...(spec.elements ?? {}), [labels.join(",")]: equation };
 }
 
 /** Apply a Scenario from the IR (`model.scenarios`). */
