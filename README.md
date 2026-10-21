@@ -12,16 +12,16 @@ We think a modeling tool for teaching and research should be open. Students shou
 
 ## A first look
 
-![SourceSink running the SIR epidemic model: three stocks (Susceptible, Infectious, Recovered) joined by infection and recovery flows, with the epidemic curves plotted below](docs/images/sir-epidemic-tutorial.png)
+![SourceSink running the Streeter-Phelps dissolved-oxygen sag model: two stocks (BOD and DO_deficit) joined by deoxygenation and reaeration flows, with BOD, the oxygen deficit and dissolved oxygen plotted below](docs/images/streeter-phelps-do-sag.png)
 
-The screenshot shows the classic SIR epidemic model (Kermack and McKendrick, 1927), one of the cited examples that ship with SourceSink. You can reproduce it in four steps:
+The screenshot shows the Streeter-Phelps dissolved-oxygen sag (Streeter and Phelps, 1925), the classic model of a river receiving a wastewater discharge and one of the cited examples that ship with SourceSink. You can reproduce it in four steps:
 
-1. Open **Examples** and choose **SIR epidemic** under Ecology.
-2. Read the diagram. People move from **Susceptible** to **Infectious** through the *infection* flow (`beta * Susceptible * Infectious / N`) and on to **Recovered** through the *recovery* flow (`gamma * Infectious`). The converters hold the contact rate `beta = 0.3`, the recovery rate `gamma = 0.1` and the population `N = 10000`, so `R0 = beta / gamma = 3`.
-3. Press **Run**. The results drawer plots the three stocks over 160 days. Infections peak near day 38 at about 3,000 people, and roughly 6% of the population is never infected.
-4. Change `beta` or `gamma` in the inspector and run again to see how the peak moves. **Analyze** ranks which parameter matters most, and **Describe** explains the feedback loops in plain language.
+1. Open **Examples** and choose **Streeter-Phelps dissolved-oxygen sag** under Environmental engineering.
+2. Read the diagram. The waste load leaves **BOD** through the *deoxygenation* flow (`kd * BOD`), and that same oxygen demand fills **DO_deficit**, which the *reaeration* flow (`ka * DO_deficit`) drains back toward saturation. The converters hold the decay rate `kd = 0.3/day`, the reaeration rate `ka = 0.6/day` and the saturation concentration `DO_sat = 9 mg/L`, and dissolved oxygen is `DO = DO_sat - DO_deficit`.
+3. Press **Run**, then turn on **DO** in the series chips. The results drawer plots 20 days downstream of the outfall. BOD decays from 20 mg/L, and dissolved oxygen falls from 7 mg/L to a low of about 3.4 mg/L a little after day 2, at the critical time `ln(ka/kd) / (ka - kd)` ≈ 2.3 days, before recovering toward saturation.
+4. Change `kd` or `ka` in the inspector and run again to see how deep the sag gets. **Analyze** ranks which parameter matters most, and **Describe** explains the two balancing feedback loops in plain language.
 
-The user manual walks through seven tutorials like this one, from building a first model to calibration and sensitivity analysis ([PDF](docs/manual/sourcesink-manual.pdf)).
+The user manual walks through seven tutorials like this one, from building a first model to calibration and sensitivity analysis ([PDF](docs/manual/sourcesink-manual.pdf)). Tutorials 3 and 4 continue with this model, fitting `kd` and `ka` to field measurements and asking what controls the lowest oxygen level.
 
 ## What you can do with it
 
