@@ -36,7 +36,7 @@ The user manual walks through seven tutorials like this one, from building a fir
 
 ## Installing
 
-You do not need to build anything. Each release on the [Releases page](https://github.com/anonymousacademe/sourcesink/releases) includes ready-to-run installers.
+You do not need to build anything. Each release on the [Releases page](https://github.com/TNAziz/sourcesink/releases) includes ready-to-run installers.
 
 | System | Download | Notes |
 |---|---|---|
@@ -50,7 +50,7 @@ You do not need to build anything. Each release on the [Releases page](https://g
 On Linux, this one command downloads the latest release and adds SourceSink to your app launcher:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/anonymousacademe/sourcesink/main/scripts/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/TNAziz/sourcesink/main/scripts/install.sh | sh
 ```
 
 Run the same script with `--uninstall` to remove it.
@@ -62,7 +62,7 @@ The modeling assistant also needs [OpenCode](https://opencode.ai) signed in to O
 You will need Node.js 22.19 or newer.
 
 ```bash
-git clone https://github.com/anonymousacademe/sourcesink.git
+git clone https://github.com/TNAziz/sourcesink.git
 cd sourcesink
 npm install
 npm start                  # the editor in your browser

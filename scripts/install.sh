@@ -1,7 +1,7 @@
 #!/bin/sh
 # Install SourceSink for the current user on Linux: no root, no FUSE, no build.
 #
-#   curl -fsSL https://raw.githubusercontent.com/anonymousacademe/sourcesink/main/scripts/install.sh | sh
+#   curl -fsSL https://raw.githubusercontent.com/TNAziz/sourcesink/main/scripts/install.sh | sh
 #
 # Downloads the latest release's x64 .tar.gz from GitHub, unpacks it under
 # ~/.local/share/sourcesink, and adds a launcher entry, an icon and the
@@ -11,7 +11,7 @@
 #   sh install.sh --uninstall    remove everything this script installed
 set -eu
 
-repo=anonymousacademe/sourcesink
+repo=TNAziz/sourcesink
 data=${XDG_DATA_HOME:-$HOME/.local/share}
 app_dir=$data/sourcesink
 desktop_file=$data/applications/sourcesink.desktop

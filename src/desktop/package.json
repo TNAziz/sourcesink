@@ -125,7 +125,7 @@
     "publish": [
       {
         "provider": "github",
-        "owner": "anonymousacademe",
+        "owner": "TNAziz",
         "repo": "sourcesink"
       }
     ],
@@ -137,5 +137,5 @@
     ]
   },
   "desktopName": "sourcesink.desktop",
-  "homepage": "https://github.com/anonymousacademe/sourcesink"
+  "homepage": "https://github.com/TNAziz/sourcesink"
 }
