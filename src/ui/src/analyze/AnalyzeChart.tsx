@@ -4,9 +4,10 @@
  * Supports lines, observation dots and shaded bands between two edge series
  * (used for the uncertainty percentiles). Colors resolve from the live theme
  * so light/dark changes rebuild the chart, like the results chart.
+ * Hovering shows a readout under the plot for the time under the cursor.
  */
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import uPlot from "uplot";
 import "uplot/dist/uPlot.min.css";
 
@@ -34,6 +35,9 @@ export interface AnalyzeChartProps {
   note?: string;
   timeUnits?: string;
   height?: number;
+  /** Lines shown under the plot for the hovered sample; defaults to each
+   * visible series' value. */
+  readout?: (index: number) => ReactNode;
 }
 
 const AXIS_FONT = "11px Inter, system-ui, sans-serif";
@@ -83,7 +87,9 @@ export function AnalyzeChart({
   note,
   timeUnits,
   height = 190,
+  readout,
 }: AnalyzeChartProps) {
+  const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   const theme = useChartTheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const plotRef = useRef<uPlot | null>(null);
@@ -116,6 +122,14 @@ export function AnalyzeChart({
       height: Math.max(1, container.clientHeight),
       class: "ana-uplot",
       legend: { show: false },
+      hooks: {
+        setCursor: [
+          (u) => {
+            const idx = u.cursor.idx;
+            setHoverIndex(idx == null || idx < 0 ? null : idx);
+          },
+        ],
+      },
       scales: { x: { time: false } },
       bands: uplotBands(series),
       axes: [
@@ -179,11 +193,40 @@ export function AnalyzeChart({
     plotRef.current?.setData(data);
   }, [data]);
 
+  const hoverTime = hoverIndex == null ? undefined : time[hoverIndex];
+  const defaultReadout = (index: number): ReactNode =>
+    series
+      .filter((spec) => spec.lineWidth !== 0 || spec.points)
+      .map((spec) => {
+        const value = spec.values[index];
+        return (
+          <span key={spec.name} className="ana-readout-item">
+            <span className="ana-readout-swatch" style={{ background: spec.color }} />
+            {spec.name} {value == null ? "–" : formatNumber(value)}
+          </span>
+        );
+      });
+
   return (
     <figure className="ana-chart" aria-label={title}>
       {title ? <figcaption className="ana-chart-title">{title}</figcaption> : null}
-      <div className="ana-chart-canvas" ref={containerRef} style={{ height }} />
-      {note ? <div className="ana-chart-note">{note}</div> : null}
+      <div
+        className="ana-chart-canvas"
+        ref={containerRef}
+        style={{ height }}
+        onMouseLeave={() => setHoverIndex(null)}
+      />
+      {hoverIndex != null && hoverTime !== undefined ? (
+        <div className="ana-readout" aria-live="polite">
+          <span className="ana-readout-time">
+            t = {formatNumber(hoverTime)}
+            {timeUnits ? ` ${timeUnits}` : ""}
+          </span>
+          {(readout ?? defaultReadout)(hoverIndex)}
+        </div>
+      ) : note ? (
+        <div className="ana-chart-note">{note}</div>
+      ) : null}
     </figure>
   );
 }

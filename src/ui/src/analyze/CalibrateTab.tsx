@@ -38,12 +38,14 @@ import {
   relativeError,
 } from "./helpers.js";
 import { ParameterRows } from "./ParameterRows.js";
-import { useAnalyzeWorker } from "./useAnalyzeWorker.js";
+import { useAnalyzeWorker, type AnalyzeWorkerEvents } from "./useAnalyzeWorker.js";
 
 export interface CalibrateTabProps {
   model: Model;
   params: ParameterRow[];
   onParamsChange(rows: ParameterRow[]): void;
+  /** Run lifecycle, so the shell can show background progress. */
+  events?: AnalyzeWorkerEvents;
 }
 
 function show(value: number): string {
@@ -76,9 +78,9 @@ function FitChartBlock({ alignment, timeUnits }: { alignment: Alignment; timeUni
   );
 }
 
-export function CalibrateTab({ model, params, onParamsChange }: CalibrateTabProps) {
+export function CalibrateTab({ model, params, onParamsChange, events }: CalibrateTabProps) {
   const updateElement = useEditor((s) => s.updateElement);
-  const worker = useAnalyzeWorker();
+  const worker = useAnalyzeWorker(events);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [dataset, setDataset] = useState<Dataset | null>(null);

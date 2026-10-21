@@ -3,7 +3,9 @@
  *
  * A run creates a fresh module worker, posts one request and terminates the
  * worker as soon as a result or error arrives. Cancelling terminates it too,
- * so the UI recovers immediately. The worker is also terminated on unmount.
+ * so the UI recovers immediately. The worker is also terminated on unmount,
+ * which is why the Analyze drawer stays mounted while it is closed: a long
+ * run keeps going in the background.
  */
 
 import { useEffect, useRef, useState } from "react";
@@ -20,12 +22,28 @@ export interface AnalyzeWorker {
   cancel(): void;
 }
 
-export function useAnalyzeWorker(): AnalyzeWorker {
+/** How a run ended, reported to `onSettle` (never for a cancelled run). */
+export type RunOutcome = { ok: true } | { ok: false; error: string };
+
+export interface AnalyzeWorkerEvents {
+  /** Called whenever `running` flips. */
+  onRunningChange?(running: boolean): void;
+  /** Called once a run finishes or fails. */
+  onSettle?(outcome: RunOutcome): void;
+}
+
+export function useAnalyzeWorker(events: AnalyzeWorkerEvents = {}): AnalyzeWorker {
   const workerRef = useRef<Worker | null>(null);
   const idRef = useRef(0);
   const [running, setRunning] = useState(false);
   const [stage, setStage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const eventsRef = useRef(events);
+  eventsRef.current = events;
+
+  useEffect(() => {
+    eventsRef.current.onRunningChange?.(running);
+  }, [running]);
 
   const stop = (): void => {
     workerRef.current?.terminate();
@@ -71,15 +89,19 @@ export function useAnalyzeWorker(): AnalyzeWorker {
       if (message.type === "error") {
         setError(message.error);
         stop();
+        eventsRef.current.onSettle?.({ ok: false, error: message.error });
         return;
       }
       onResult(message);
       stop();
+      eventsRef.current.onSettle?.({ ok: true });
     };
 
     worker.onerror = (event) => {
-      setError(event.message || "The analysis worker failed.");
+      const text = event.message || "The analysis worker failed.";
+      setError(text);
       stop();
+      eventsRef.current.onSettle?.({ ok: false, error: text });
     };
 
     worker.postMessage(payload);

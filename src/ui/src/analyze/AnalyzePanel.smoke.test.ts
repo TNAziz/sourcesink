@@ -18,4 +18,12 @@ describe("AnalyzePanel", () => {
     expect(out).toContain("Uncertainty");
     expect(out).toContain("Observations");
   });
+
+  it("stays rendered but hidden when closed, so runs keep going", () => {
+    const out = renderToStaticMarkup(createElement(AnalyzePanel, { onClose: () => {}, open: false }));
+    expect(out).toContain("ana-panel-hidden");
+    expect(out).toContain('aria-hidden="true"');
+    expect(out).not.toContain("ana-backdrop");
+    expect(out).toContain("Sensitivity");
+  });
 });

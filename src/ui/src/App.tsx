@@ -4,7 +4,7 @@
  * results drawer at the bottom that opens automatically after a run.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
   BookOpen,
@@ -29,15 +29,18 @@ import {
   Variable,
   Undo2,
 } from "lucide-react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, CircleHelp, Loader2 } from "lucide-react";
 import { useEditor, type Tool } from "./state/store";
 import { loadInitialModel } from "./files/startup";
 import { useShortcuts } from "./files/shortcuts";
 import { newModelFile, openModelContent, openModelFile, saveModelFile } from "./files/fileActions";
 import { useDesktopIntegration } from "./desktop/desktop";
 import { ExamplesMenu } from "./files/ExamplesMenu";
+import { HelpMenu } from "./help/HelpMenu";
+import { openManual } from "./help/manual";
 import { ExplainPanel } from "./explain/ExplainPanel";
-import { AnalyzePanel, type AnalyzeInitial } from "./analyze/AnalyzePanel";
+import { AnalyzePanel, type AnalyzeInitial, type Tab as AnalyzeTab } from "./analyze/AnalyzePanel";
+import type { RunOutcome } from "./analyze/useAnalyzeWorker";
 import { AssistantPanel } from "./assistant/AssistantPanel";
 import { suggestionAction } from "./assistant/logic";
 import type { FeatureSuggestion } from "@sourcesink/assistant";
@@ -282,11 +285,15 @@ export default function App() {
   const canRedo = useEditor((s) => s.future.length > 0);
   const runError = useEditor((s) => s.runError);
   const [examplesOpen, setExamplesOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [describeOpen, setDescribeOpen] = useState(false);
   const [analyzeOpen, setAnalyzeOpen] = useState(false);
   const [assistantOpen, setAssistantOpen] = useState(false);
   const [analyzeInitial, setAnalyzeInitial] = useState<AnalyzeInitial | undefined>();
   const [analyzeKey, setAnalyzeKey] = useState(0);
+  // Mounted from first open on, so runs survive closing the drawer.
+  const [analyzeMounted, setAnalyzeMounted] = useState(false);
+  const [analyzeBusy, setAnalyzeBusy] = useState<AnalyzeTab[]>([]);
   const [themeMode, setThemeMode] = useState<ThemeMode>(initialTheme);
   const { toasts, push } = useToasts();
 
@@ -305,6 +312,7 @@ export default function App() {
     save: (saveAs) => saveModelFile(saveAs),
     openPath: (name, content, path) => void openModelContent(name, content, path),
     showExamples: () => setExamplesOpen(true),
+    openManual: () => openManual(),
     toggleTheme: () =>
       setThemeMode((m) => {
         const dark =
@@ -347,6 +355,7 @@ export default function App() {
       case "analyze":
         setAnalyzeInitial({ tab: action.tab, elements: action.elements });
         setAnalyzeKey((n) => n + 1);
+        setAnalyzeMounted(true);
         setAnalyzeOpen(true);
         break;
       case "scenarios":
@@ -354,6 +363,15 @@ export default function App() {
         push(action.hint, "info");
         break;
     }
+  };
+
+  // Only announce runs that finish while the drawer is closed.
+  const analyzeOpenRef = useRef(analyzeOpen);
+  analyzeOpenRef.current = analyzeOpen;
+  const onAnalysisFinished = (_tab: AnalyzeTab, label: string, outcome: RunOutcome): void => {
+    if (analyzeOpenRef.current) return;
+    if (outcome.ok) push(`${label} finished. Open Analyze to see the results.`, "success");
+    else push(`${label} failed: ${outcome.error}`, "error");
   };
 
   return (
@@ -426,16 +444,34 @@ export default function App() {
           <button
             type="button"
             className="app-btn"
-            title="Calibrate, sensitivity and uncertainty analysis"
+            title={
+              analyzeBusy.length > 0
+                ? `Analysis running in the background (${analyzeBusy.join(", ")})`
+                : "Calibrate, sensitivity and uncertainty analysis"
+            }
             aria-pressed={analyzeOpen}
             onClick={() => {
-              setAnalyzeInitial(undefined);
-              setAnalyzeKey((n) => n + 1);
+              setAnalyzeMounted(true);
               setAnalyzeOpen((v) => !v);
             }}
           >
-            <FlaskConical size={14} />
+            {analyzeBusy.length > 0 ? (
+              <Loader2 size={14} className="app-spin" aria-label="Analysis running" />
+            ) : (
+              <FlaskConical size={14} />
+            )}
             Analyze
+          </button>
+          <button
+            type="button"
+            className="app-btn"
+            title="User manual and tutorials"
+            aria-pressed={helpOpen}
+            data-help-toggle
+            onClick={() => setHelpOpen((v) => !v)}
+          >
+            <CircleHelp size={14} />
+            Help
           </button>
 
           <span className="app-sep" />
@@ -476,6 +512,7 @@ export default function App() {
 
         <div className="app-menu-anchor">
           {examplesOpen ? <ExamplesMenu onClose={() => setExamplesOpen(false)} /> : null}
+          {helpOpen ? <HelpMenu onClose={() => setHelpOpen(false)} /> : null}
         </div>
       </header>
 
@@ -497,11 +534,14 @@ export default function App() {
         />
       ) : null}
       {describeOpen ? <ExplainPanel onClose={() => setDescribeOpen(false)} /> : null}
-      {analyzeOpen ? (
+      {analyzeMounted ? (
         <AnalyzePanel
-          key={analyzeKey}
+          open={analyzeOpen}
           initial={analyzeInitial}
+          initialKey={analyzeKey}
           onClose={() => setAnalyzeOpen(false)}
+          onActivity={setAnalyzeBusy}
+          onFinished={onAnalysisFinished}
         />
       ) : null}
       <ToastStack toasts={toasts} className="app-toasts" />

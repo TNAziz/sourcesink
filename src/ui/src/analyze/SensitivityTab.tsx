@@ -13,6 +13,8 @@ import type { Model } from "@sourcesink/model";
 import { formatNumber } from "../results/csv.js";
 import { seriesNames } from "../results/series.js";
 import { BarChart, type BarGroup } from "./BarChart.js";
+import { readMorris, readSobol } from "./explain.js";
+import { InfoTip } from "./InfoTip.js";
 import {
   makeOutputMetric,
   morrisRequest,
@@ -22,12 +24,14 @@ import {
   type Statistic,
 } from "./helpers.js";
 import { ParameterRows } from "./ParameterRows.js";
-import { useAnalyzeWorker } from "./useAnalyzeWorker.js";
+import { useAnalyzeWorker, type AnalyzeWorkerEvents } from "./useAnalyzeWorker.js";
 
 export interface SensitivityTabProps {
   model: Model;
   params: ParameterRow[];
   onParamsChange(rows: ParameterRow[]): void;
+  /** Run lifecycle, so the shell can show background progress. */
+  events?: AnalyzeWorkerEvents;
 }
 
 const STAT_LABELS: Array<{ value: Statistic; label: string }> = [
@@ -56,8 +60,8 @@ function describeMetric(metric: OutputMetric): string {
   }
 }
 
-export function SensitivityTab({ model, params, onParamsChange }: SensitivityTabProps) {
-  const worker = useAnalyzeWorker();
+export function SensitivityTab({ model, params, onParamsChange, events }: SensitivityTabProps) {
+  const worker = useAnalyzeWorker(events);
   const modelSeries = useMemo(() => seriesNames(model), [model]);
   const validation = useMemo(() => validateParameterRows(params, model), [params, model]);
 
@@ -101,8 +105,9 @@ export function SensitivityTab({ model, params, onParamsChange }: SensitivityTab
 
   const morrisGroups: BarGroup[] = useMemo(() => {
     if (!morrisResult) return [];
-    return morrisResult.parameters.map((p) => ({
+    return morrisResult.parameters.map((p, i) => ({
       label: p.name,
+      reading: readMorris(p, i + 1, morrisResult.parameters),
       title: `${p.name} — μ = ${formatNumber(p.mu)}, μ* = ${formatNumber(p.muStar)}, σ = ${formatNumber(p.sigma)}`,
       values: [{ key: "μ*", value: p.muStar, color: "var(--accent)", marker: p.sigma }],
     }));
@@ -110,8 +115,9 @@ export function SensitivityTab({ model, params, onParamsChange }: SensitivityTab
 
   const sobolGroups: BarGroup[] = useMemo(() => {
     if (!sobolResult) return [];
-    return sobolResult.parameters.map((p) => ({
+    return sobolResult.parameters.map((p, i) => ({
       label: p.name,
+      reading: readSobol(p, i + 1),
       title: `${p.name} — S1 = ${formatNumber(p.first)} [${formatNumber(p.firstCI[0])}, ${formatNumber(
         p.firstCI[1],
       )}], ST = ${formatNumber(p.total)} [${formatNumber(p.totalCI[0])}, ${formatNumber(p.totalCI[1])}]`,
@@ -139,7 +145,20 @@ export function SensitivityTab({ model, params, onParamsChange }: SensitivityTab
   return (
     <div className="ana-tabpane">
       <section className="ana-section" aria-label="Output metric">
-        <h3 className="ana-section-title">Output metric</h3>
+        <h3 className="ana-section-title">
+          Output metric
+          <InfoTip title="Output metric">
+            <p>
+              Sensitivity analysis needs one number from each run. Pick the series you care about and how
+              to boil its time path down to a number.
+            </p>
+            <p>
+              For example, the <b>Minimum</b> of a dissolved-oxygen series is the depth of the sag, and the{" "}
+              <b>Final value</b> of a stock is where it ends up. The ranking can change completely with the
+              metric, so choose the one that answers your question.
+            </p>
+          </InfoTip>
+        </h3>
         <div className="ana-grid-3">
           <label className="ana-field">
             <span className="ana-label">Series</span>
@@ -158,7 +177,17 @@ export function SensitivityTab({ model, params, onParamsChange }: SensitivityTab
             </select>
           </label>
           <label className="ana-field">
-            <span className="ana-label">Statistic</span>
+            <span className="ana-label">
+              Statistic
+              <InfoTip title="Statistic">
+                <p>
+                  <b>Final value</b>: the value at the stop time. <b>Maximum</b> / <b>Minimum</b>: the peak
+                  or trough over the run. <b>Time-average</b>: the mean over the run.{" "}
+                  <b>Integral</b>: the area under the curve, such as a total load or exposure.{" "}
+                  <b>Value at time…</b>: the value at the time you enter.
+                </p>
+              </InfoTip>
+            </span>
             <select
               className="ana-select"
               value={stat}
@@ -187,7 +216,20 @@ export function SensitivityTab({ model, params, onParamsChange }: SensitivityTab
       </section>
 
       <section className="ana-section" aria-label="Sensitivity parameters">
-        <h3 className="ana-section-title">Parameters</h3>
+        <h3 className="ana-section-title">
+          Parameters
+          <InfoTip title="Parameters and ranges">
+            <p>
+              Each parameter is varied between its <b>Min</b> and <b>Max</b>. Use the range you actually
+              believe is plausible, such as values reported in the literature or seen in the field. Results
+              are only as meaningful as these ranges.
+            </p>
+            <p>
+              Tick <b>Log</b> when a range spans more than about 10× (for example 0.01 to 1). Values are then
+              spread evenly in orders of magnitude, so the low end is not under-sampled.
+            </p>
+          </InfoTip>
+        </h3>
         <ParameterRows
           model={model}
           rows={params}
@@ -198,7 +240,20 @@ export function SensitivityTab({ model, params, onParamsChange }: SensitivityTab
       </section>
 
       <section className="ana-section" aria-label="Sensitivity method">
-        <h3 className="ana-section-title">Method</h3>
+        <h3 className="ana-section-title">
+          Method
+          <InfoTip title="Morris or Sobol?">
+            <p>
+              <b>Quick screen (Morris)</b> moves one parameter at a time along random paths through the
+              ranges. It is cheap, so use it first, with many parameters, to find the few that matter.
+            </p>
+            <p>
+              <b>Variance-based (Sobol)</b> samples all parameters together and splits the spread of the
+              output into shares due to each parameter and their interactions. It costs more runs, so use it
+              on the short list Morris gives you.
+            </p>
+          </InfoTip>
+        </h3>
         <div className="ana-grid-3">
           <label className="ana-field">
             <span className="ana-label">Method</span>
@@ -214,7 +269,16 @@ export function SensitivityTab({ model, params, onParamsChange }: SensitivityTab
           </label>
           {method === "morris" ? (
             <label className="ana-field">
-              <span className="ana-label">Trajectories</span>
+              <span className="ana-label">
+                Trajectories
+                <InfoTip title="Trajectories">
+                  <p>
+                    Each trajectory is one random path that changes every parameter once. More trajectories
+                    give a steadier ranking: 10 to 50 is typical. If the order of the top bars changes
+                    between runs, add more.
+                  </p>
+                </InfoTip>
+              </span>
               <input
                 className="ana-input"
                 inputMode="numeric"
@@ -225,7 +289,16 @@ export function SensitivityTab({ model, params, onParamsChange }: SensitivityTab
             </label>
           ) : (
             <label className="ana-field">
-              <span className="ana-label">Base samples</span>
+              <span className="ana-label">
+                Base samples
+                <InfoTip title="Base samples">
+                  <p>
+                    The size N of the quasi-random sample. The cost is N × (parameters + 2) runs. 512 to 1024
+                    is typical. The confidence whiskers shrink as N grows, so raise it when they overlap
+                    between parameters.
+                  </p>
+                </InfoTip>
+              </span>
               <input
                 className="ana-input"
                 inputMode="numeric"
@@ -285,12 +358,40 @@ export function SensitivityTab({ model, params, onParamsChange }: SensitivityTab
           <div className="ana-section-head">
             <h3 className="ana-section-title">
               {method === "morris" ? "Morris elementary effects" : "Sobol indices"}
+              {method === "morris" ? (
+                <InfoTip title="Reading a Morris screen">
+                  <p>
+                    <b>μ*</b> (the bar) is the average size of the change in the output when this parameter
+                    moves. Bigger means more influential. Effects are measured on each range scaled to 0–1,
+                    so bars compare fairly across units.
+                  </p>
+                  <p>
+                    <b>σ</b> (the thin tick) is how much that effect varies from place to place. When σ is
+                    small next to μ*, the effect is close to linear. When σ is close to or above μ*, the
+                    effect is non-linear or depends on other parameters.
+                  </p>
+                </InfoTip>
+              ) : (
+                <InfoTip title="Reading Sobol indices">
+                  <p>
+                    <b>S1</b> is the share of the output&rsquo;s variance this parameter causes on its own.{" "}
+                    <b>ST</b> adds the share from its interactions with other parameters. Both run from 0 to
+                    1.
+                  </p>
+                  <p>
+                    A big gap between ST and S1 means interactions. ST near 0 means the parameter can be
+                    fixed. The whiskers are bootstrap 95% confidence intervals: if two whiskers overlap, the
+                    order of those two parameters is not settled.
+                  </p>
+                </InfoTip>
+              )}
             </h3>
             <span className="ana-badge ana-badge-ok">
               <CircleCheck size={12} aria-hidden />
               {method === "morris" ? "μ* ranking" : "S1 / ST"}
             </span>
           </div>
+          <p className="ana-muted ana-hover-hint">Hover a bar to see what it means.</p>
           <p className="ana-muted">
             {describeMetric(result.metric)} · {result.evaluations.toLocaleString()} evaluations
             {result.failed > 0 ? ` · ${result.failed} failed` : ""}

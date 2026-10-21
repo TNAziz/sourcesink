@@ -125,6 +125,28 @@
   display: none;
 }
 
+/* Closed but still mounted: runs continue in the background. */
+.ana-panel-hidden {
+  display: none;
+}
+
+.ana-tab-busy {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 6px;
+  border-radius: 50%;
+  vertical-align: middle;
+  background: var(--accent);
+  animation: ana-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes ana-pulse {
+  50% {
+    opacity: 0.3;
+  }
+}
+
 .ana-tabpane {
   display: flex;
   flex-direction: column;
@@ -428,8 +450,13 @@
   font-size: 12px;
 }
 
-.ana-spin {
+.ana-spin,
+.app-spin {
   animation: ana-spin 0.9s linear infinite;
+}
+
+.app-spin {
+  color: var(--accent);
 }
 
 @keyframes ana-spin {
@@ -734,4 +761,117 @@
   .ana-param-main {
     grid-template-columns: minmax(0, 1fr) 66px 66px 40px 26px;
   }
+}
+
+/* --- explainers: ⓘ tips, hover cards, chart readouts ---------------------- */
+
+.ana-info {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-left: 4px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  vertical-align: -3px;
+  color: var(--text-muted);
+  background: transparent;
+  cursor: help;
+}
+
+.ana-info:hover,
+.ana-info:focus-visible {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.ana-tipcard {
+  position: fixed;
+  z-index: 60;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.5;
+  letter-spacing: normal;
+  text-transform: none;
+  pointer-events: none;
+}
+
+.ana-tipcard-title {
+  margin-bottom: 4px;
+  font-weight: 650;
+  font-size: 12.5px;
+}
+
+.ana-tipcard-body p {
+  margin: 0 0 6px;
+}
+
+.ana-tipcard-body p:last-child {
+  margin-bottom: 0;
+}
+
+.ana-tipcard-facts {
+  margin: 0 0 8px;
+  padding: 6px 8px;
+  list-style: none;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 11.5px;
+}
+
+.ana-bars {
+  position: relative;
+}
+
+.ana-bars-hit {
+  fill: transparent;
+}
+
+.ana-bars-hit-on {
+  fill: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.ana-bars-svg rect:not(.ana-bars-hit),
+.ana-bars-svg line,
+.ana-bars-svg text {
+  pointer-events: none;
+}
+
+.ana-hover-hint {
+  font-style: italic;
+}
+
+.ana-readout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin-top: 4px;
+  font-size: 11.5px;
+  color: var(--text);
+}
+
+.ana-readout-time {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.ana-readout-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ana-readout-swatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
 }

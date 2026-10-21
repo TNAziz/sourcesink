@@ -4,10 +4,15 @@
  * One group per parameter; each group may have several bars (Sobol S1/ST) and
  * optional low/high confidence whiskers plus a thin marker (Morris σ). Colors
  * are passed in (usually CSS variables or the chart palette), so the chart
- * follows the theme without a canvas.
+ * follows the theme without a canvas. Hovering a row highlights it and, when
+ * the group carries a `reading`, opens a card explaining the numbers.
  */
 
+import { useState } from "react";
+
 import { formatNumber } from "../results/csv.js";
+import type { Reading } from "./explain.js";
+import { FloatingCard, type Anchor } from "./InfoTip.js";
 
 export interface BarValue {
   key: string;
@@ -24,6 +29,8 @@ export interface BarGroup {
   values: BarValue[];
   /** Accessible summary; defaults to label + formatted values. */
   title?: string;
+  /** Plain-language explanation shown on hover. */
+  reading?: Reading;
 }
 
 export interface BarChartProps {
@@ -61,9 +68,16 @@ export function BarChart({ groups, ariaLabel, legend }: BarChartProps) {
   const rowHeight = Math.max(24, maxBars * 13 + GROUP_PAD * 2 + 4);
   const height = Math.max(rowHeight, groups.length * rowHeight + 24);
   const zero = x(0);
+  const [hover, setHover] = useState<{ index: number; anchor: Anchor } | null>(null);
+  const hovered = hover ? groups[hover.index] : undefined;
+
+  const track = (index: number, target: SVGRectElement): void => {
+    const rect = target.getBoundingClientRect();
+    setHover({ index, anchor: { left: rect.left, top: rect.top, bottom: rect.bottom, width: rect.width } });
+  };
 
   return (
-    <div className="ana-bars">
+    <div className="ana-bars" onMouseLeave={() => setHover(null)}>
       <svg
         className="ana-bars-svg"
         viewBox={`0 0 ${WIDTH} ${height}`}
@@ -86,7 +100,15 @@ export function BarChart({ groups, ariaLabel, legend }: BarChartProps) {
             group.values.map((v) => `${v.key}: ${formatNumber(v.value)}`).join(", ");
           return (
             <g key={group.label}>
-              <title>{`${group.label} — ${title}`}</title>
+              {group.reading ? null : <title>{`${group.label} — ${title}`}</title>}
+              <rect
+                x={0}
+                y={top}
+                width={WIDTH}
+                height={rowHeight}
+                className={hover?.index === gi ? "ana-bars-hit ana-bars-hit-on" : "ana-bars-hit"}
+                onMouseEnter={(event) => track(gi, event.currentTarget)}
+              />
               <text x={0} y={center} className="ana-bars-label" dominantBaseline="middle">
                 {labelFor(group.label)}
               </text>
@@ -161,6 +183,18 @@ export function BarChart({ groups, ariaLabel, legend }: BarChartProps) {
           {formatNumber(domainMax)}
         </text>
       </svg>
+      {hover && hovered?.reading ? (
+        <FloatingCard anchor={hover.anchor} title={hovered.reading.heading} width={340}>
+          <ul className="ana-tipcard-facts">
+            {hovered.reading.facts.map((fact) => (
+              <li key={fact}>{fact}</li>
+            ))}
+          </ul>
+          {hovered.reading.meaning.map((line) => (
+            <p key={line}>{line}</p>
+          ))}
+        </FloatingCard>
+      ) : null}
       {legend && legend.length > 0 ? (
         <div className="ana-bars-legend">
           {legend.map((entry) => (

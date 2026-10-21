@@ -12,15 +12,19 @@ import type { Model } from "@sourcesink/model";
 import { defaultPlotted, seriesNames } from "../results/series.js";
 import { useChartTheme } from "../results/useChartTheme.js";
 import { AnalyzeChart, alphaColor } from "./AnalyzeChart.js";
+import { readBands } from "./explain.js";
+import { InfoTip } from "./InfoTip.js";
 import { buildBandSeries, uncertaintyRequest, validateParameterRows, type ParameterRow } from "./helpers.js";
 import { ParameterRows } from "./ParameterRows.js";
-import { useAnalyzeWorker } from "./useAnalyzeWorker.js";
+import { useAnalyzeWorker, type AnalyzeWorkerEvents } from "./useAnalyzeWorker.js";
 import type { UncertaintyResult } from "./workerCore.js";
 
 export interface UncertaintyTabProps {
   model: Model;
   params: ParameterRow[];
   onParamsChange(rows: ParameterRow[]): void;
+  /** Run lifecycle, so the shell can show background progress. */
+  events?: AnalyzeWorkerEvents;
 }
 
 function defaultSeries(model: Model): string[] {
@@ -47,7 +51,20 @@ function BandChartBlock({
       time={band.time}
       timeUnits={timeUnits}
       title={`${name} — median and uncertainty bands`}
-      note="Median line; darker band 25–75%, lighter band 5–95%."
+      note="Median line; darker band 25–75%, lighter band 5–95%. Hover the chart to read the spread."
+      readout={(i) =>
+        readBands({
+          p5: band.p5[i] ?? null,
+          p25: band.p25[i] ?? null,
+          median: band.median[i] ?? null,
+          p75: band.p75[i] ?? null,
+          p95: band.p95[i] ?? null,
+        }).map((line) => (
+          <span key={line} className="ana-readout-item">
+            {line}
+          </span>
+        ))
+      }
       series={[
         { name: "5%", color: "transparent", values: band.p5, lineWidth: 0 },
         {
@@ -73,8 +90,8 @@ function BandChartBlock({
   );
 }
 
-export function UncertaintyTab({ model, params, onParamsChange }: UncertaintyTabProps) {
-  const worker = useAnalyzeWorker();
+export function UncertaintyTab({ model, params, onParamsChange, events }: UncertaintyTabProps) {
+  const worker = useAnalyzeWorker(events);
   const modelSeries = useMemo(() => seriesNames(model), [model]);
   const validation = useMemo(() => validateParameterRows(params, model), [params, model]);
 
@@ -104,7 +121,20 @@ export function UncertaintyTab({ model, params, onParamsChange }: UncertaintyTab
   return (
     <div className="ana-tabpane">
       <section className="ana-section" aria-label="Uncertainty parameters">
-        <h3 className="ana-section-title">Parameters</h3>
+        <h3 className="ana-section-title">
+          Parameters
+          <InfoTip title="What gets sampled">
+            <p>
+              Every run draws a value for each parameter from its <b>Min</b> to <b>Max</b> range at the same
+              time. The draws use a Latin hypercube: each range is cut into equal slices and every slice is
+              used once, so even a few hundred runs cover the ranges evenly.
+            </p>
+            <p>
+              Set ranges that reflect what you really don&rsquo;t know about each value. The bands show how much
+              that uncertainty spreads the results.
+            </p>
+          </InfoTip>
+        </h3>
         <ParameterRows
           model={model}
           rows={params}
@@ -121,7 +151,15 @@ export function UncertaintyTab({ model, params, onParamsChange }: UncertaintyTab
         <h3 className="ana-section-title">Ensemble</h3>
         <div className="ana-grid-3">
           <label className="ana-field">
-            <span className="ana-label">Runs</span>
+            <span className="ana-label">
+              Runs
+              <InfoTip title="How many runs?">
+                <p>
+                  The 5% and 95% edges need enough runs in the tails to be stable: 200 to 500 is a good
+                  start. If the light band looks jagged, double the runs.
+                </p>
+              </InfoTip>
+            </span>
             <input
               className="ana-input"
               inputMode="numeric"
@@ -192,7 +230,23 @@ export function UncertaintyTab({ model, params, onParamsChange }: UncertaintyTab
 
       {result ? (
         <section className="ana-section" aria-label="Uncertainty result">
-          <h3 className="ana-section-title">Ensemble summary</h3>
+          <h3 className="ana-section-title">
+            Ensemble summary
+            <InfoTip title="Reading the bands">
+              <p>
+                The <b>line</b> is the median run at each time: half the runs are above it.
+              </p>
+              <p>
+                The <b>dark band</b> holds the middle 50% of runs (25th to 75th percentile), and the{" "}
+                <b>light band</b> the middle 90% (5th to 95th).
+              </p>
+              <p>
+                A wide band at a time means the parameter ranges you set matter a lot there. Use Sensitivity
+                to find out which parameter is responsible. The bands are built time by time, so the median
+                line is not any single run.
+              </p>
+            </InfoTip>
+          </h3>
           <p className="ana-muted">
             {result.runs.toLocaleString()} runs
             {result.failed > 0 ? ` · ${result.failed} failed` : " · all runs succeeded"}
