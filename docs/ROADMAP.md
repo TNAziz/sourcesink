@@ -144,19 +144,51 @@ Detailed plan: [`plans/design-and-policy-features.md`](plans/design-and-policy-f
 | Causal discovery | Research | Candidate links and rate forms from data, shown as hypotheses, never auto-applied |
 | Experiment design | Research | Choosing the most informative next runs and stress cases |
 
+### Track H: Readability of large models
+
+Small and medium models read well, but large ones can become unreadable. A
+policy model of about 70 elements, written without connectors in its file,
+showed the problem clearly: with no information links the layout had nothing
+to anchor its 45 converters to, so they stacked into one tall column, and fit
+to screen shrank the diagram to specks. Tidy up could not help, for the same
+reason. Large models also suffer from many constants, repeated per-unit
+structure and long crossing links.
+
+| Item | Status | What it adds |
+|---|---|---|
+| Infer connectors from equations | Planned | Files with missing or no links still draw (and lay out) correctly; one action connects everything an equation uses |
+| Grid fallback and minimum zoom | Planned | Elements with no anchor form a compact grid, never a single column; fit-to-screen stays legible |
+| Show or hide constants; parameter table | Planned | Plain constants collapse to small tags or a side table, decluttering the diagram |
+| Validator warning for unlinked models | Planned | Models (including AI-built ones) with no connectors are flagged |
+| Focus mode | Idea | Highlight what feeds and is fed by the selected element; dim the rest |
+| Sectors | Idea | Named, colored regions that collapse to one box; suggested automatically from clusters of tightly linked elements |
+| Array suggestions | Idea | Detect repeated per-unit structure (`Area_1` … `Area_4`) and offer to convert it to arrays |
+| Ghost copies | Idea | Duplicate a widely used value next to each consumer instead of drawing long lines |
+| Multiple views | Idea | Separate diagram pages for parts of one model (XMILE supports this) |
+| Zoom-dependent detail and a minimap | Idea | Sector boxes and main flows when zoomed out; detail when zoomed in |
+| Layered layout engine for large models | Idea | Crossing-minimized layout with right-angled connectors, arranged by sector |
+| Lighter connectors | Idea | Links from constants shown on hover or selection; parallel links bundled |
+| Dashboard tiles for indicators | Idea | Accounting totals and KPIs shown as tiles rather than canvas elements |
+| Assistant conventions | Idea | The assistant declares connectors, uses arrays and assigns sectors when it builds a model |
+
 ## 4. Suggested order
 
-1. **Track A, phase 1** (scenarios on every command, scalar outcomes, random
+1. **Readability quick fixes** (Track H: inferred connectors, grid fallback,
+   constants toggle, validator warning). Small, and without them large models
+   cannot be read at all.
+2. **Track A, phase 1** (scenarios on every command, scalar outcomes, random
    streams, unit syntax). A few days; removes the main frictions in policy
    studies.
-2. **Loop dominance and story mode** (Track B). The clearest step toward a
+3. **Loop dominance and story mode** (Track B). The clearest step toward a
    model that explains itself, and the foundation for the tutor.
-3. **Optimization and trade-offs** (Track A, phase 2). The core of design studies.
-4. **Bayesian calibration and residual diagnostics** (Track C).
-5. **The teaching layer** (Track D), starting with predict-then-run and the
-   grounded tutor, which build directly on items 2 and 4.
-6. **Networks, allocation and co-flows** (Track A, phase 3).
-7. **Research frontier** (Track G) as a research program alongside the above.
+4. **Optimization and trade-offs** (Track A, phase 2). The core of design studies.
+5. **Bayesian calibration and residual diagnostics** (Track C).
+6. **The teaching layer** (Track D), starting with predict-then-run and the
+   grounded tutor, which build directly on items 3 and 5.
+7. **Sectors, focus mode and array suggestions** (Track H), before models
+   grow larger with networks.
+8. **Networks, allocation and co-flows** (Track A, phase 3).
+9. **Research frontier** (Track G) as a research program alongside the above.
 
 The order follows one rule: make results trustworthy and explainable before
 making them automatic.
@@ -175,6 +207,10 @@ proposals accepted without edits; cost per turn.
 **Teaching.** Learning gains against a comparison section; fewer structural
 misconceptions over a term; better prediction accuracy; transfer to models the
 student did not build; whether the tool narrows or widens gaps between students.
+
+**Readability.** Every example and evaluation model draws with all its links,
+no overlapping shapes after Tidy up, and readable text at fit-to-screen; large
+test models (50+ elements) are part of the visual checks.
 
 **Research.** Whether an independent user can reproduce a result from the
 model file and its provenance, and whether an analysis changes a stated
