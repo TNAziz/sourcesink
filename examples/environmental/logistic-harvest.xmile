@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Logistic Population Growth with Harvest</name>
+    <vendor>sourcesink</vendor>
+    <product version="0.1">sourcesink</product>
+  </header>
+  <sim_specs method="Euler" time_units="year">
+    <start>0</start>
+    <stop>50</stop>
+    <dt>0.25</dt>
+    <saveEvery>1</saveEvery>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Population">
+        <eqn>100</eqn>
+        <units>individuals</units>
+        <doc>Population biomass/abundance (e.g., a fish stock).</doc>
+        <inflows>
+          <flow>growth</flow>
+        </inflows>
+        <outflows>
+          <flow>harvest</flow>
+        </outflows>
+      </stock>
+      <flow name="growth">
+        <eqn>r * Population * (1 - Population / carrying_capacity)</eqn>
+        <units>individuals/year</units>
+        <doc>Logistic reproduction: density-dependent growth toward carrying capacity.</doc>
+      </flow>
+      <flow name="harvest">
+        <eqn>effort * Population</eqn>
+        <units>individuals/year</units>
+        <doc>Constant-effort harvest (catch proportional to abundance).</doc>
+      </flow>
+      <aux name="r">
+        <eqn>0.3</eqn>
+        <units>1/year</units>
+        <doc>Intrinsic (maximum per-capita) growth rate.</doc>
+      </aux>
+      <aux name="carrying_capacity">
+        <eqn>1000</eqn>
+        <units>individuals</units>
+        <doc>Environmental carrying capacity K.</doc>
+      </aux>
+      <aux name="effort">
+        <eqn>0.15</eqn>
+        <units>1/year</units>
+        <doc>Harvest effort. The stock is driven to equilibrium K * (1 - effort / r); effort greater than r collapses the population.</doc>
+      </aux>
+      <aux name="catch">
+        <eqn>harvest</eqn>
+        <units>individuals/year</units>
+        <doc>Reported annual catch (= harvest rate).</doc>
+      </aux>
+    </variables>
+    <views>
+      <view type="stock_flow">
+        <connector from="r" to="growth"/>
+        <connector from="Population" to="growth"/>
+        <connector from="carrying_capacity" to="growth"/>
+        <connector from="effort" to="harvest"/>
+        <connector from="Population" to="harvest"/>
+        <connector from="harvest" to="catch"/>
+      </view>
+    </views>
+  </model>
+</xmile>

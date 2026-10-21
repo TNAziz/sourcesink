@@ -1,0 +1,31 @@
+{
+  "name": "@sourcesink/mcp",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "bin": {
+    "sourcesink-mcp": "./src/server.ts"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "start": "tsx src/server.ts",
+    "test:stdio": "vitest run src/stdio.test.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "@sourcesink/analysis": "0.1.0",
+    "@sourcesink/engine": "0.1.0",
+    "@sourcesink/explain": "0.1.0",
+    "@sourcesink/legacy": "0.1.0",
+    "@sourcesink/model": "0.1.0",
+    "@sourcesink/patch": "0.1.0",
+    "@sourcesink/xmile": "0.1.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0"
+  }
+}

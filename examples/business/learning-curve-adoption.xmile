@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0" xmlns="http://docs.oasis-open.org/xmile/ns/XMILE/v1.0" xmlns:ss="https://sourcesink.dev/xmile/1">
+  <header>
+    <name>Learning-Curve Adoption of Solar Photovoltaics</name>
+    <vendor>sourcesink</vendor>
+    <product version="0.1">sourcesink</product>
+    <doc>Based on Wright (1936), the learning curve, and Bass (1969), diffusion of a new product.</doc>
+  </header>
+  <sim_specs method="Euler" time_units="year">
+    <start>0</start>
+    <stop>40</stop>
+    <dt>0.05</dt>
+    <saveper>0.25</saveper>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Potential_capacity">
+        <eqn>99</eqn>
+        <units>GW</units>
+        <doc>Solar capacity not yet installed, out of a 100 GW potential market.</doc>
+        <outflows>
+          <flow>adoption</flow>
+        </outflows>
+      </stock>
+      <stock name="Cumulative_capacity">
+        <eqn>1</eqn>
+        <units>GW</units>
+        <doc>Total installed solar capacity, which starts at 1 GW and drives cost down the learning curve.</doc>
+        <inflows>
+          <flow>adoption</flow>
+        </inflows>
+      </stock>
+      <flow name="adoption">
+        <eqn>attractiveness * (p + q * Cumulative_capacity / market_size) * Potential_capacity</eqn>
+        <units>GW/year</units>
+        <doc>New capacity installed per year: Bass adoption scaled by how attractive the current cost is.</doc>
+      </flow>
+      <aux name="market_size">
+        <eqn>Potential_capacity + Cumulative_capacity</eqn>
+        <units>GW</units>
+        <doc>Total potential capacity N, fixed at 100 GW.</doc>
+      </aux>
+      <aux name="p">
+        <eqn>0.01</eqn>
+        <units>1/year</units>
+        <doc>Bass coefficient of innovation.</doc>
+      </aux>
+      <aux name="q">
+        <eqn>0.3</eqn>
+        <units>1/year</units>
+        <doc>Bass coefficient of imitation.</doc>
+      </aux>
+      <aux name="learning_rate">
+        <eqn>0.2</eqn>
+        <units>1</units>
+        <doc>Fraction by which unit cost falls for every doubling of cumulative capacity.</doc>
+      </aux>
+      <aux name="b">
+        <eqn>-LN(1 - learning_rate) / LN(2)</eqn>
+        <units>1</units>
+        <doc>Learning-curve exponent, the Wright exponent implied by the learning rate.</doc>
+      </aux>
+      <aux name="initial_cost">
+        <eqn>4</eqn>
+        <units>USD/W</units>
+        <doc>Unit cost of solar capacity at the initial cumulative capacity.</doc>
+      </aux>
+      <aux name="initial_capacity">
+        <eqn>1</eqn>
+        <units>GW</units>
+        <doc>Cumulative capacity at which initial_cost applies.</doc>
+      </aux>
+      <aux name="reference_cost">
+        <eqn>1</eqn>
+        <units>USD/W</units>
+        <doc>Cost at which solar becomes fully attractive relative to alternatives.</doc>
+      </aux>
+      <aux name="cost">
+        <eqn>initial_cost * (Cumulative_capacity / initial_capacity)^(-b)</eqn>
+        <units>USD/W</units>
+        <doc>Unit cost, falling as a power of cumulative capacity (Wright's learning curve).</doc>
+      </aux>
+      <aux name="attractiveness">
+        <eqn>MIN(1, reference_cost / cost)</eqn>
+        <units>1</units>
+        <doc>Adoption multiplier from cost: 1 once cost reaches the reference cost, lower while cost is high.</doc>
+      </aux>
+      <aux name="doublings">
+        <eqn>LN(Cumulative_capacity / initial_capacity) / LN(2)</eqn>
+        <units>1</units>
+        <doc>Number of cumulative-capacity doublings since the initial 1 GW.</doc>
+      </aux>
+    </variables>
+    <views>
+      <view type="stock_flow">
+        <connector from="attractiveness" to="adoption"/>
+        <connector from="p" to="adoption"/>
+        <connector from="q" to="adoption"/>
+        <connector from="Cumulative_capacity" to="adoption"/>
+        <connector from="market_size" to="adoption"/>
+        <connector from="Potential_capacity" to="adoption"/>
+        <connector from="Potential_capacity" to="market_size"/>
+        <connector from="Cumulative_capacity" to="market_size"/>
+        <connector from="learning_rate" to="b"/>
+        <connector from="b" to="cost"/>
+        <connector from="initial_cost" to="cost"/>
+        <connector from="Cumulative_capacity" to="cost"/>
+        <connector from="initial_capacity" to="cost"/>
+        <connector from="reference_cost" to="attractiveness"/>
+        <connector from="cost" to="attractiveness"/>
+        <connector from="Cumulative_capacity" to="doublings"/>
+        <connector from="initial_capacity" to="doublings"/>
+      </view>
+    </views>
+  </model>
+</xmile>

@@ -1,0 +1,8 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "../../dist/model",
+    "rootDir": "src"
+  },
+  "include": ["src"]
+}

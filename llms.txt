@@ -1,0 +1,23 @@
+# SourceSink
+
+> SourceSink is an open-source stock-and-flow system-dynamics tool for Linux, Windows, macOS and the browser: build and edit models, simulate them, fit parameters, run sensitivity and uncertainty analysis, explain structure, and import legacy `.stm`/`.itm` model files. It ships a `sourcesink` command line and an MCP server for AI agents.
+
+## For language models
+
+- [CLI and MCP guide for language models](docs/llm/cli-guide.md): the primary reference. Every command, flag, default, output shape and MCP tool, with verified examples.
+- [README](README.md): what SourceSink is, install, build, and the short Streeter-Phelps walkthrough.
+
+## Analysis
+
+- [Calibration, sensitivity and uncertainty](docs/analysis.md): objectives, optimisers, standard errors, Morris and Sobol, Monte Carlo bands.
+- [Modeling assistant](docs/assistant.md): how the conversational assistant proposes changes through validated patches.
+
+## Models
+
+- [Example library](examples/README.md): 33 original, tested XMILE models across environmental engineering, business, resources, climate, ecology and problem solving.
+- [Legacy `.stm`/`.itm` format spec](docs/format/stm.md): the legacy binary format, documented by observation, that the importer implements.
+
+## Optional
+
+- [Architecture](docs/architecture.md): package boundaries and the model/engine contracts.
+- [Future work](docs/FUTURE.md): the roadmap.

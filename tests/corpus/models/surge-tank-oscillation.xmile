@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Surge Tank Oscillation</name>
+    <vendor>SourceSink</vendor>
+    <product version="0.1.0">SourceSink</product>
+  </header>
+  <sim_specs method="Euler" time_units="second">
+    <start>0</start>
+    <stop>6.283185307179586</stop>
+    <dt>0.0005</dt>
+    <saveper>1.5707963267948966</saveper>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Displacement">
+        <eqn>1</eqn>
+        <inflow name="Velocity_flow"/>
+      </stock>
+      <stock name="Velocity">
+        <eqn>0</eqn>
+        <inflow name="Restoring"/>
+      </stock>
+      <flow name="Velocity_flow">
+        <eqn>Velocity</eqn>
+      </flow>
+      <flow name="Restoring">
+        <eqn>-1 * Displacement</eqn>
+      </flow>
+    </variables>
+  </model>
+</xmile>

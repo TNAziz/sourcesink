@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Aquifer Pumping with Recharge</name>
+    <vendor>SourceSink</vendor>
+    <product version="0.1.0">SourceSink</product>
+  </header>
+  <sim_specs method="Euler" time_units="year">
+    <start>0</start>
+    <stop>10</stop>
+    <dt>0.5</dt>
+    <saveper>1</saveper>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Aquifer">
+        <eqn>100</eqn>
+        <inflow name="Recharge"/>
+        <outflow name="Pump"/>
+      </stock>
+      <flow name="Recharge">
+        <eqn>4</eqn>
+      </flow>
+      <flow name="Pump">
+        <eqn>10</eqn>
+      </flow>
+    </variables>
+  </model>
+</xmile>

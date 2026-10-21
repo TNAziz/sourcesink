@@ -1,0 +1,275 @@
+[
+  {
+    "id": "bass-diffusion",
+    "file": "bass-diffusion.xmile",
+    "title": "Bass diffusion: adoption of a new technology",
+    "category": "business",
+    "level": "intro",
+    "summary": "Adoption of a new product spreads through innovation and imitation until the market is saturated.",
+    "question": "When does adoption peak, and how much of the market is still untapped at that point?",
+    "teaching": "Two stocks, potential adopters and adopters, are linked by a single adoption flow. The innovation term p acts on the remaining market, while the imitation term q grows with the share already adopted, producing a bell-shaped adoption rate. Students should see the peak near ln(q/p)/(p+q) and the S-shaped cumulative adoption.",
+    "references": [
+      {
+        "citation": "Bass, F. M. (1969). A new product growth for model consumer durables. Management Science, 15(5), 215–227.",
+        "doi": "10.1287/mnsc.15.5.215"
+      },
+      {
+        "citation": "Sterman, J. D. (2000). Business Dynamics: Systems Thinking and Modeling for a Complex World. Irwin/McGraw-Hill."
+      }
+    ],
+    "checks": [
+      {
+        "type": "value",
+        "series": "Adopters",
+        "time": 10,
+        "expected": 812803,
+        "tol": 200
+      },
+      {
+        "type": "final",
+        "series": "Adopters",
+        "expected": 996259,
+        "tol": 200
+      },
+      {
+        "type": "max",
+        "series": "adoption",
+        "expected": 110600,
+        "tol": 500
+      },
+      {
+        "type": "argmax",
+        "series": "adoption",
+        "expected": 6.19,
+        "tol": 0.3
+      },
+      {
+        "type": "monotonic",
+        "series": "Adopters",
+        "direction": "up"
+      },
+      {
+        "type": "monotonic",
+        "series": "Potential_adopters",
+        "direction": "down"
+      },
+      {
+        "type": "bounds",
+        "series": "Adopters",
+        "min": 0,
+        "max": 1000000
+      }
+    ]
+  },
+  {
+    "id": "stock-management",
+    "file": "stock-management.xmile",
+    "title": "Stock management with a supply-line delay",
+    "category": "business",
+    "level": "intermediate",
+    "summary": "A replenishment rule that under-weights orders already in the pipeline overshoots and oscillates after a demand step.",
+    "question": "Why does inventory overshoot when managers ignore the supply line, and what changes when they weight it fully?",
+    "teaching": "Inventory and the supply line are the two stocks; orders fill the supply line, deliveries (a third-order delay of about four weeks) drain it into inventory, and shipments follow customer demand. The ordering rule combines expected demand, an inventory gap, and a weighted supply-line gap. At a supply-line weight of 0.3 the response oscillates; the included scenario with weight 1 gives a smooth adjustment.",
+    "references": [
+      {
+        "citation": "Sterman, J. D. (1989). Modeling managerial behavior: Misperceptions of feedback in a dynamic decision making experiment. Management Science, 35(3), 321–339.",
+        "doi": "10.1287/mnsc.35.3.321"
+      },
+      {
+        "citation": "Sterman, J. D. (2000). Business Dynamics: Systems Thinking and Modeling for a Complex World. Irwin/McGraw-Hill."
+      }
+    ],
+    "checks": [
+      {
+        "type": "oscillates",
+        "series": "Inventory",
+        "minPeaks": 3
+      },
+      {
+        "type": "final",
+        "series": "Inventory",
+        "expected": 400,
+        "tol": 20
+      },
+      {
+        "type": "value",
+        "series": "Inventory",
+        "time": 10,
+        "expected": 343.03,
+        "tol": 3
+      },
+      {
+        "type": "max",
+        "series": "orders",
+        "expected": 151.06,
+        "tol": 2
+      }
+    ]
+  },
+  {
+    "id": "rework-cycle",
+    "file": "rework-cycle.xmile",
+    "title": "Rework cycle and the 90 percent syndrome",
+    "category": "business",
+    "level": "intermediate",
+    "summary": "Hidden rework keeps a project from finishing even after its nominal work content has been completed.",
+    "question": "Why is a project only 80 percent done after the time needed to do all 1000 tasks at full productivity?",
+    "teaching": "Work moves from Work_to_do to Work_done, but a fraction of progress creates Undiscovered_rework that returns to Work_to_do once found. Because the three stocks conserve total work, the visible completion curve lags the nominal 100-week schedule, illustrating the 90 percent syndrome.",
+    "references": [
+      {
+        "citation": "Cooper, K. G. (1980). Naval ship production: A claim settled and a framework built. Interfaces, 10(6), 20–36.",
+        "doi": "10.1287/inte.10.6.20"
+      }
+    ],
+    "checks": [
+      {
+        "type": "value",
+        "series": "total_work",
+        "time": 100,
+        "expected": 1000,
+        "tol": 0.01
+      },
+      {
+        "type": "bounds",
+        "series": "total_work",
+        "min": 999.9,
+        "max": 1000.1
+      },
+      {
+        "type": "value",
+        "series": "Work_done",
+        "time": 100,
+        "expected": 800,
+        "tol": 2
+      },
+      {
+        "type": "final",
+        "series": "Work_done",
+        "expected": 1000,
+        "tol": 1
+      },
+      {
+        "type": "monotonic",
+        "series": "Work_done",
+        "direction": "up"
+      }
+    ]
+  },
+  {
+    "id": "learning-curve-adoption",
+    "file": "learning-curve-adoption.xmile",
+    "title": "Solar PV: learning curve meets diffusion",
+    "category": "business",
+    "level": "advanced",
+    "summary": "Falling costs from cumulative production and word-of-mouth adoption reinforce each other to produce an S-shaped energy transition.",
+    "question": "How much does cost fall by the time solar capacity has doubled four times, and when does adoption peak?",
+    "teaching": "Cumulative capacity drives unit cost down a Wright learning curve, and lower cost raises the attractiveness multiplier on a Bass adoption flow. The feedback between cost and adoption accelerates uptake once cost approaches the reference cost. Students should check that four doublings cut cost to 4·0.8⁴ ≈ 1.64 USD/W and that the cost path is monotonic down.",
+    "references": [
+      {
+        "citation": "Wright, T. P. (1936). Factors affecting the cost of airplanes. Journal of the Aeronautical Sciences, 3(4), 122–128.",
+        "doi": "10.2514/8.155"
+      },
+      {
+        "citation": "Bass, F. M. (1969). A new product growth for model consumer durables. Management Science, 15(5), 215–227.",
+        "doi": "10.1287/mnsc.15.5.215"
+      }
+    ],
+    "checks": [
+      {
+        "type": "value",
+        "series": "cost",
+        "time": 13,
+        "expected": 1.64,
+        "tol": 0.02
+      },
+      {
+        "type": "monotonic",
+        "series": "cost",
+        "direction": "down"
+      },
+      {
+        "type": "monotonic",
+        "series": "Cumulative_capacity",
+        "direction": "up"
+      },
+      {
+        "type": "monotonic",
+        "series": "doublings",
+        "direction": "up"
+      },
+      {
+        "type": "bounds",
+        "series": "Cumulative_capacity",
+        "min": 0,
+        "max": 100
+      },
+      {
+        "type": "final",
+        "series": "Cumulative_capacity",
+        "expected": 99.83,
+        "tol": 0.5
+      },
+      {
+        "type": "argmax",
+        "series": "adoption",
+        "expected": 20.25,
+        "tol": 1
+      },
+      {
+        "type": "max",
+        "series": "adoption",
+        "expected": 7.15,
+        "tol": 0.2
+      }
+    ]
+  },
+  {
+    "id": "workforce-aging-chain",
+    "file": "workforce-aging-chain.xmile",
+    "title": "Workforce aging chain: hiring, training and attrition",
+    "category": "business",
+    "level": "intro",
+    "summary": "A sudden expansion dilutes experience as new hires pass through a rookie stock before becoming productive.",
+    "question": "Why does productivity per head fall just after a hiring surge even though total headcount is rising?",
+    "teaching": "Rookies and experienced workers form a two-stage aging chain fed by hiring and drained by quits; rookies mature at a fixed assimilation rate. When the desired workforce steps from 100 to 150, headcount rises quickly but the experienced share and effective workforce fall before recovering. Students should watch the experience ratio dip and then settle near its new equilibrium.",
+    "references": [
+      {
+        "citation": "Sterman, J. D. (2000). Business Dynamics: Systems Thinking and Modeling for a Complex World. Irwin/McGraw-Hill."
+      }
+    ],
+    "checks": [
+      {
+        "type": "final",
+        "series": "total_workforce",
+        "expected": 150,
+        "tol": 3
+      },
+      {
+        "type": "value",
+        "series": "total_workforce",
+        "time": 2,
+        "expected": 100,
+        "tol": 1
+      },
+      {
+        "type": "min",
+        "series": "experience_ratio",
+        "expected": 0.766,
+        "tol": 0.01
+      },
+      {
+        "type": "final",
+        "series": "experience_ratio",
+        "expected": 0.889,
+        "tol": 0.01
+      },
+      {
+        "type": "value",
+        "series": "effective_workforce",
+        "time": 15,
+        "expected": 141.67,
+        "tol": 1
+      }
+    ]
+  }
+]

@@ -1,0 +1,36 @@
+{
+  "name": "@sourcesink/ui",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "SourceSink — React + Vite + React Flow diagram editor and run panel.",
+  "scripts": {
+    "dev": "vite --configLoader runner",
+    "build": "vite build --configLoader runner",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@sourcesink/analysis": "*",
+    "@sourcesink/assistant": "0.1.0",
+    "@sourcesink/engine": "*",
+    "@sourcesink/explain": "*",
+    "@sourcesink/legacy": "*",
+    "@sourcesink/model": "^0.1.0",
+    "@sourcesink/units": "0.1.0",
+    "@sourcesink/xmile": "^0.1.0",
+    "@xyflow/react": "^12.12.0",
+    "lucide-react": "^1.59.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "uplot": "^1.6.32",
+    "zustand": "^5.0.15"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.7.0",
+    "typescript": "^5.7.0",
+    "vite": "^6.4.4"
+  }
+}

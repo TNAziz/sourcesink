@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>First-Order Aquifer Contaminant Decay</name>
+    <vendor>SourceSink</vendor>
+    <product version="0.1.0">SourceSink</product>
+  </header>
+  <sim_specs method="Euler" time_units="year">
+    <start>0</start>
+    <stop>20</stop>
+    <dt>0.005</dt>
+    <saveper>1</saveper>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Contaminant">
+        <eqn>100</eqn>
+        <outflow name="Decay"/>
+      </stock>
+      <flow name="Decay">
+        <eqn>0.1 * Contaminant</eqn>
+      </flow>
+    </variables>
+  </model>
+</xmile>

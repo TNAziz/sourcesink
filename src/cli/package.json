@@ -1,0 +1,28 @@
+{
+  "name": "@sourcesink/cli",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "description": "SourceSink — headless runner: load a model, simulate, emit results.",
+  "bin": {
+    "sourcesink": "./src/run.ts"
+  },
+  "scripts": {
+    "run": "tsx src/run.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@sourcesink/analysis": "*",
+    "@sourcesink/engine": "*",
+    "@sourcesink/explain": "*",
+    "@sourcesink/legacy": "*",
+    "@sourcesink/model": "*",
+    "@sourcesink/units": "0.1.0",
+    "@sourcesink/xmile": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  }
+}

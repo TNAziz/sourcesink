@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Indoor Radon Activity</name>
+    <vendor>sourcesink</vendor>
+    <product version="0.1">sourcesink</product>
+    <doc>Based on Nazaroff (1992), with Harte (1988) as inspiration.</doc>
+  </header>
+  <sim_specs method="Euler" time_units="h">
+    <start>0</start>
+    <stop>48</stop>
+    <dt>0.01</dt>
+    <saveEvery>0.1</saveEvery>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Radon_activity">
+        <eqn>0</eqn>
+        <units>Bq</units>
+        <doc>Total radon activity A in the house air, starting at zero.</doc>
+        <inflows>
+          <flow>soil_entry</flow>
+        </inflows>
+        <outflows>
+          <flow>ventilation</flow>
+          <flow>radioactive_decay</flow>
+        </outflows>
+      </stock>
+      <flow name="soil_entry">
+        <eqn>3000</eqn>
+        <units>Bq/h</units>
+        <doc>Radon entry rate S from soil gas.</doc>
+      </flow>
+      <flow name="ventilation">
+        <eqn>ventilation_rate * Radon_activity</eqn>
+        <units>Bq/h</units>
+        <doc>Removal by air exchange at rate lambda_v.</doc>
+      </flow>
+      <flow name="radioactive_decay">
+        <eqn>decay_constant * Radon_activity</eqn>
+        <units>Bq/h</units>
+        <doc>Radioactive decay of radon at rate lambda_d.</doc>
+      </flow>
+      <aux name="V">
+        <eqn>300</eqn>
+        <units>m3</units>
+        <doc>House air volume V.</doc>
+      </aux>
+      <aux name="ventilation_rate">
+        <eqn>0.5</eqn>
+        <units>1/h</units>
+        <doc>Air-exchange (ventilation) rate lambda_v for a normally ventilated house.</doc>
+      </aux>
+      <aux name="decay_constant">
+        <eqn>0.00755</eqn>
+        <units>1/h</units>
+        <doc>Radon radioactive decay constant lambda_d, corresponding to a 3.82-day half-life.</doc>
+      </aux>
+      <aux name="concentration">
+        <eqn>Radon_activity / V</eqn>
+        <units>Bq/m3</units>
+        <doc>Radon activity concentration in the indoor air.</doc>
+      </aux>
+      <aux name="steady_state_concentration">
+        <eqn>soil_entry / (V * (ventilation_rate + decay_constant))</eqn>
+        <units>Bq/m3</units>
+        <doc>Steady-state concentration S/(V*(lambda_v+lambda_d)), about 19.7 Bq/m3.</doc>
+      </aux>
+      <aux name="time_constant">
+        <eqn>1 / (ventilation_rate + decay_constant)</eqn>
+        <units>h</units>
+        <doc>Approach time 1/(lambda_v+lambda_d) = 1.97 h.</doc>
+      </aux>
+      <aux name="tight_ventilation_rate">
+        <eqn>0.1</eqn>
+        <units>1/h</units>
+        <doc>Air-exchange rate lambda_v for a tight, poorly ventilated house.</doc>
+      </aux>
+      <aux name="tight_house_concentration">
+        <eqn>soil_entry / (V * (tight_ventilation_rate + decay_constant))</eqn>
+        <units>Bq/m3</units>
+        <doc>Steady-state concentration in the tight house, about 92.9 Bq/m3.</doc>
+      </aux>
+    </variables>
+    <views>
+      <view type="stock_flow">
+        <connector from="ventilation_rate" to="ventilation"/>
+        <connector from="Radon_activity" to="ventilation"/>
+        <connector from="decay_constant" to="radioactive_decay"/>
+        <connector from="Radon_activity" to="radioactive_decay"/>
+        <connector from="Radon_activity" to="concentration"/>
+        <connector from="V" to="concentration"/>
+        <connector from="V" to="steady_state_concentration"/>
+        <connector from="ventilation_rate" to="steady_state_concentration"/>
+        <connector from="decay_constant" to="steady_state_concentration"/>
+        <connector from="ventilation_rate" to="time_constant"/>
+        <connector from="decay_constant" to="time_constant"/>
+        <connector from="V" to="tight_house_concentration"/>
+        <connector from="tight_ventilation_rate" to="tight_house_concentration"/>
+        <connector from="decay_constant" to="tight_house_concentration"/>
+      </view>
+    </views>
+    <ss:scenarios xmlns:ss="https://sourcesink.dev/xmile/1">
+      <ss:scenario id="tight_house" name="Tight house (lambda_v = 0.1/h)">
+        <ss:override name="ventilation_rate">0.1</ss:override>
+        <ss:run stop="200"/>
+        <ss:doc>Lower the air-exchange rate to 0.1 per hour and run to steady state; the poorly ventilated case approaches 92.9 Bq/m3.</ss:doc>
+      </ss:scenario>
+    </ss:scenarios>
+  </model>
+</xmile>

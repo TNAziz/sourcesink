@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Rosenzweig-MacArthur Predator-Prey Model</name>
+    <vendor>sourcesink</vendor>
+    <product version="0.1">sourcesink</product>
+    <doc>Based on Rosenzweig and MacArthur (1963) and Rosenzweig (1971).</doc>
+  </header>
+  <sim_specs method="RK4" time_units="year">
+    <start>0</start>
+    <stop>200</stop>
+    <dt>0.01</dt>
+    <saveEvery>0.1</saveEvery>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Prey">
+        <eqn>1</eqn>
+        <units>individuals</units>
+        <doc>Prey population N with logistic growth, in prey individuals.</doc>
+        <inflows>
+          <flow>prey_growth</flow>
+        </inflows>
+        <outflows>
+          <flow>predation</flow>
+        </outflows>
+      </stock>
+      <stock name="Predator">
+        <eqn>1</eqn>
+        <units>individuals</units>
+        <doc>Predator population P, in predator individuals.</doc>
+        <inflows>
+          <flow>predator_growth</flow>
+        </inflows>
+        <outflows>
+          <flow>predator_death</flow>
+        </outflows>
+      </stock>
+      <flow name="prey_growth">
+        <eqn>r * Prey * (1 - Prey / K)</eqn>
+        <units>individuals/year</units>
+        <doc>Logistic prey reproduction r*N*(1-N/K) before predation.</doc>
+      </flow>
+      <flow name="predation">
+        <eqn>a * Prey * Predator / (1 + a * h * Prey)</eqn>
+        <units>individuals/year</units>
+        <doc>Predators consume prey at the saturating Holling type II rate a*N*P/(1+a*h*N).</doc>
+      </flow>
+      <flow name="predator_growth">
+        <eqn>e * a * Prey * Predator / (1 + a * h * Prey)</eqn>
+        <units>individuals/year</units>
+        <doc>Predator reproduction, the conversion efficiency e times prey consumed.</doc>
+      </flow>
+      <flow name="predator_death">
+        <eqn>m * Predator</eqn>
+        <units>individuals/year</units>
+        <doc>Predator mortality m*P at a constant per-capita rate.</doc>
+      </flow>
+      <aux name="r">
+        <eqn>1</eqn>
+        <units>1/year</units>
+        <doc>Prey intrinsic growth rate r.</doc>
+      </aux>
+      <aux name="K">
+        <eqn>4</eqn>
+        <units>individuals</units>
+        <doc>Prey carrying capacity K; raising K is the "enrichment" experiment.</doc>
+      </aux>
+      <aux name="a">
+        <eqn>1</eqn>
+        <units>1/individuals/year</units>
+        <doc>Predator attack (search) rate a in the Holling response.</doc>
+      </aux>
+      <aux name="h">
+        <eqn>1</eqn>
+        <units>year</units>
+        <doc>Handling time h per prey item.</doc>
+      </aux>
+      <aux name="e">
+        <eqn>0.5</eqn>
+        <units>dimensionless</units>
+        <doc>Conversion efficiency e of prey into predator offspring.</doc>
+      </aux>
+      <aux name="m">
+        <eqn>0.2</eqn>
+        <units>1/year</units>
+        <doc>Predator mortality rate m.</doc>
+      </aux>
+      <aux name="prey_equilibrium">
+        <eqn>m / (a * (e - m * h))</eqn>
+        <units>individuals</units>
+        <doc>Coexistence prey equilibrium N* = m/(a*(e-m*h)) = 0.667.</doc>
+      </aux>
+      <aux name="hopf_threshold">
+        <eqn>2 * prey_equilibrium + 1 / (a * h)</eqn>
+        <units>individuals</units>
+        <doc>Carrying capacity above which the coexistence equilibrium loses stability, K > 2*N* + 1/(a*h) = 2.333.</doc>
+      </aux>
+    </variables>
+    <views>
+      <view type="stock_flow">
+        <connector from="r" to="prey_growth"/>
+        <connector from="Prey" to="prey_growth"/>
+        <connector from="K" to="prey_growth"/>
+        <connector from="a" to="predation"/>
+        <connector from="h" to="predation"/>
+        <connector from="Prey" to="predation"/>
+        <connector from="Predator" to="predation"/>
+        <connector from="e" to="predator_growth"/>
+        <connector from="a" to="predator_growth"/>
+        <connector from="h" to="predator_growth"/>
+        <connector from="Prey" to="predator_growth"/>
+        <connector from="Predator" to="predator_growth"/>
+        <connector from="m" to="predator_death"/>
+        <connector from="Predator" to="predator_death"/>
+        <connector from="m" to="prey_equilibrium"/>
+        <connector from="a" to="prey_equilibrium"/>
+        <connector from="e" to="prey_equilibrium"/>
+        <connector from="h" to="prey_equilibrium"/>
+        <connector from="prey_equilibrium" to="hopf_threshold"/>
+        <connector from="a" to="hopf_threshold"/>
+        <connector from="h" to="hopf_threshold"/>
+      </view>
+    </views>
+  </model>
+</xmile>

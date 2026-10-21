@@ -1,0 +1,18 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./src/model" },
+    { "path": "./src/engine" },
+    { "path": "./src/explain" },
+    { "path": "./src/xmile" },
+    { "path": "./src/legacy" },
+    { "path": "./src/analysis" },
+    { "path": "./src/units" },
+    { "path": "./src/patch" },
+    { "path": "./src/assistant" },
+    { "path": "./src/mcp" },
+    { "path": "./src/cli" },
+    { "path": "./src/ui" },
+    { "path": "./src/desktop" }
+  ]
+}

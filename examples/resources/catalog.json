@@ -1,0 +1,319 @@
+[
+  {
+    "id": "open-access-fishery",
+    "file": "open-access-fishery.xmile",
+    "title": "Open-access fishery: bioeconomic equilibrium",
+    "category": "resources",
+    "level": "intermediate",
+    "summary": "A logistic fish stock and an entering/leaving fishing fleet settle at the open-access bionomic equilibrium instead of at maximum sustainable yield.",
+    "question": "Where does an unregulated fishery end up, and why is that not the stock level that produces the largest sustainable catch?",
+    "teaching": "The fish stock grows logistically and is caught in proportion to stock and effort. Effort rises while profit per vessel is positive and falls while it is negative, closing a reinforcing fishing loop and a balancing profit loop. The system converges toward the bionomic equilibrium X* = c/(p q) = 200,000 t and E* = 40,000 vessels, not the maximum-sustainable-yield stock K/2 = 500,000 t; open access dissipates the resource rent.",
+    "references": [
+      {
+        "citation": "Gordon, H. S. (1954). The economic theory of a common-property resource: The fishery. Journal of Political Economy, 62(2), 124–142.",
+        "doi": "10.1086/257497"
+      },
+      {
+        "citation": "Smith, V. L. (1969). On models of commercial fishing. Journal of Political Economy, 77(2), 181–198.",
+        "doi": "10.1086/259507"
+      }
+    ],
+    "checks": [
+      {
+        "type": "final",
+        "series": "Fish_stock",
+        "expected": 200000,
+        "tol": 4000
+      },
+      {
+        "type": "final",
+        "series": "Effort",
+        "expected": 40000,
+        "tol": 800
+      },
+      {
+        "type": "bounds",
+        "series": "Fish_stock",
+        "min": 0,
+        "max": 1000000
+      },
+      {
+        "type": "argmin",
+        "series": "Fish_stock",
+        "expected": 27,
+        "tol": 2
+      }
+    ]
+  },
+  {
+    "id": "easter-island",
+    "file": "easter-island.xmile",
+    "title": "Easter Island: a Ricardo–Malthus resource model",
+    "category": "resources",
+    "level": "advanced",
+    "summary": "A growing population harvests a renewable resource, overshoots the resource's capacity, and then both population and resource fall back toward an interior equilibrium.",
+    "question": "How can a society grow rapidly on a renewable resource and then collapse even though the resource can regenerate?",
+    "teaching": "Population grows when harvesting adds to a negative exogenous birth–death balance, while harvest reduces the logistic resource stock. The interior equilibrium is S* = (d − b)/(φ α β) = 6,250 biomass units and L* ≈ 4,792 people; the approach is an overshoot followed by damped population–resource cycles. With the published parameters the first population peak occurs early (about year 80); the later cycles are the long, damped adjustment toward the interior equilibrium. Brander and Taylor work in decades (r = 0.04 and b − d = −0.1 per decade); here every rate is converted to per year, which leaves the equilibrium (S* = 6,250, L* ≈ 4,792) unchanged. Population peaks near 10,000 about 800 years after settlement, then falls with the resource to roughly 3,000–4,000, and the system approaches equilibrium only very slowly through damped cycles.",
+    "references": [
+      {
+        "citation": "Brander, J. A., & Taylor, M. S. (1998). The simple economics of Easter Island: A Ricardo-Malthus model of renewable resource use. American Economic Review, 88(1), 119–138."
+      }
+    ],
+    "checks": [
+      {
+        "type": "max",
+        "series": "Population",
+        "expected": 10161,
+        "tol": 300
+      },
+      {
+        "type": "argmax",
+        "series": "Population",
+        "expected": 803,
+        "tol": 30
+      },
+      {
+        "type": "value",
+        "series": "Population",
+        "time": 1000,
+        "expected": 7548,
+        "tol": 150
+      },
+      {
+        "type": "value",
+        "series": "Population",
+        "time": 1600,
+        "expected": 3033,
+        "tol": 100
+      },
+      {
+        "type": "argmin",
+        "series": "Resource",
+        "expected": 1100,
+        "tol": 120
+      },
+      {
+        "type": "bounds",
+        "series": "Resource",
+        "min": 0,
+        "max": 12000
+      }
+    ]
+  },
+  {
+    "id": "kaibab-deer",
+    "file": "kaibab-deer.xmile",
+    "title": "Kaibab deer: predator removal and range overshoot",
+    "category": "resources",
+    "level": "intro",
+    "summary": "Removing predators lets a deer herd irrupt far above its food supply, damage the range, and crash back.",
+    "question": "What happens to a deer herd and its range when the predators that once kept the herd in check are removed?",
+    "teaching": "Deer births are constant per head, while deaths rise steeply as forage per deer falls; forage grows logistically and is eaten in proportion to the herd. Predation is switched off in 1907, so the herd overshoots to roughly eight times its initial size, overgrazing damages the range's forage capacity, and both the herd and the forage crash. The classic Kaibab account has been debated (Caughley 1970), so the model is best read as an illustration of irruption and overshoot rather than a precise historical reconstruction.",
+    "references": [
+      {
+        "citation": "Rasmussen, D. I. (1941). Biotic communities of Kaibab Plateau, Arizona. Ecological Monographs, 11(3), 229–275.",
+        "doi": "10.2307/1943204"
+      },
+      {
+        "citation": "Caughley, G. (1970). Eruption of ungulate populations, with emphasis on Himalayan thar in New Zealand. Ecology, 51(1), 53–72.",
+        "doi": "10.2307/1933599"
+      }
+    ],
+    "checks": [
+      {
+        "type": "argmax",
+        "series": "Deer",
+        "expected": 1915,
+        "tol": 5
+      },
+      {
+        "type": "max",
+        "series": "Deer",
+        "expected": 33517,
+        "tol": 3000
+      },
+      {
+        "type": "final",
+        "series": "Forage",
+        "expected": 49871,
+        "tol": 5000
+      },
+      {
+        "type": "bounds",
+        "series": "Forage",
+        "min": 0,
+        "max": 200000
+      },
+      {
+        "type": "final",
+        "series": "Deer",
+        "expected": 12468,
+        "tol": 2000
+      }
+    ]
+  },
+  {
+    "id": "nonrenewable-depletion",
+    "file": "nonrenewable-depletion.xmile",
+    "title": "Hubbert-style peak in a nonrenewable resource",
+    "category": "resources",
+    "level": "intermediate",
+    "summary": "Reinvestment builds production capacity while depletion makes each unit of remaining resource harder to extract, producing a single bell-shaped production peak.",
+    "question": "Why does oil production rise, peak, and then decline even while demand and investment continue?",
+    "teaching": "Production is proportional to producing capital and to the fraction of the resource still in the ground. Revenue finances new wells, capital depreciates, and the falling resource fraction eventually outweighs capital growth, so production peaks once and declines. Cumulative production is a stock that can never exceed the 2,000-billion-barrel endowment; the peak here occurs near year 108.",
+    "references": [
+      {
+        "citation": "Hubbert, M. K. (1956). Nuclear energy and the fossil fuels. Drilling and Production Practice, American Petroleum Institute, 7–25."
+      },
+      {
+        "citation": "Sterman, J. D., & Richardson, G. P. (1985). An experiment to evaluate methods for estimating fossil fuel resources. Journal of Forecasting, 4(2), 197–226.",
+        "doi": "10.1002/for.3980040208"
+      }
+    ],
+    "checks": [
+      {
+        "type": "argmax",
+        "series": "production",
+        "expected": 108,
+        "tol": 5
+      },
+      {
+        "type": "max",
+        "series": "production",
+        "expected": 20.763,
+        "tol": 0.5
+      },
+      {
+        "type": "final",
+        "series": "Resource_remaining",
+        "expected": 386.96,
+        "tol": 20
+      },
+      {
+        "type": "monotonic",
+        "series": "Resource_remaining",
+        "direction": "down"
+      },
+      {
+        "type": "bounds",
+        "series": "Cumulative_production",
+        "min": 0,
+        "max": 2000
+      },
+      {
+        "type": "final",
+        "series": "Cumulative_production",
+        "expected": 1613.04,
+        "tol": 10
+      }
+    ]
+  },
+  {
+    "id": "groundwater-commons",
+    "file": "groundwater-commons.xmile",
+    "title": "Groundwater commons: the tragedy of the commons",
+    "category": "resources",
+    "level": "intro",
+    "summary": "Two farms expand irrigation while pumping remains profitable, drawing the shared aquifer down until profit vanishes and further expansion stops.",
+    "question": "Why do two rational farmers keep expanding irrigation until the shared aquifer is depleted, and when does expansion stop?",
+    "teaching": "Each farm pumps in proportion to its irrigated area and expands while profit per hectare is positive. Pumping lowers the water table, raises the lift, and increases pumping cost, so profit falls as the aquifer is drawn down. Total irrigated area rises and then plateaus at the zero-profit level, while the aquifer settles near the storage that corresponds to that lift; irrigation switches on and off in a narrow band around zero profit.",
+    "references": [
+      {
+        "citation": "Hardin, G. (1968). The tragedy of the commons. Science, 162(3859), 1243–1248.",
+        "doi": "10.1126/science.162.3859.1243"
+      }
+    ],
+    "checks": [
+      {
+        "type": "final",
+        "series": "Aquifer",
+        "expected": 19008787,
+        "tol": 100000
+      },
+      {
+        "type": "final",
+        "series": "Farm1_area",
+        "expected": 80.526,
+        "tol": 2
+      },
+      {
+        "type": "final",
+        "series": "Farm2_area",
+        "expected": 80.526,
+        "tol": 2
+      },
+      {
+        "type": "final",
+        "series": "profit_per_hectare",
+        "expected": 0.35,
+        "tol": 1
+      },
+      {
+        "type": "monotonic",
+        "series": "Farm1_area",
+        "direction": "up"
+      },
+      {
+        "type": "bounds",
+        "series": "Aquifer",
+        "min": 18990000,
+        "max": 20000000
+      }
+    ]
+  },
+  {
+    "id": "limits-to-growth-toy",
+    "file": "limits-to-growth-toy.xmile",
+    "title": "Limits to growth: a population–resource–pollution toy",
+    "category": "resources",
+    "level": "intro",
+    "summary": "A growing population depletes a nonrenewable resource and accumulates pollution, both of which eventually reverse population growth.",
+    "question": "How do resource depletion and pollution combine to make a growing population overshoot and then decline?",
+    "teaching": "This is a teaching-scale model in the spirit of World3, not World3 itself. Population grows at a constant birth rate while deaths rise with accumulated pollution; resource use per capita falls as the remaining resource is harder to extract, so output per capita declines. Population peaks around 2025, pollution keeps rising for decades, and the coupled resource and pollution limits produce a long decline to 2100.",
+    "references": [
+      {
+        "citation": "Meadows, D. H., Meadows, D. L., Randers, J., & Behrens, W. W. III (1972). The Limits to Growth. Universe Books."
+      },
+      {
+        "citation": "Forrester, J. W. (1971). World Dynamics. Wright-Allen Press."
+      }
+    ],
+    "checks": [
+      {
+        "type": "argmax",
+        "series": "Population",
+        "expected": 2025,
+        "tol": 3
+      },
+      {
+        "type": "max",
+        "series": "Population",
+        "expected": 3.616,
+        "tol": 0.05
+      },
+      {
+        "type": "final",
+        "series": "Population",
+        "expected": 3.283,
+        "tol": 0.1
+      },
+      {
+        "type": "monotonic",
+        "series": "Resource",
+        "direction": "down"
+      },
+      {
+        "type": "final",
+        "series": "output_per_capita",
+        "expected": 0.575,
+        "tol": 0.02
+      },
+      {
+        "type": "final",
+        "series": "Pollution",
+        "expected": 167.09,
+        "tol": 5
+      }
+    ]
+  }
+]

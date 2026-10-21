@@ -1,0 +1,184 @@
+[
+  {
+    "id": "lotka-volterra",
+    "file": "lotka-volterra.xmile",
+    "title": "Lotka-Volterra predator and prey cycles",
+    "category": "ecology",
+    "level": "intro",
+    "summary": "Hare and lynx populations chase each other in neutral predator-prey cycles with no damping.",
+    "question": "Why do predator and prey abundances cycle, and why does the cycle neither grow nor settle?",
+    "teaching": "Two stocks, hares and lynx, are linked by predation and predator reproduction. The prey loop and the predator loop are both reinforcing on their own but together produce a closed orbit: the conserved quantity V stays constant, so the cycle is neutral rather than damped. Students can compare starting conditions to see that the amplitude changes while the period stays close to the same.",
+    "references": [
+      {
+        "citation": "Lotka, A. J. (1925). Elements of Physical Biology. Williams & Wilkins."
+      },
+      {
+        "citation": "Volterra, V. (1926). Fluctuations in the abundance of a species considered mathematically. Nature, 118, 558–560.",
+        "doi": "10.1038/118558a0"
+      }
+    ],
+    "checks": [
+      {
+        "type": "oscillates",
+        "series": "Hares",
+        "minPeaks": 4
+      },
+      {
+        "type": "value",
+        "series": "Lynx",
+        "time": 6.0,
+        "expected": 53.615,
+        "tol": 0.5
+      },
+      {
+        "type": "bounds",
+        "series": "conserved_quantity",
+        "min": -2.0041,
+        "max": -1.9842
+      }
+    ]
+  },
+  {
+    "id": "rosenzweig-macarthur",
+    "file": "rosenzweig-macarthur.xmile",
+    "title": "Rosenzweig-MacArthur model: the paradox of enrichment",
+    "category": "ecology",
+    "level": "advanced",
+    "summary": "A logistic prey and a saturating predator produce a stable limit cycle that appears when the habitat is enriched.",
+    "question": "What happens to predator-prey stability when the prey carrying capacity is raised?",
+    "teaching": "Prey grow logistically and predators consume them with a Holling type II response. The coexistence equilibrium has N* = m/(a*(e-m*h)) and is stable only for carrying capacities below K = 2*N* + 1/(a*h). At the default K = 4 the equilibrium is unstable and the system settles onto a large limit cycle, so enriching the habitat destabilises the interaction rather than making it safer.",
+    "references": [
+      {
+        "citation": "Rosenzweig, M. L., & MacArthur, R. H. (1963). Graphical representation and stability conditions of predator-prey interactions. The American Naturalist, 97(895), 209–223.",
+        "doi": "10.1086/282272"
+      },
+      {
+        "citation": "Rosenzweig, M. L. (1971). Paradox of enrichment: Destabilization of exploitation ecosystems in ecological time. Science, 171(3969), 385–387.",
+        "doi": "10.1126/science.171.3969.385"
+      }
+    ],
+    "checks": [
+      {
+        "type": "oscillates",
+        "series": "Prey",
+        "minPeaks": 3
+      },
+      {
+        "type": "value",
+        "series": "Prey",
+        "time": 178.4,
+        "expected": 3.436,
+        "tol": 0.05
+      },
+      {
+        "type": "max",
+        "series": "Prey",
+        "expected": 3.437,
+        "tol": 0.05
+      },
+      {
+        "type": "final",
+        "series": "prey_equilibrium",
+        "expected": 0.6667,
+        "tol": 0.001
+      },
+      {
+        "type": "final",
+        "series": "hopf_threshold",
+        "expected": 2.3333,
+        "tol": 0.001
+      }
+    ]
+  },
+  {
+    "id": "sir-epidemic",
+    "file": "sir-epidemic.xmile",
+    "title": "SIR epidemic in a closed population",
+    "category": "ecology",
+    "level": "intro",
+    "summary": "An infection with R0 = 3 sweeps through a closed population, infecting about 94 % of it before burning out.",
+    "question": "How large is the final epidemic, and when does the number of infectious people peak?",
+    "teaching": "Susceptible, infectious and recovered stocks exchange people through infection and recovery. With beta = 0.3 per day and gamma = 0.1 per day, R0 = 3; the infectious stock rises to a single peak and then falls, while the recovered stock is the cumulative number ever infected. The final size follows z = 1 - exp(-R0*z), giving about 9,405 people, and 1 - 1/R0 = 0.667 is the herd-immunity threshold.",
+    "references": [
+      {
+        "citation": "Kermack, W. O., & McKendrick, A. G. (1927). A contribution to the mathematical theory of epidemics. Proceedings of the Royal Society A, 115(772), 700–721.",
+        "doi": "10.1098/rspa.1927.0118"
+      }
+    ],
+    "checks": [
+      {
+        "type": "final",
+        "series": "Recovered",
+        "expected": 9405.5,
+        "tol": 94.1
+      },
+      {
+        "type": "max",
+        "series": "Infectious",
+        "expected": 3007.1,
+        "tol": 60
+      },
+      {
+        "type": "argmax",
+        "series": "Infectious",
+        "expected": 38.0,
+        "tol": 1.5
+      },
+      {
+        "type": "value",
+        "series": "Infectious",
+        "time": 160,
+        "expected": 0.295,
+        "tol": 0.05
+      },
+      {
+        "type": "monotonic",
+        "series": "Recovered",
+        "direction": "up"
+      }
+    ]
+  },
+  {
+    "id": "us-population-logistic",
+    "file": "us-population-logistic.xmile",
+    "title": "U.S. population: Pearl and Reed's logistic curve",
+    "category": "ecology",
+    "level": "intro",
+    "summary": "The logistic curve fitted to U.S. census data from 1790 to 1910 tracks the nineteenth century but overshoots reality by 2000.",
+    "question": "How well does a single logistic curve fitted to early census data predict the U.S. population a century later?",
+    "teaching": "One stock grows logistically toward a fitted carrying capacity of 197.27 million with r = 0.03134 per year from 3.9 million in 1790. The curve passes through the analytic values for 1900 and 2000, but the actual 2000 census was 281 million, so the model illustrates the limits of extrapolating a fitted curve beyond its calibration period.",
+    "references": [
+      {
+        "citation": "Pearl, R., & Reed, L. J. (1920). On the rate of growth of the population of the United States since 1790 and its mathematical representation. Proceedings of the National Academy of Sciences, 6(6), 275–288.",
+        "doi": "10.1073/pnas.6.6.275"
+      }
+    ],
+    "checks": [
+      {
+        "type": "value",
+        "series": "Population",
+        "time": 1900,
+        "expected": 76517248,
+        "tol": 1530345
+      },
+      {
+        "type": "value",
+        "series": "Population",
+        "time": 2000,
+        "expected": 184585964,
+        "tol": 3691719
+      },
+      {
+        "type": "monotonic",
+        "series": "Population",
+        "direction": "up"
+      },
+      {
+        "type": "bounds",
+        "series": "Population",
+        "min": 3900000,
+        "max": 197270000
+      }
+    ]
+  }
+]

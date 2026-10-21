@@ -1,0 +1,484 @@
+/*
+ * SourceSink — inspector panel styles. Scoped to `.insp*` and expressed only with
+ * the design tokens in theme.css so light/dark themes stay consistent.
+ */
+
+.insp {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  height: 100%;
+  overflow-y: auto;
+  padding: 16px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.insp-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.insp-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.insp-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* --- labels & headings ---------------------------------------------------- */
+
+.insp-label,
+.insp-section-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.insp-section-title {
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.insp-model-name {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.insp-model-doc {
+  margin: 0;
+  color: var(--text-muted);
+  white-space: pre-wrap;
+}
+
+/* --- kind badge / counts -------------------------------------------------- */
+
+.insp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 9px 3px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-2);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+}
+
+.insp-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+
+.insp-counts {
+  flex-direction: row;
+  gap: 8px;
+}
+
+.insp-count {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+
+.insp-count-num {
+  font-size: 16px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+.insp-count-word {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.insp-multi {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* --- fields --------------------------------------------------------------- */
+
+.insp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.insp-input,
+.insp-textarea,
+.insp-select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 7px 9px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  transition: border-color 150ms var(--ease), box-shadow 150ms var(--ease);
+}
+
+.insp-textarea {
+  resize: vertical;
+  min-height: 56px;
+  line-height: 1.5;
+}
+
+.insp-mono {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+}
+
+.insp-select {
+  cursor: pointer;
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--text-muted) 50%),
+    linear-gradient(135deg, var(--text-muted) 50%, transparent 50%);
+  background-position: calc(100% - 16px) 55%, calc(100% - 11px) 55%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 28px;
+}
+
+.insp-input::placeholder,
+.insp-textarea::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+.insp :is(.insp-input, .insp-textarea, .insp-select):hover {
+  border-color: var(--text-muted);
+}
+
+.insp :is(.insp-input, .insp-textarea, .insp-select):focus-visible,
+.insp .insp-menu-item:focus-visible,
+.insp .insp-btn:focus-visible,
+.insp .insp-toggle input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.insp-invalid {
+  border-color: var(--danger);
+}
+
+/* --- messages (space is reserved so errors don't shift layout) ------------ */
+
+.insp-msg {
+  min-height: 15px;
+  font-size: 11.5px;
+  line-height: 15px;
+}
+
+.insp-msg-error {
+  color: var(--danger);
+}
+
+.insp-msg-hint {
+  color: var(--text-muted);
+}
+
+.insp-muted {
+  color: var(--text-muted);
+}
+
+.insp-unit-warning {
+  margin-top: -8px;
+  color: var(--text-muted);
+  font-size: 11.5px;
+  line-height: 15px;
+}
+
+.insp-unit-warning p {
+  margin: 0;
+}
+
+/* Warm "needs wiring" hint. theme.css has no dedicated amber token, so we use
+ * the connector colour — semantically the right signal for this hint. */
+.insp-warn {
+  color: var(--connector);
+}
+
+/* --- equation editor ------------------------------------------------------ */
+
+.insp-eq-wrap {
+  position: relative;
+}
+
+.insp-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 30;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  max-height: 240px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.insp-menu-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.insp-menu-item.is-active {
+  background: var(--accent-soft);
+}
+
+.insp-menu-label {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.insp-menu-detail {
+  flex: 0 0 auto;
+  font-size: 10.5px;
+  color: var(--text-muted);
+}
+
+/* --- inputs check --------------------------------------------------------- */
+
+.insp-inputs {
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+
+.insp-inputs-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.insp-inputs-row b {
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+/* --- lists ---------------------------------------------------------------- */
+
+.insp-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.insp-list li {
+  padding: 2px 7px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-2);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+}
+
+/* --- toggles -------------------------------------------------------------- */
+
+.insp-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.insp-toggle input {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.insp-toggle-label {
+  font-size: 13px;
+}
+
+/* --- flow direction ------------------------------------------------------- */
+
+.insp-flow-ends {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+}
+
+.insp-arrow {
+  color: var(--text-muted);
+}
+
+/* --- buttons -------------------------------------------------------------- */
+
+.insp-btn {
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 550;
+  cursor: pointer;
+  transition: background-color 150ms var(--ease), border-color 150ms var(--ease),
+    color 150ms var(--ease);
+}
+
+.insp-btn:hover {
+  background: var(--surface-2);
+}
+
+.insp-btn-tiny {
+  padding: 3px 9px;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.insp-delete {
+  align-self: flex-start;
+  color: var(--danger);
+}
+
+.insp-delete:hover {
+  border-color: var(--danger);
+  background: var(--surface-2);
+}
+
+.insp-actions {
+  display: flex;
+  padding-top: 4px;
+}
+
+/* --- run settings grid ---------------------------------------------------- */
+
+.insp-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 12px;
+}
+
+.insp-field-narrow .insp-input {
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- arrays ---------------------------------------------------------------- */
+
+.insp-dim-row {
+  display: grid;
+  grid-template-columns: 30% 1fr auto;
+  gap: 6px;
+  align-items: center;
+}
+
+.insp-icon-btn {
+  padding: 2px 8px;
+  line-height: 1;
+}
+
+.insp-dim-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+
+.insp-elements {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 260px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.insp-element-row {
+  display: grid;
+  grid-template-columns: minmax(0, 45%) 1fr;
+  gap: 6px;
+  align-items: center;
+}
+
+.insp-element-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --- scenarios -------------------------------------------------------------- */
+
+.insp-scenario {
+  display: flex;
+  flex-direction: column;
+}
+
+.insp-scenario-head {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.insp-override-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 84px auto;
+  gap: 6px;
+  align-items: center;
+}

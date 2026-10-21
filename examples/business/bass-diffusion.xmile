@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0" xmlns="http://docs.oasis-open.org/xmile/ns/XMILE/v1.0" xmlns:ss="https://sourcesink.dev/xmile/1">
+  <header>
+    <name>Bass Diffusion of a New Product</name>
+    <vendor>sourcesink</vendor>
+    <product version="0.1">sourcesink</product>
+    <doc>Based on Bass (1969): adoption by innovation and imitation in a fixed market.</doc>
+  </header>
+  <sim_specs method="RK4" time_units="year">
+    <start>0</start>
+    <stop>20</stop>
+    <dt>0.0625</dt>
+    <saveper>0.25</saveper>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Potential_adopters">
+        <eqn>1000000</eqn>
+        <units>people</units>
+        <doc>Consumers in the market who have not yet adopted the product (P in Bass 1969).</doc>
+        <outflows>
+          <flow>adoption</flow>
+        </outflows>
+      </stock>
+      <stock name="Adopters">
+        <eqn>0</eqn>
+        <units>people</units>
+        <doc>Consumers who have adopted the product (A in Bass 1969); starts empty.</doc>
+        <inflows>
+          <flow>adoption</flow>
+        </inflows>
+      </stock>
+      <flow name="adoption">
+        <eqn>(p + q * Adopters / market_size) * Potential_adopters</eqn>
+        <units>people/year</units>
+        <doc>New adopters per year: a constant innovation rate p plus an imitation rate q applied to the share already adopted, acting only on the remaining market.</doc>
+      </flow>
+      <aux name="p">
+        <eqn>0.03</eqn>
+        <units>1/year</units>
+        <doc>Coefficient of innovation, the chance per year that a non-adopter adopts independently of others.</doc>
+      </aux>
+      <aux name="q">
+        <eqn>0.38</eqn>
+        <units>1/year</units>
+        <doc>Coefficient of imitation, the strength of word-of-mouth contact with current adopters.</doc>
+      </aux>
+      <aux name="market_size">
+        <eqn>Potential_adopters + Adopters</eqn>
+        <units>people</units>
+        <doc>Total market N, the sum of potential and actual adopters (constant at 1,000,000).</doc>
+      </aux>
+    </variables>
+    <views>
+      <view type="stock_flow">
+        <connector from="p" to="adoption"/>
+        <connector from="q" to="adoption"/>
+        <connector from="Adopters" to="adoption"/>
+        <connector from="Potential_adopters" to="adoption"/>
+        <connector from="market_size" to="adoption"/>
+        <connector from="Potential_adopters" to="market_size"/>
+        <connector from="Adopters" to="market_size"/>
+      </view>
+    </views>
+  </model>
+</xmile>

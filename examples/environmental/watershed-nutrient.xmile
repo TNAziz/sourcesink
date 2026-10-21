@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Watershed Nonpoint-Source Nutrient Export</name>
+    <vendor>sourcesink</vendor>
+    <product version="0.1">sourcesink</product>
+  </header>
+  <sim_specs method="Euler" time_units="month">
+    <start>0</start>
+    <stop>36</stop>
+    <dt>0.25</dt>
+    <saveEvery>1</saveEvery>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Stream_N">
+        <eqn>1.0</eqn>
+        <units>kg N</units>
+        <doc>Nitrogen mass in the receiving reach (well-mixed).</doc>
+        <inflows>
+          <flow>loading</flow>
+        </inflows>
+        <outflows>
+          <flow>flushing</flow>
+        </outflows>
+      </stock>
+      <flow name="loading">
+        <eqn>total_load</eqn>
+        <units>kg/month</units>
+        <doc>Total nitrogen delivered to the reach from all land uses.</doc>
+      </flow>
+      <flow name="flushing">
+        <eqn>Stream_N / residence_time</eqn>
+        <units>kg/month</units>
+        <doc>Hydraulic export of nitrogen downstream.</doc>
+      </flow>
+      <aux name="total_load">
+        <eqn>forest_load + ag_load + urban_load</eqn>
+        <units>kg/month</units>
+        <doc>Sum of nitrogen loads across land-use categories.</doc>
+      </aux>
+      <aux name="forest_load">
+        <eqn>forest_area * forest_ec * runoff_depth</eqn>
+        <units>kg/month</units>
+        <doc>Nitrogen export from forested land.</doc>
+      </aux>
+      <aux name="ag_load">
+        <eqn>ag_area * ag_ec * runoff_depth</eqn>
+        <units>kg/month</units>
+        <doc>Nitrogen export from agricultural land.</doc>
+      </aux>
+      <aux name="urban_load">
+        <eqn>urban_area * urban_ec * runoff_depth</eqn>
+        <units>kg/month</units>
+        <doc>Nitrogen export from urban/impervious land.</doc>
+      </aux>
+      <aux name="runoff_depth">
+        <eqn>precip * runoff_coeff</eqn>
+        <units>cm/month</units>
+        <doc>Depth of runoff generated from monthly precipitation.</doc>
+      </aux>
+      <aux name="precip">
+        <eqn>precip_mean * (1 + seasonality * SIN(2 * PI * TIME / season_period))</eqn>
+        <units>cm/month</units>
+        <doc>Seasonal precipitation with a 12-month period and peak amplitude set by seasonality.</doc>
+      </aux>
+      <aux name="precip_mean">
+        <eqn>9</eqn>
+        <units>cm/month</units>
+        <doc>Mean monthly precipitation (about 108 cm/year).</doc>
+      </aux>
+      <aux name="seasonality">
+        <eqn>0.4</eqn>
+        <units>dimensionless</units>
+        <doc>Fractional seasonal amplitude of precipitation.</doc>
+      </aux>
+      <aux name="season_period">
+        <eqn>12</eqn>
+        <units>month</units>
+        <doc>Length of the seasonal precipitation cycle.</doc>
+      </aux>
+      <aux name="runoff_coeff">
+        <eqn>0.35</eqn>
+        <units>dimensionless</units>
+        <doc>Runoff coefficient (fraction of precipitation that becomes runoff).</doc>
+      </aux>
+      <aux name="forest_area">
+        <eqn>50</eqn>
+        <units>ha</units>
+        <doc>Forested catchment area.</doc>
+      </aux>
+      <aux name="forest_ec">
+        <eqn>0.02</eqn>
+        <units>kg N / ha / cm</units>
+        <doc>Forest export coefficient (mass per area per cm of runoff).</doc>
+      </aux>
+      <aux name="ag_area">
+        <eqn>30</eqn>
+        <units>ha</units>
+        <doc>Agricultural catchment area.</doc>
+      </aux>
+      <aux name="ag_ec">
+        <eqn>0.15</eqn>
+        <units>kg N / ha / cm</units>
+        <doc>Agricultural export coefficient.</doc>
+      </aux>
+      <aux name="urban_area">
+        <eqn>20</eqn>
+        <units>ha</units>
+        <doc>Urban/impervious catchment area.</doc>
+      </aux>
+      <aux name="urban_ec">
+        <eqn>0.25</eqn>
+        <units>kg N / ha / cm</units>
+        <doc>Urban export coefficient.</doc>
+      </aux>
+      <aux name="residence_time">
+        <eqn>1.0</eqn>
+        <units>month</units>
+        <doc>Hydraulic residence time of the reach.</doc>
+      </aux>
+      <aux name="stream_volume">
+        <eqn>10000</eqn>
+        <units>m3</units>
+        <doc>Volume of the receiving reach.</doc>
+      </aux>
+      <aux name="N_concentration">
+        <eqn>1000 * Stream_N / stream_volume</eqn>
+        <units>mg/L</units>
+        <doc>In-stream nitrogen concentration (1 kg N in 10000 m3 is 0.1 mg/L when 1000 kg/m3 conversion is applied).</doc>
+      </aux>
+    </variables>
+    <views>
+      <view type="stock_flow">
+        <connector from="total_load" to="loading"/>
+        <connector from="Stream_N" to="flushing"/>
+        <connector from="residence_time" to="flushing"/>
+        <connector from="forest_load" to="total_load"/>
+        <connector from="ag_load" to="total_load"/>
+        <connector from="urban_load" to="total_load"/>
+        <connector from="forest_area" to="forest_load"/>
+        <connector from="forest_ec" to="forest_load"/>
+        <connector from="runoff_depth" to="forest_load"/>
+        <connector from="ag_area" to="ag_load"/>
+        <connector from="ag_ec" to="ag_load"/>
+        <connector from="runoff_depth" to="ag_load"/>
+        <connector from="urban_area" to="urban_load"/>
+        <connector from="urban_ec" to="urban_load"/>
+        <connector from="runoff_depth" to="urban_load"/>
+        <connector from="precip" to="runoff_depth"/>
+        <connector from="runoff_coeff" to="runoff_depth"/>
+        <connector from="precip_mean" to="precip"/>
+        <connector from="seasonality" to="precip"/>
+        <connector from="season_period" to="precip"/>
+        <connector from="Stream_N" to="N_concentration"/>
+        <connector from="stream_volume" to="N_concentration"/>
+      </view>
+    </views>
+  </model>
+</xmile>

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Bioconcentration of a Contaminant in Fish</name>
+    <vendor>sourcesink</vendor>
+    <product version="0.1">sourcesink</product>
+    <doc>Based on Mackay (1982), with Harte (1988) as inspiration.</doc>
+  </header>
+  <sim_specs method="Euler" time_units="day">
+    <start>0</start>
+    <stop>100</stop>
+    <dt>0.01</dt>
+    <saveEvery>0.01</saveEvery>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Fish_concentration">
+        <eqn>0</eqn>
+        <units>ug/kg</units>
+        <doc>Contaminant concentration C_fish in fish tissue, starting clean.</doc>
+        <inflows>
+          <flow>uptake</flow>
+        </inflows>
+        <outflows>
+          <flow>depuration</flow>
+        </outflows>
+      </stock>
+      <flow name="uptake">
+        <eqn>uptake_rate * Water_concentration * (1 - STEP(1, 60))</eqn>
+        <units>ug/kg/day</units>
+        <doc>Uptake from water k1*C_water, switched off at day 60 when exposure stops.</doc>
+      </flow>
+      <flow name="depuration">
+        <eqn>depuration_rate * Fish_concentration</eqn>
+        <units>ug/kg/day</units>
+        <doc>First-order depuration k2*C_fish.</doc>
+      </flow>
+      <aux name="Water_concentration">
+        <eqn>1</eqn>
+        <units>ug/L</units>
+        <doc>Dissolved contaminant concentration in the water.</doc>
+      </aux>
+      <aux name="uptake_rate">
+        <eqn>500</eqn>
+        <units>L/kg/day</units>
+        <doc>Uptake rate constant k1.</doc>
+      </aux>
+      <aux name="depuration_rate">
+        <eqn>0.1</eqn>
+        <units>1/day</units>
+        <doc>Depuration rate constant k2.</doc>
+      </aux>
+      <aux name="BCF">
+        <eqn>uptake_rate / depuration_rate</eqn>
+        <units>L/kg</units>
+        <doc>Bioconcentration factor BCF = k1/k2 = 5,000 L/kg.</doc>
+      </aux>
+      <aux name="steady_state_concentration">
+        <eqn>BCF * Water_concentration</eqn>
+        <units>ug/kg</units>
+        <doc>Steady-state fish concentration BCF*C_water = 5,000 ug/kg.</doc>
+      </aux>
+      <aux name="half_life">
+        <eqn>LN(2) / depuration_rate</eqn>
+        <units>day</units>
+        <doc>Depuration half-life ln(2)/k2 = 6.93 days.</doc>
+      </aux>
+      <aux name="time_to_95_percent">
+        <eqn>3 / depuration_rate</eqn>
+        <units>day</units>
+        <doc>Time to reach 95 % of steady state, 3/k2 = 30 days.</doc>
+      </aux>
+    </variables>
+    <views>
+      <view type="stock_flow">
+        <connector from="uptake_rate" to="uptake"/>
+        <connector from="Water_concentration" to="uptake"/>
+        <connector from="depuration_rate" to="depuration"/>
+        <connector from="Fish_concentration" to="depuration"/>
+        <connector from="uptake_rate" to="BCF"/>
+        <connector from="depuration_rate" to="BCF"/>
+        <connector from="BCF" to="steady_state_concentration"/>
+        <connector from="Water_concentration" to="steady_state_concentration"/>
+        <connector from="depuration_rate" to="half_life"/>
+        <connector from="depuration_rate" to="time_to_95_percent"/>
+      </view>
+    </views>
+  </model>
+</xmile>

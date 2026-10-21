@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0" xmlns="http://docs.oasis-open.org/xmile/ns/XMILE/v1.0" xmlns:ss="https://sourcesink.dev/xmile/1">
+  <header>
+    <name>Stock Management with a Supply Line</name>
+    <vendor>sourcesink</vendor>
+    <product version="0.1">sourcesink</product>
+    <doc>Based on Sterman (1989), the anchoring-and-adjustment ordering experiment, and Sterman (2000), Business Dynamics.</doc>
+  </header>
+  <sim_specs method="Euler" time_units="week">
+    <start>0</start>
+    <stop>60</stop>
+    <dt>0.05</dt>
+    <saveper>0.25</saveper>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Inventory">
+        <eqn>400</eqn>
+        <units>units</units>
+        <doc>Stock of finished goods held to meet customer demand; starts at the desired 400 units.</doc>
+        <inflows>
+          <flow>deliveries</flow>
+        </inflows>
+        <outflows>
+          <flow>shipments</flow>
+        </outflows>
+      </stock>
+      <stock name="Supply_line">
+        <eqn>desired_supply_line</eqn>
+        <units>units</units>
+        <doc>Orders placed with suppliers that have not yet arrived (the supply line); starts at its equilibrium, expected demand times the delivery delay.</doc>
+        <inflows>
+          <flow>orders</flow>
+        </inflows>
+        <outflows>
+          <flow>deliveries</flow>
+        </outflows>
+      </stock>
+      <flow name="orders">
+        <eqn>MAX(0 * expected_demand, desired_orders)</eqn>
+        <units>units/week</units>
+        <doc>Order rate placed with suppliers, never negative: expected demand plus inventory and supply-line adjustment.</doc>
+      </flow>
+      <flow name="deliveries">
+        <eqn>DELAY3(orders, delivery_delay)</eqn>
+        <units>units/week</units>
+        <doc>Arrival rate of ordered goods at the warehouse: a third-order material delay of the orders, so goods arrive spread out around the delivery delay.</doc>
+      </flow>
+      <flow name="shipments">
+        <eqn>customer_demand</eqn>
+        <units>units/week</units>
+        <doc>Outgoing shipment rate, equal to customer demand because unfilled orders are not backlogged in this model.</doc>
+      </flow>
+      <aux name="desired_orders">
+        <eqn>expected_demand + (desired_inventory - Inventory) / adjustment_time + weight_on_supply_line * (desired_supply_line - Supply_line) / adjustment_time</eqn>
+        <units>units/week</units>
+        <doc>Ordering rule: replace expected demand, close the inventory gap, and partially close the supply-line gap (Sterman's anchoring and adjustment).</doc>
+      </aux>
+      <aux name="customer_demand">
+        <eqn>100 + STEP(20, 5)</eqn>
+        <units>units/week</units>
+        <doc>Customer demand, 100 units/week stepping to 120 units/week at week 5.</doc>
+      </aux>
+      <aux name="expected_demand">
+        <eqn>SMTH1(customer_demand, 4, 100)</eqn>
+        <units>units/week</units>
+        <doc>Smoothed demand forecast, a four-week exponential average (SMTH1).</doc>
+      </aux>
+      <aux name="desired_inventory">
+        <eqn>400</eqn>
+        <units>units</units>
+        <doc>Target inventory level.</doc>
+      </aux>
+      <aux name="adjustment_time">
+        <eqn>1</eqn>
+        <units>week</units>
+        <doc>Time over which inventory and supply-line gaps are closed.</doc>
+      </aux>
+      <aux name="weight_on_supply_line">
+        <eqn>0.3</eqn>
+        <units>1</units>
+        <doc>Weight given to the supply-line gap; below 1 means managers under-weight orders already in the pipeline.</doc>
+      </aux>
+      <aux name="delivery_delay">
+        <eqn>4</eqn>
+        <units>week</units>
+        <doc>Lag between placing an order and receiving the goods.</doc>
+      </aux>
+      <aux name="desired_supply_line">
+        <eqn>expected_demand * delivery_delay</eqn>
+        <units>units</units>
+        <doc>Supply line needed to sustain expected demand through the delivery delay.</doc>
+      </aux>
+    </variables>
+    <ss:scenarios>
+      <ss:scenario id="full-supply-line-weight" name="Full supply-line weight">
+        <ss:override name="weight_on_supply_line">1</ss:override>
+        <ss:doc>Weighting the full supply line shows the smooth, non-oscillatory response.</ss:doc>
+      </ss:scenario>
+    </ss:scenarios>
+    <views>
+      <view type="stock_flow">
+        <connector from="desired_orders" to="orders"/>
+        <connector from="expected_demand" to="desired_orders"/>
+        <connector from="Inventory" to="desired_orders"/>
+        <connector from="desired_inventory" to="desired_orders"/>
+        <connector from="adjustment_time" to="desired_orders"/>
+        <connector from="weight_on_supply_line" to="desired_orders"/>
+        <connector from="desired_supply_line" to="desired_orders"/>
+        <connector from="Supply_line" to="desired_orders"/>
+        <connector from="customer_demand" to="expected_demand"/>
+        <connector from="expected_demand" to="desired_supply_line"/>
+        <connector from="delivery_delay" to="desired_supply_line"/>
+        <connector from="Supply_line" to="deliveries"/>
+        <connector from="delivery_delay" to="deliveries"/>
+        <connector from="customer_demand" to="shipments"/>
+      </view>
+    </views>
+  </model>
+</xmile>

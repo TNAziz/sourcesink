@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Stage-Discharge Rating Curve</name>
+    <vendor>SourceSink</vendor>
+    <product version="0.1.0">SourceSink</product>
+  </header>
+  <sim_specs method="Euler" time_units="day">
+    <start>0</start>
+    <stop>10</stop>
+    <dt>0.5</dt>
+    <saveper>0.5</saveper>
+  </sim_specs>
+  <model>
+    <variables>
+      <aux name="Stage">
+        <eqn>RAMP(0.5, 0)</eqn>
+      </aux>
+      <aux name="Discharge">
+        <eqn>Rating_curve(Stage)</eqn>
+      </aux>
+      <gf name="Rating_curve" interpolation="linear" extrapolation="clip">
+        <xpts>0,1,2,3</xpts>
+        <ypts>0,2,8,18</ypts>
+      </gf>
+    </variables>
+  </model>
+</xmile>

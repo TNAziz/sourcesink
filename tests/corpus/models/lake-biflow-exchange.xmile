@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Two-Basin Lake Exchange with Biflow</name>
+    <vendor>SourceSink</vendor>
+    <product version="0.1.0">SourceSink</product>
+  </header>
+  <sim_specs method="Euler" time_units="day">
+    <start>0</start>
+    <stop>50</stop>
+    <dt>0.01</dt>
+    <saveper>1</saveper>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="NorthBasin">
+        <eqn>10</eqn>
+        <outflow name="Exchange"/>
+        <outflow name="Drain"/>
+      </stock>
+      <stock name="SouthBasin">
+        <eqn>0</eqn>
+        <inflow name="Exchange"/>
+        <inflow name="Supply"/>
+      </stock>
+      <flow name="Exchange" biflow="true">
+        <eqn>0.2 * (NorthBasin - SouthBasin)</eqn>
+      </flow>
+      <flow name="Drain">
+        <eqn>0.5</eqn>
+      </flow>
+      <flow name="Supply">
+        <eqn>0.5</eqn>
+      </flow>
+    </variables>
+  </model>
+</xmile>

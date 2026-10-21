@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header><name>Malformed</name></header>
+  <sim_specs method="Euler"><start>0</start><stop>10</stop><dt>1</dt><saveper>1</saveper></sim_specs>
+  <model>
+    <variables>
+      <aux name="Rate"><eqn>1</eqn></aux>

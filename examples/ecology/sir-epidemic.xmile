@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>SIR Epidemic in a Closed Population</name>
+    <vendor>sourcesink</vendor>
+    <product version="0.1">sourcesink</product>
+    <doc>Based on Kermack and McKendrick (1927).</doc>
+  </header>
+  <sim_specs method="Euler" time_units="day">
+    <start>0</start>
+    <stop>160</stop>
+    <dt>0.01</dt>
+    <saveEvery>1</saveEvery>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Susceptible">
+        <eqn>9990</eqn>
+        <units>people</units>
+        <doc>Susceptible people S who have not yet been infected.</doc>
+        <outflows>
+          <flow>infection</flow>
+        </outflows>
+      </stock>
+      <stock name="Infectious">
+        <eqn>10</eqn>
+        <units>people</units>
+        <doc>Currently infectious people I.</doc>
+        <inflows>
+          <flow>infection</flow>
+        </inflows>
+        <outflows>
+          <flow>recovery</flow>
+        </outflows>
+      </stock>
+      <stock name="Recovered">
+        <eqn>0</eqn>
+        <units>people</units>
+        <doc>People R who have recovered and are immune; here this is also the cumulative number ever infected.</doc>
+        <inflows>
+          <flow>recovery</flow>
+        </inflows>
+      </stock>
+      <flow name="infection">
+        <eqn>beta * Susceptible * Infectious / N</eqn>
+        <units>people/day</units>
+        <doc>New infections beta*S*I/N from random mixing in the closed population.</doc>
+      </flow>
+      <flow name="recovery">
+        <eqn>gamma * Infectious</eqn>
+        <units>people/day</units>
+        <doc>Removals from the infectious class at per-capita rate gamma.</doc>
+      </flow>
+      <aux name="N">
+        <eqn>10000</eqn>
+        <units>people</units>
+        <doc>Total closed population N = S + I + R, constant.</doc>
+      </aux>
+      <aux name="beta">
+        <eqn>0.3</eqn>
+        <units>1/day</units>
+        <doc>Transmission rate beta per susceptible-infectious contact.</doc>
+      </aux>
+      <aux name="gamma">
+        <eqn>0.1</eqn>
+        <units>1/day</units>
+        <doc>Recovery rate gamma; the mean infectious period is 1/gamma = 10 days.</doc>
+      </aux>
+      <aux name="R0">
+        <eqn>beta / gamma</eqn>
+        <units>dimensionless</units>
+        <doc>Basic reproduction number R0 = beta/gamma = 3.</doc>
+      </aux>
+      <aux name="herd_immunity_threshold">
+        <eqn>1 - 1 / R0</eqn>
+        <units>dimensionless</units>
+        <doc>Fraction of the population that must be immune to stop transmission, 1 - 1/R0 = 0.667.</doc>
+      </aux>
+    </variables>
+    <views>
+      <view type="stock_flow">
+        <connector from="beta" to="infection"/>
+        <connector from="Susceptible" to="infection"/>
+        <connector from="Infectious" to="infection"/>
+        <connector from="N" to="infection"/>
+        <connector from="gamma" to="recovery"/>
+        <connector from="Infectious" to="recovery"/>
+        <connector from="beta" to="R0"/>
+        <connector from="gamma" to="R0"/>
+        <connector from="R0" to="herd_immunity_threshold"/>
+      </view>
+    </views>
+  </model>
+</xmile>

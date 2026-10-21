@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Easter Island: A Ricardo-Malthus Resource Model</name>
+    <vendor>sourcesink</vendor>
+    <product version="0.1">sourcesink</product>
+  </header>
+  <sim_specs method="RK4" time_units="year">
+    <start>0</start>
+    <stop>2000</stop>
+    <dt>1</dt>
+    <saveEvery>1</saveEvery>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Resource">
+        <eqn>12000</eqn>
+        <units>biomass</units>
+        <doc>Renewable resource stock, S, in biomass units; starts at its carrying capacity K.</doc>
+        <inflows>
+          <flow>resource_regeneration</flow>
+        </inflows>
+        <outflows>
+          <flow>harvest</flow>
+        </outflows>
+      </stock>
+      <stock name="Population">
+        <eqn>40</eqn>
+        <units>person</units>
+        <doc>Human population, L, in people.</doc>
+        <inflows>
+          <flow>net_population_change</flow>
+        </inflows>
+      </stock>
+      <flow name="resource_regeneration">
+        <eqn>r * Resource * (1 - Resource / K)</eqn>
+        <units>biomass/year</units>
+        <doc>Logistic regeneration of the resource toward carrying capacity K.</doc>
+      </flow>
+      <flow name="harvest">
+        <eqn>alpha * beta * Population * Resource</eqn>
+        <units>biomass/year</units>
+        <doc>Resource harvested by the population, proportional to population and to the standing resource.</doc>
+      </flow>
+      <flow name="net_population_change">
+        <eqn>Population * (net_birth_rate + phi * alpha * beta * Resource)</eqn>
+        <units>person/year</units>
+        <doc>Net population growth: the exogenous birth-death balance plus the resource-dependent gain from harvesting.</doc>
+      </flow>
+      <aux name="r">
+        <eqn>0.004</eqn>
+        <units>1/year</units>
+        <doc>Intrinsic regeneration rate of the resource (0.04 per decade in Brander and Taylor, here per year).</doc>
+      </aux>
+      <aux name="K">
+        <eqn>12000</eqn>
+        <units>biomass</units>
+        <doc>Resource carrying capacity, K.</doc>
+      </aux>
+      <aux name="alpha">
+        <eqn>0.000001</eqn>
+        <units>1/person/year</units>
+        <doc>Resource harvest coefficient, alpha (0.00001 per person per decade in the source, here per year).</doc>
+      </aux>
+      <aux name="beta">
+        <eqn>0.4</eqn>
+        <units>dimensionless</units>
+        <doc>Per-capita harvest coefficient, beta.</doc>
+      </aux>
+      <aux name="phi">
+        <eqn>4</eqn>
+        <units>person/biomass</units>
+        <doc>Conversion of harvested resource into population growth, phi.</doc>
+      </aux>
+      <aux name="net_birth_rate">
+        <eqn>-0.01</eqn>
+        <units>1/year</units>
+        <doc>Exogenous birth minus death rate, b - d (-0.1 per decade in the source, here per year).</doc>
+      </aux>
+      <aux name="resource_equilibrium">
+        <eqn>-net_birth_rate / (phi * alpha * beta)</eqn>
+        <units>biomass</units>
+        <doc>Interior equilibrium resource stock, S* = (d - b)/(phi alpha beta).</doc>
+      </aux>
+      <aux name="population_equilibrium">
+        <eqn>r * (1 - resource_equilibrium / K) / (alpha * beta)</eqn>
+        <units>person</units>
+        <doc>Interior equilibrium population, L* = r (1 - S*/K)/(alpha beta).</doc>
+      </aux>
+    </variables>
+    <views>
+      <view type="stock_flow">
+        <connector from="r" to="resource_regeneration"/>
+        <connector from="Resource" to="resource_regeneration"/>
+        <connector from="K" to="resource_regeneration"/>
+        <connector from="alpha" to="harvest"/>
+        <connector from="beta" to="harvest"/>
+        <connector from="Population" to="harvest"/>
+        <connector from="Resource" to="harvest"/>
+        <connector from="Population" to="net_population_change"/>
+        <connector from="net_birth_rate" to="net_population_change"/>
+        <connector from="phi" to="net_population_change"/>
+        <connector from="alpha" to="net_population_change"/>
+        <connector from="beta" to="net_population_change"/>
+        <connector from="Resource" to="net_population_change"/>
+        <connector from="net_birth_rate" to="resource_equilibrium"/>
+        <connector from="phi" to="resource_equilibrium"/>
+        <connector from="alpha" to="resource_equilibrium"/>
+        <connector from="beta" to="resource_equilibrium"/>
+        <connector from="r" to="population_equilibrium"/>
+        <connector from="resource_equilibrium" to="population_equilibrium"/>
+        <connector from="K" to="population_equilibrium"/>
+        <connector from="alpha" to="population_equilibrium"/>
+        <connector from="beta" to="population_equilibrium"/>
+      </view>
+    </views>
+  </model>
+</xmile>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Residence Time of a Pollutant in a Well-Mixed Lake</name>
+    <vendor>sourcesink</vendor>
+    <product version="0.1">sourcesink</product>
+    <doc>Based on Harte (1988); this box model is an original SourceSink calculation.</doc>
+  </header>
+  <sim_specs method="Euler" time_units="day">
+    <start>0</start>
+    <stop>1000</stop>
+    <dt>0.1</dt>
+    <saveEvery>1</saveEvery>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Mass">
+        <eqn>0</eqn>
+        <units>kg</units>
+        <doc>Mass of pollutant in the lake, starting clean at day 0.</doc>
+        <inflows>
+          <flow>load</flow>
+        </inflows>
+        <outflows>
+          <flow>export</flow>
+        </outflows>
+      </stock>
+      <flow name="load">
+        <eqn>50</eqn>
+        <units>kg/day</units>
+        <doc>Constant pollutant load entering the lake from day 0 onward.</doc>
+      </flow>
+      <flow name="export">
+        <eqn>outflow_rate * Mass</eqn>
+        <units>kg/day</units>
+        <doc>Pollutant carried out with the outflow at the well-mixed lake concentration.</doc>
+      </flow>
+      <aux name="V">
+        <eqn>1e7</eqn>
+        <units>m3</units>
+        <doc>Lake volume V.</doc>
+      </aux>
+      <aux name="Q">
+        <eqn>1e5</eqn>
+        <units>m3/day</units>
+        <doc>Inflow and outflow discharge Q.</doc>
+      </aux>
+      <aux name="outflow_rate">
+        <eqn>Q / V</eqn>
+        <units>1/day</units>
+        <doc>Flushing rate Q/V, the fraction of lake volume leaving per day.</doc>
+      </aux>
+      <aux name="residence_time">
+        <eqn>V / Q</eqn>
+        <units>day</units>
+        <doc>Hydraulic residence time tau = V/Q = 100 days.</doc>
+      </aux>
+      <aux name="concentration_kg_m3">
+        <eqn>Mass / V</eqn>
+        <units>kg/m3</units>
+        <doc>Well-mixed pollutant concentration in mass per unit volume.</doc>
+      </aux>
+      <aux name="concentration_mg_L">
+        <eqn>concentration_kg_m3 * 1000</eqn>
+        <units>mg/L</units>
+        <doc>Pollutant concentration expressed in milligrams per litre.</doc>
+      </aux>
+      <aux name="steady_state_mass">
+        <eqn>load * residence_time</eqn>
+        <units>kg</units>
+        <doc>Expected steady-state mass, load times residence time = 5,000 kg.</doc>
+      </aux>
+    </variables>
+    <views>
+      <view type="stock_flow">
+        <connector from="Mass" to="export"/>
+        <connector from="outflow_rate" to="export"/>
+        <connector from="Q" to="outflow_rate"/>
+        <connector from="V" to="outflow_rate"/>
+        <connector from="V" to="residence_time"/>
+        <connector from="Q" to="residence_time"/>
+        <connector from="Mass" to="concentration_kg_m3"/>
+        <connector from="V" to="concentration_kg_m3"/>
+        <connector from="concentration_kg_m3" to="concentration_mg_L"/>
+      </view>
+    </views>
+  </model>
+</xmile>

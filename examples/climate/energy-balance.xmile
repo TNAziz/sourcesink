@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Zero-Dimensional Energy Balance of the Earth</name>
+    <vendor>sourcesink</vendor>
+    <product version="0.1">sourcesink</product>
+  </header>
+  <sim_specs method="RK4" time_units="year">
+    <start>0</start>
+    <stop>30</stop>
+    <dt>0.05</dt>
+    <saveEvery>0.5</saveEvery>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Temperature">
+        <eqn>255</eqn>
+        <units>K</units>
+        <doc>Planetary surface temperature T. Based on North, Cahalan and Coakley (1981).</doc>
+        <inflows>
+          <flow>absorbed_heating</flow>
+        </inflows>
+        <outflows>
+          <flow>longwave_cooling</flow>
+        </outflows>
+      </stock>
+      <flow name="absorbed_heating">
+        <eqn>absorbed_solar / heat_capacity</eqn>
+        <units>K/year</units>
+        <doc>Rate at which absorbed sunlight raises the surface temperature, absorbed_solar / C.</doc>
+      </flow>
+      <flow name="longwave_cooling">
+        <eqn>outgoing_longwave / heat_capacity</eqn>
+        <units>K/year</units>
+        <doc>Rate at which emitted longwave radiation cools the surface, outgoing_longwave / C.</doc>
+      </flow>
+      <aux name="solar_constant">
+        <eqn>1361</eqn>
+        <units>W/m^2</units>
+        <doc>Total solar irradiance S0 at the top of the atmosphere (W m-2).</doc>
+      </aux>
+      <aux name="albedo">
+        <eqn>0.30</eqn>
+        <units>1</units>
+        <doc>Planetary albedo alpha, the fraction of sunlight reflected back to space.</doc>
+      </aux>
+      <aux name="emissivity">
+        <eqn>0.612</eqn>
+        <units>1</units>
+        <doc>Effective longwave emissivity epsilon, standing in for the greenhouse effect.</doc>
+      </aux>
+      <aux name="stefan_boltzmann">
+        <eqn>5.67e-8</eqn>
+        <units>W/m^2/K^4</units>
+        <doc>Stefan-Boltzmann constant sigma.</doc>
+      </aux>
+      <aux name="heat_capacity">
+        <eqn>8</eqn>
+        <units>W*yr/m^2/K</units>
+        <doc>Effective heat capacity C of the ocean mixed layer, in energy per unit area per kelvin.</doc>
+      </aux>
+      <aux name="absorbed_solar">
+        <eqn>solar_constant * (1 - albedo) / 4</eqn>
+        <units>W/m^2</units>
+        <doc>Globally averaged solar energy absorbed at the surface, S0 (1 - alpha) / 4.</doc>
+      </aux>
+      <aux name="outgoing_longwave">
+        <eqn>emissivity * stefan_boltzmann * Temperature^4</eqn>
+        <units>W/m^2</units>
+        <doc>Longwave energy radiated to space, epsilon sigma T^4.</doc>
+      </aux>
+      <aux name="imbalance">
+        <eqn>absorbed_solar - outgoing_longwave</eqn>
+        <units>W/m^2</units>
+        <doc>Net radiative energy balance at the top of the atmosphere; zero at equilibrium.</doc>
+      </aux>
+    </variables>
+    <views>
+      <view type="stock_flow">
+        <connector from="heat_capacity" to="absorbed_heating"/>
+        <connector from="absorbed_solar" to="absorbed_heating"/>
+        <connector from="heat_capacity" to="longwave_cooling"/>
+        <connector from="outgoing_longwave" to="longwave_cooling"/>
+        <connector from="solar_constant" to="absorbed_solar"/>
+        <connector from="albedo" to="absorbed_solar"/>
+        <connector from="emissivity" to="outgoing_longwave"/>
+        <connector from="stefan_boltzmann" to="outgoing_longwave"/>
+        <connector from="Temperature" to="outgoing_longwave"/>
+        <connector from="absorbed_solar" to="imbalance"/>
+        <connector from="outgoing_longwave" to="imbalance"/>
+      </view>
+    </views>
+  </model>
+</xmile>

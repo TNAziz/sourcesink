@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Two-Layer Ocean Warming: Fast and Slow Responses to CO2 Forcing</name>
+    <vendor>sourcesink</vendor>
+    <product version="0.1">sourcesink</product>
+  </header>
+  <sim_specs method="RK4" time_units="year">
+    <start>0</start>
+    <stop>1000</stop>
+    <dt>0.5</dt>
+    <saveEvery>1</saveEvery>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="surface_warming">
+        <eqn>0</eqn>
+        <units>K</units>
+        <doc>Temperature anomaly of the surface and ocean mixed layer, T. Based on Held et al. (2010) and Gregory (2000).</doc>
+        <inflows>
+          <flow>forcing_heating</flow>
+        </inflows>
+        <outflows>
+          <flow>feedback_cooling</flow>
+          <flow>ocean_heat_uptake</flow>
+        </outflows>
+      </stock>
+      <stock name="deep_ocean_warming">
+        <eqn>0</eqn>
+        <units>K</units>
+        <doc>Temperature anomaly of the deep ocean, T0.</doc>
+        <inflows>
+          <flow>deep_ocean_heating</flow>
+        </inflows>
+      </stock>
+      <flow name="forcing_heating">
+        <eqn>forcing / heat_capacity</eqn>
+        <units>K/year</units>
+        <doc>Warming from the imposed radiative forcing, F / C.</doc>
+      </flow>
+      <flow name="feedback_cooling">
+        <eqn>feedback_parameter * surface_warming / heat_capacity</eqn>
+        <units>K/year</units>
+        <doc>Cooling from the stabilizing climate feedback, lambda T / C.</doc>
+      </flow>
+      <flow name="ocean_heat_uptake">
+        <eqn>heat_uptake_parameter * (surface_warming - deep_ocean_warming) / heat_capacity</eqn>
+        <units>K/year</units>
+        <doc>Heat transferred from the mixed layer to the deep ocean, gamma (T - T0) / C.</doc>
+      </flow>
+      <flow name="deep_ocean_heating">
+        <eqn>heat_uptake_parameter * (surface_warming - deep_ocean_warming) / deep_heat_capacity</eqn>
+        <units>K/year</units>
+        <doc>Warming of the deep ocean by the same heat flux, gamma (T - T0) / C0.</doc>
+      </flow>
+      <aux name="forcing">
+        <eqn>3.7</eqn>
+        <units>W/m^2</units>
+        <doc>Radiative forcing from a doubling of atmospheric CO2, F.</doc>
+      </aux>
+      <aux name="feedback_parameter">
+        <eqn>1.3</eqn>
+        <units>W/m^2/K</units>
+        <doc>Climate feedback parameter lambda; the equilibrium warming is F / lambda.</doc>
+      </aux>
+      <aux name="heat_uptake_parameter">
+        <eqn>0.7</eqn>
+        <units>W/m^2/K</units>
+        <doc>Deep-ocean heat uptake parameter gamma.</doc>
+      </aux>
+      <aux name="heat_capacity">
+        <eqn>8</eqn>
+        <units>W*yr/m^2/K</units>
+        <doc>Heat capacity C of the surface and ocean mixed layer.</doc>
+      </aux>
+      <aux name="deep_heat_capacity">
+        <eqn>100</eqn>
+        <units>W*yr/m^2/K</units>
+        <doc>Effective heat capacity C0 of the deep ocean.</doc>
+      </aux>
+      <aux name="equilibrium_warming">
+        <eqn>forcing / feedback_parameter</eqn>
+        <units>K</units>
+        <doc>Equilibrium surface warming F / lambda, approached only after the deep ocean has warmed.</doc>
+      </aux>
+      <aux name="fast_response_warming">
+        <eqn>forcing / (feedback_parameter + heat_uptake_parameter)</eqn>
+        <units>K</units>
+        <doc>Warming reached quickly while the deep ocean is still cold, F / (lambda + gamma).</doc>
+      </aux>
+    </variables>
+    <views>
+      <view type="stock_flow">
+        <connector from="forcing" to="forcing_heating"/>
+        <connector from="heat_capacity" to="forcing_heating"/>
+        <connector from="feedback_parameter" to="feedback_cooling"/>
+        <connector from="surface_warming" to="feedback_cooling"/>
+        <connector from="heat_capacity" to="feedback_cooling"/>
+        <connector from="heat_uptake_parameter" to="ocean_heat_uptake"/>
+        <connector from="surface_warming" to="ocean_heat_uptake"/>
+        <connector from="deep_ocean_warming" to="ocean_heat_uptake"/>
+        <connector from="heat_capacity" to="ocean_heat_uptake"/>
+        <connector from="heat_uptake_parameter" to="deep_ocean_heating"/>
+        <connector from="surface_warming" to="deep_ocean_heating"/>
+        <connector from="deep_ocean_warming" to="deep_ocean_heating"/>
+        <connector from="deep_heat_capacity" to="deep_ocean_heating"/>
+        <connector from="forcing" to="equilibrium_warming"/>
+        <connector from="feedback_parameter" to="equilibrium_warming"/>
+        <connector from="forcing" to="fast_response_warming"/>
+        <connector from="feedback_parameter" to="fast_response_warming"/>
+        <connector from="heat_uptake_parameter" to="fast_response_warming"/>
+      </view>
+    </views>
+  </model>
+</xmile>

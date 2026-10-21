@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>MIN/MAX Release Clipping</name>
+    <vendor>SourceSink</vendor>
+    <product version="0.1.0">SourceSink</product>
+  </header>
+  <sim_specs method="Euler" time_units="day">
+    <start>0</start>
+    <stop>10</stop>
+    <dt>0.5</dt>
+    <saveper>1</saveper>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Released">
+        <eqn>0</eqn>
+        <inflow name="Release"/>
+      </stock>
+      <flow name="Release">
+        <eqn>MIN(MAX(2 * TIME, 0), 8)</eqn>
+      </flow>
+    </variables>
+  </model>
+</xmile>

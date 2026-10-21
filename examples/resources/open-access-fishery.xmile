@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Open-Access Fishery</name>
+    <vendor>sourcesink</vendor>
+    <product version="0.1">sourcesink</product>
+  </header>
+  <sim_specs method="Euler" time_units="year">
+    <start>0</start>
+    <stop>100</stop>
+    <dt>0.125</dt>
+    <saveEvery>1</saveEvery>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Fish_stock">
+        <eqn>1000000</eqn>
+        <units>tonne</units>
+        <doc>Fish biomass in the fishery, X, in tonnes; starts at the carrying capacity.</doc>
+        <inflows>
+          <flow>growth</flow>
+        </inflows>
+        <outflows>
+          <flow>catch</flow>
+        </outflows>
+      </stock>
+      <stock name="Effort">
+        <eqn>10</eqn>
+        <units>vessel</units>
+        <doc>Fishing effort, E, measured as the number of active vessels.</doc>
+        <inflows>
+          <flow>effort_response</flow>
+        </inflows>
+      </stock>
+      <flow name="growth">
+        <eqn>r * Fish_stock * (1 - Fish_stock / K)</eqn>
+        <units>tonne/year</units>
+        <doc>Logistic recruitment of the fish stock toward its carrying capacity K.</doc>
+      </flow>
+      <flow name="catch">
+        <eqn>q * Effort * Fish_stock</eqn>
+        <units>tonne/year</units>
+        <doc>Total catch, proportional to effort and to the stock (constant catchability q).</doc>
+      </flow>
+      <flow name="effort_response">
+        <eqn>fleet_response * (price * q * Fish_stock - cost) * Effort</eqn>
+        <units>vessel/year</units>
+        <doc>Entry or exit of vessels: effort grows while profit per vessel is positive and falls while it is negative.</doc>
+      </flow>
+      <aux name="r">
+        <eqn>0.5</eqn>
+        <units>1/year</units>
+        <doc>Intrinsic growth rate of the fish stock.</doc>
+      </aux>
+      <aux name="K">
+        <eqn>1000000</eqn>
+        <units>tonne</units>
+        <doc>Environmental carrying capacity of the fishery, K.</doc>
+      </aux>
+      <aux name="q">
+        <eqn>0.00001</eqn>
+        <units>1/vessel/year</units>
+        <doc>Catchability coefficient, q: the fraction of the stock caught per vessel per year.</doc>
+      </aux>
+      <aux name="price">
+        <eqn>1000</eqn>
+        <units>dollar/tonne</units>
+        <doc>Ex-vessel fish price, p, in dollars per tonne.</doc>
+      </aux>
+      <aux name="cost">
+        <eqn>2000</eqn>
+        <units>dollar/vessel/year</units>
+        <doc>Annual operating cost per vessel, c.</doc>
+      </aux>
+      <aux name="fleet_response">
+        <eqn>0.00007</eqn>
+        <units>vessel/dollar</units>
+        <doc>Fleet response coefficient, k: how quickly vessels enter or leave in response to profit.</doc>
+      </aux>
+      <aux name="profit_per_vessel">
+        <eqn>price * q * Fish_stock - cost</eqn>
+        <units>dollar/vessel/year</units>
+        <doc>Annual profit earned by one vessel at the current stock level.</doc>
+      </aux>
+      <aux name="bionomic_stock">
+        <eqn>cost / q / price</eqn>
+        <units>tonne</units>
+        <doc>Bionomic equilibrium stock, X* = c/(p q), where profit per vessel is zero.</doc>
+      </aux>
+      <aux name="maximum_sustainable_yield">
+        <eqn>r * K / 4</eqn>
+        <units>tonne/year</units>
+        <doc>Maximum sustainable yield of the unharvested logistic stock, r K / 4, attained at X = K/2.</doc>
+      </aux>
+    </variables>
+    <views>
+      <view type="stock_flow">
+        <connector from="r" to="growth"/>
+        <connector from="Fish_stock" to="growth"/>
+        <connector from="K" to="growth"/>
+        <connector from="q" to="catch"/>
+        <connector from="Effort" to="catch"/>
+        <connector from="Fish_stock" to="catch"/>
+        <connector from="fleet_response" to="effort_response"/>
+        <connector from="price" to="effort_response"/>
+        <connector from="q" to="effort_response"/>
+        <connector from="Fish_stock" to="effort_response"/>
+        <connector from="cost" to="effort_response"/>
+        <connector from="Effort" to="effort_response"/>
+        <connector from="price" to="profit_per_vessel"/>
+        <connector from="q" to="profit_per_vessel"/>
+        <connector from="Fish_stock" to="profit_per_vessel"/>
+        <connector from="cost" to="profit_per_vessel"/>
+        <connector from="cost" to="bionomic_stock"/>
+        <connector from="price" to="bionomic_stock"/>
+        <connector from="q" to="bionomic_stock"/>
+        <connector from="r" to="maximum_sustainable_yield"/>
+        <connector from="K" to="maximum_sustainable_yield"/>
+      </view>
+    </views>
+  </model>
+</xmile>

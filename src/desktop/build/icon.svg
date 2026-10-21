@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4a7bff"/>
+      <stop offset="1" stop-color="#2a4fd0"/>
+    </linearGradient>
+  </defs>
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="url(#bg)"/>
+  <!-- inflow pipe and valve -->
+  <rect x="64" y="236" width="140" height="40" rx="10" fill="#bff3e8"/>
+  <path d="M104 206 L136 256 L104 306 Z M168 206 L136 256 L168 306 Z" fill="#ffffff"/>
+  <!-- stock -->
+  <rect x="200" y="176" width="176" height="160" rx="28" fill="#ffffff"/>
+  <rect x="200" y="256" width="176" height="80" rx="28" fill="#cfe0ff"/>
+  <rect x="200" y="256" width="176" height="40" fill="#cfe0ff"/>
+  <!-- outflow arrow -->
+  <rect x="376" y="236" width="56" height="40" fill="#bff3e8"/>
+  <path d="M424 216 L464 256 L424 296 Z" fill="#bff3e8"/>
+</svg>

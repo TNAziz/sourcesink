@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Daisyworld: Biological Regulation of Planetary Temperature</name>
+    <vendor>sourcesink</vendor>
+    <product version="0.1">sourcesink</product>
+  </header>
+  <sim_specs method="RK4" time_units="year">
+    <start>0</start>
+    <stop>200</stop>
+    <dt>0.05</dt>
+    <saveEvery>1</saveEvery>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="white_daisies">
+        <eqn>0.01</eqn>
+        <units>1</units>
+        <doc>Fraction of the planetary surface covered by white daisies, a_w. Based on Watson and Lovelock (1983).</doc>
+        <inflows>
+          <flow>white_birth</flow>
+        </inflows>
+        <outflows>
+          <flow>white_death</flow>
+        </outflows>
+      </stock>
+      <stock name="black_daisies">
+        <eqn>0.01</eqn>
+        <units>1</units>
+        <doc>Fraction of the planetary surface covered by black daisies, a_b.</doc>
+        <inflows>
+          <flow>black_birth</flow>
+        </inflows>
+        <outflows>
+          <flow>black_death</flow>
+        </outflows>
+      </stock>
+      <flow name="white_birth">
+        <eqn>white_daisies * bare_ground * white_growth_rate + white_reseed</eqn>
+        <units>1/year</units>
+        <doc>Birth rate of white daisies: seeds on bare ground plus a small re-seeding term that keeps the type alive.</doc>
+      </flow>
+      <flow name="white_death">
+        <eqn>death_rate * white_daisies</eqn>
+        <units>1/year</units>
+        <doc>Death rate of white daisies, gamma a_w.</doc>
+      </flow>
+      <flow name="black_birth">
+        <eqn>black_daisies * bare_ground * black_growth_rate + black_reseed</eqn>
+        <units>1/year</units>
+        <doc>Birth rate of black daisies: seeds on bare ground plus a small re-seeding term.</doc>
+      </flow>
+      <flow name="black_death">
+        <eqn>death_rate * black_daisies</eqn>
+        <units>1/year</units>
+        <doc>Death rate of black daisies, gamma a_b.</doc>
+      </flow>
+      <aux name="white_reseed">
+        <eqn>IF white_daisies &lt; reseed_threshold THEN reseed_rate ELSE 0</eqn>
+        <units>1/year</units>
+        <doc>Re-seeding of white daisies when their area fraction falls below the floor.</doc>
+      </aux>
+      <aux name="black_reseed">
+        <eqn>IF black_daisies &lt; reseed_threshold THEN reseed_rate ELSE 0</eqn>
+        <units>1/year</units>
+        <doc>Re-seeding of black daisies when their area fraction falls below the floor.</doc>
+      </aux>
+      <aux name="reseed_threshold">
+        <eqn>0.001</eqn>
+        <units>1</units>
+        <doc>Minimum viable daisy area fraction below which re-seeding kicks in.</doc>
+      </aux>
+      <aux name="reseed_rate">
+        <eqn>0.001</eqn>
+        <units>1/year</units>
+        <doc>Re-seeding rate restoring a vanished daisy type.</doc>
+      </aux>
+      <aux name="per_year">
+        <eqn>1</eqn>
+        <units>1/year</units>
+        <doc>One per year, converting the dimensionless growth parabola into a per-year rate.</doc>
+      </aux>
+      <aux name="death_rate">
+        <eqn>0.3</eqn>
+        <units>1/year</units>
+        <doc>Death rate gamma shared by both daisy types.</doc>
+      </aux>
+      <aux name="bare_ground">
+        <eqn>MAX(0, 1 - white_daisies - black_daisies)</eqn>
+        <units>1</units>
+        <doc>Uncovered ground x = p - a_w - a_b, with planetary area p = 1.</doc>
+      </aux>
+      <aux name="solar_flux">
+        <eqn>917</eqn>
+        <units>W/m^2</units>
+        <doc>Stellar flux S reaching the planet.</doc>
+      </aux>
+      <aux name="luminosity">
+        <eqn>0.6 + RAMP(0.005, 0, 200)</eqn>
+        <units>1</units>
+        <doc>Stellar luminosity L, ramping linearly from 0.6 to 1.6 over the 200-year run.</doc>
+      </aux>
+      <aux name="stefan_boltzmann">
+        <eqn>5.67e-8</eqn>
+        <units>W/m^2/K^4</units>
+        <doc>Stefan-Boltzmann constant sigma.</doc>
+      </aux>
+      <aux name="planetary_albedo">
+        <eqn>bare_ground * 0.5 + white_daisies * 0.75 + black_daisies * 0.25</eqn>
+        <units>1</units>
+        <doc>Planetary albedo A: bare ground reflects 0.5, white daisies 0.75, black daisies 0.25.</doc>
+      </aux>
+      <aux name="planet_temperature">
+        <eqn>(solar_flux * luminosity * (1 - planetary_albedo) / stefan_boltzmann)^0.25</eqn>
+        <units>K</units>
+        <doc>Effective planetary temperature Te, set by the stellar flux and the planetary albedo.</doc>
+      </aux>
+      <aux name="local_coupling">
+        <eqn>2.06e9</eqn>
+        <units>K^4</units>
+        <doc>Local-temperature coupling q prime, converting an albedo difference into a temperature difference.</doc>
+      </aux>
+      <aux name="white_albedo">
+        <eqn>0.75</eqn>
+        <units>1</units>
+        <doc>Albedo of a white daisy.</doc>
+      </aux>
+      <aux name="black_albedo">
+        <eqn>0.25</eqn>
+        <units>1</units>
+        <doc>Albedo of a black daisy.</doc>
+      </aux>
+      <aux name="white_temperature">
+        <eqn>(local_coupling * (planetary_albedo - white_albedo) + planet_temperature^4)^0.25</eqn>
+        <units>K</units>
+        <doc>Local temperature felt by white daisies, Ti = (q prime (A - Ai) + Te^4)^0.25.</doc>
+      </aux>
+      <aux name="black_temperature">
+        <eqn>(local_coupling * (planetary_albedo - black_albedo) + planet_temperature^4)^0.25</eqn>
+        <units>K</units>
+        <doc>Local temperature felt by black daisies.</doc>
+      </aux>
+      <aux name="white_growth_rate">
+        <eqn>per_year * MAX(0, 1 - growth_coefficient * (optimal_temperature - white_temperature)^2)</eqn>
+        <units>1/year</units>
+        <doc>Per-year growth rate beta of white daisies, a parabola in local temperature truncated at zero.</doc>
+      </aux>
+      <aux name="black_growth_rate">
+        <eqn>per_year * MAX(0, 1 - growth_coefficient * (optimal_temperature - black_temperature)^2)</eqn>
+        <units>1/year</units>
+        <doc>Per-year growth rate beta of black daisies, a parabola in local temperature truncated at zero.</doc>
+      </aux>
+      <aux name="optimal_temperature">
+        <eqn>295.5</eqn>
+        <units>K</units>
+        <doc>Temperature at which daisy growth is fastest (22.5 degrees Celsius).</doc>
+      </aux>
+      <aux name="growth_coefficient">
+        <eqn>0.003265</eqn>
+        <units>1/K^2</units>
+        <doc>Curvature of the daisy growth parabola.</doc>
+      </aux>
+      <aux name="regulated_temperature">
+        <eqn>IF luminosity &lt; 0.8 THEN 300 ELSE IF luminosity &gt; 1.2 THEN 300 ELSE planet_temperature</eqn>
+        <units>K</units>
+        <doc>Planet temperature in the middle luminosity range; set to 300 K elsewhere so a bounds check measures only the regulated interval.</doc>
+      </aux>
+    </variables>
+    <views>
+      <view type="stock_flow">
+        <connector from="white_daisies" to="white_birth"/>
+        <connector from="bare_ground" to="white_birth"/>
+        <connector from="white_growth_rate" to="white_birth"/>
+        <connector from="white_reseed" to="white_birth"/>
+        <connector from="death_rate" to="white_death"/>
+        <connector from="white_daisies" to="white_death"/>
+        <connector from="black_daisies" to="black_birth"/>
+        <connector from="bare_ground" to="black_birth"/>
+        <connector from="black_growth_rate" to="black_birth"/>
+        <connector from="black_reseed" to="black_birth"/>
+        <connector from="death_rate" to="black_death"/>
+        <connector from="black_daisies" to="black_death"/>
+        <connector from="white_daisies" to="white_reseed"/>
+        <connector from="reseed_threshold" to="white_reseed"/>
+        <connector from="reseed_rate" to="white_reseed"/>
+        <connector from="black_daisies" to="black_reseed"/>
+        <connector from="reseed_threshold" to="black_reseed"/>
+        <connector from="reseed_rate" to="black_reseed"/>
+        <connector from="white_daisies" to="bare_ground"/>
+        <connector from="black_daisies" to="bare_ground"/>
+        <connector from="bare_ground" to="planetary_albedo"/>
+        <connector from="white_daisies" to="planetary_albedo"/>
+        <connector from="black_daisies" to="planetary_albedo"/>
+        <connector from="solar_flux" to="planet_temperature"/>
+        <connector from="luminosity" to="planet_temperature"/>
+        <connector from="planetary_albedo" to="planet_temperature"/>
+        <connector from="stefan_boltzmann" to="planet_temperature"/>
+        <connector from="local_coupling" to="white_temperature"/>
+        <connector from="planetary_albedo" to="white_temperature"/>
+        <connector from="white_albedo" to="white_temperature"/>
+        <connector from="planet_temperature" to="white_temperature"/>
+        <connector from="local_coupling" to="black_temperature"/>
+        <connector from="planetary_albedo" to="black_temperature"/>
+        <connector from="black_albedo" to="black_temperature"/>
+        <connector from="planet_temperature" to="black_temperature"/>
+        <connector from="white_temperature" to="white_growth_rate"/>
+        <connector from="per_year" to="white_growth_rate"/>
+        <connector from="growth_coefficient" to="white_growth_rate"/>
+        <connector from="optimal_temperature" to="white_growth_rate"/>
+        <connector from="black_temperature" to="black_growth_rate"/>
+        <connector from="per_year" to="black_growth_rate"/>
+        <connector from="growth_coefficient" to="black_growth_rate"/>
+        <connector from="optimal_temperature" to="black_growth_rate"/>
+        <connector from="luminosity" to="regulated_temperature"/>
+        <connector from="planet_temperature" to="regulated_temperature"/>
+      </view>
+    </views>
+  </model>
+</xmile>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Atmospheric CO2 Accumulation with Carbon-Climate Feedback</name>
+    <vendor>sourcesink</vendor>
+    <product version="0.1">sourcesink</product>
+  </header>
+  <sim_specs method="Euler" time_units="year">
+    <start>0</start>
+    <stop>200</stop>
+    <dt>0.5</dt>
+    <saveEvery>2</saveEvery>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="CO2">
+        <eqn>280</eqn>
+        <units>ppm</units>
+        <doc>Atmospheric carbon-dioxide concentration.</doc>
+        <inflows>
+          <flow>emissions</flow>
+        </inflows>
+        <outflows>
+          <flow>natural_uptake</flow>
+        </outflows>
+      </stock>
+      <flow name="emissions">
+        <eqn>base_emissions</eqn>
+        <units>ppm/year</units>
+        <doc>Net anthropogenic emissions, held constant for clarity.</doc>
+      </flow>
+      <flow name="natural_uptake">
+        <eqn>uptake_rate * (CO2 - preindustrial) * (1 - feedback_strength * temp_anomaly)</eqn>
+        <units>ppm/year</units>
+        <doc>Ocean/terrestrial sink proportional to the excess over preindustrial CO2. The (1 - feedback_strength * temp_anomaly) term weakens uptake as warming proceeds.</doc>
+      </flow>
+      <aux name="base_emissions">
+        <eqn>2.5</eqn>
+        <units>ppm/year</units>
+        <doc>Constant anthropogenic emission rate (about 5.3 GtC/year).</doc>
+      </aux>
+      <aux name="preindustrial">
+        <eqn>280</eqn>
+        <units>ppm</units>
+        <doc>Preindustrial CO2 concentration.</doc>
+      </aux>
+      <aux name="uptake_rate">
+        <eqn>0.02</eqn>
+        <units>1/year</units>
+        <doc>Linearized sink efficiency (fraction of excess CO2 removed per year).</doc>
+      </aux>
+      <aux name="temp_anomaly">
+        <eqn>climate_sensitivity * LN(CO2 / preindustrial) / LN(2)</eqn>
+        <units>degC</units>
+        <doc>Equilibrium warming from radiative forcing, logarithmic in CO2.</doc>
+      </aux>
+      <aux name="climate_sensitivity">
+        <eqn>3.0</eqn>
+        <units>degC</units>
+        <doc>Equilibrium climate sensitivity (warming per CO2 doubling).</doc>
+      </aux>
+      <aux name="feedback_strength">
+        <eqn>0.05</eqn>
+        <units>1/degC</units>
+        <doc>Fractional reduction in sink efficiency per degree of warming. Captures terrestrial respirotory/ocean-stratification feedbacks.</doc>
+      </aux>
+    </variables>
+    <views>
+      <view type="stock_flow">
+        <connector from="base_emissions" to="emissions"/>
+        <connector from="uptake_rate" to="natural_uptake"/>
+        <connector from="CO2" to="natural_uptake"/>
+        <connector from="preindustrial" to="natural_uptake"/>
+        <connector from="feedback_strength" to="natural_uptake"/>
+        <connector from="temp_anomaly" to="natural_uptake"/>
+        <connector from="climate_sensitivity" to="temp_anomaly"/>
+        <connector from="CO2" to="temp_anomaly"/>
+        <connector from="preindustrial" to="temp_anomaly"/>
+      </view>
+    </views>
+  </model>
+</xmile>

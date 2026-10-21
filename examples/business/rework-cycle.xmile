@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0" xmlns="http://docs.oasis-open.org/xmile/ns/XMILE/v1.0" xmlns:ss="https://sourcesink.dev/xmile/1">
+  <header>
+    <name>Rework Cycle and the 90 Percent Syndrome</name>
+    <vendor>sourcesink</vendor>
+    <product version="0.1">sourcesink</product>
+    <doc>Based on Cooper (1980), the rework cycle in naval ship production.</doc>
+  </header>
+  <sim_specs method="Euler" time_units="week">
+    <start>0</start>
+    <stop>200</stop>
+    <dt>0.1</dt>
+    <saveper>0.5</saveper>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Work_to_do">
+        <eqn>1000</eqn>
+        <units>tasks</units>
+        <doc>Tasks still to be completed, including work not yet started and rework returned to the queue; starts at 1000.</doc>
+        <inflows>
+          <flow>rework_discovery</flow>
+        </inflows>
+        <outflows>
+          <flow>new_work_done</flow>
+          <flow>new_errors</flow>
+        </outflows>
+      </stock>
+      <stock name="Undiscovered_rework">
+        <eqn>0</eqn>
+        <units>tasks</units>
+        <doc>Work performed but containing errors that have not yet been found.</doc>
+        <inflows>
+          <flow>new_errors</flow>
+        </inflows>
+        <outflows>
+          <flow>rework_discovery</flow>
+        </outflows>
+      </stock>
+      <stock name="Work_done">
+        <eqn>0</eqn>
+        <units>tasks</units>
+        <doc>Tasks genuinely completed and accepted.</doc>
+        <inflows>
+          <flow>new_work_done</flow>
+        </inflows>
+      </stock>
+      <flow name="new_work_done">
+        <eqn>progress * (1 - error_fraction)</eqn>
+        <units>tasks/week</units>
+        <doc>Portion of progress that is correct on the first pass and moves to Work_done.</doc>
+      </flow>
+      <flow name="new_errors">
+        <eqn>progress * error_fraction</eqn>
+        <units>tasks/week</units>
+        <doc>Portion of progress that contains errors and enters Undiscovered_rework.</doc>
+      </flow>
+      <flow name="rework_discovery">
+        <eqn>Undiscovered_rework / discovery_time</eqn>
+        <units>tasks/week</units>
+        <doc>Rate at which hidden errors are found and returned to Work_to_do for rework.</doc>
+      </flow>
+      <aux name="progress">
+        <eqn>MIN(staff * productivity, Work_to_do / one_week)</eqn>
+        <units>tasks/week</units>
+        <doc>Work completed per week, limited by staff capacity and by the work actually left.</doc>
+      </aux>
+      <aux name="staff">
+        <eqn>10</eqn>
+        <units>person</units>
+        <doc>Number of people working on the project.</doc>
+      </aux>
+      <aux name="productivity">
+        <eqn>1</eqn>
+        <units>tasks/person/week</units>
+        <doc>Nominal output per person.</doc>
+      </aux>
+      <aux name="one_week">
+        <eqn>1</eqn>
+        <units>week</units>
+        <doc>One week, used to express the remaining work as a DT-safe weekly rate.</doc>
+      </aux>
+      <aux name="error_fraction">
+        <eqn>0.2</eqn>
+        <units>1</units>
+        <doc>Fraction of completed work that contains errors discovered later.</doc>
+      </aux>
+      <aux name="discovery_time">
+        <eqn>4</eqn>
+        <units>week</units>
+        <doc>Average time before hidden errors are discovered.</doc>
+      </aux>
+      <aux name="total_work">
+        <eqn>Work_to_do + Undiscovered_rework + Work_done</eqn>
+        <units>tasks</units>
+        <doc>Total task count, conserved at 1000 as work moves between the three stocks.</doc>
+      </aux>
+    </variables>
+    <views>
+      <view type="stock_flow">
+        <connector from="staff" to="progress"/>
+        <connector from="productivity" to="progress"/>
+        <connector from="Work_to_do" to="progress"/>
+        <connector from="one_week" to="progress"/>
+        <connector from="progress" to="new_work_done"/>
+        <connector from="error_fraction" to="new_work_done"/>
+        <connector from="progress" to="new_errors"/>
+        <connector from="error_fraction" to="new_errors"/>
+        <connector from="Undiscovered_rework" to="rework_discovery"/>
+        <connector from="discovery_time" to="rework_discovery"/>
+        <connector from="Work_to_do" to="total_work"/>
+        <connector from="Undiscovered_rework" to="total_work"/>
+        <connector from="Work_done" to="total_work"/>
+      </view>
+    </views>
+  </model>
+</xmile>

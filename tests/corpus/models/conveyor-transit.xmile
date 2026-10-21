@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Conveyor Transit Delay</name>
+    <vendor>SourceSink</vendor>
+    <product version="0.1.0">SourceSink</product>
+  </header>
+  <sim_specs method="Euler" time_units="day">
+    <start>0</start>
+    <stop>10</stop>
+    <dt>0.5</dt>
+    <saveper>0.5</saveper>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Belt">
+        <eqn>0</eqn>
+        <inflow name="Feed"/>
+        <outflow name="Exit"/>
+        <conveyor>
+          <len>3</len>
+        </conveyor>
+      </stock>
+      <flow name="Feed">
+        <eqn>2</eqn>
+      </flow>
+      <flow name="Exit">
+        <eqn>0</eqn>
+      </flow>
+    </variables>
+  </model>
+</xmile>

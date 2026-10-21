@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Lake Eutrophication: Phosphorus, Algae and Dissolved Oxygen</name>
+    <vendor>sourcesink</vendor>
+    <product version="0.1">sourcesink</product>
+  </header>
+  <sim_specs method="Euler" time_units="day">
+    <start>0</start>
+    <stop>90</stop>
+    <dt>0.25</dt>
+    <saveEvery>1</saveEvery>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="P">
+        <eqn>0.05</eqn>
+        <units>mg/L</units>
+        <doc>Available dissolved phosphorus in the water column.</doc>
+        <inflows>
+          <flow>P_load</flow>
+          <flow>recycle</flow>
+        </inflows>
+        <outflows>
+          <flow>uptake</flow>
+        </outflows>
+      </stock>
+      <stock name="Algae">
+        <eqn>0.5</eqn>
+        <units>mg/L</units>
+        <doc>Algal biomass (as chlorophyll-a proxy). Capped by self-shading carrying capacity.</doc>
+        <inflows>
+          <flow>growth</flow>
+        </inflows>
+        <outflows>
+          <flow>death</flow>
+        </outflows>
+      </stock>
+      <stock name="DO">
+        <eqn>8.0</eqn>
+        <units>mg/L</units>
+        <doc>Dissolved oxygen. Gains from photosynthesis and reaeration; loses from respiration and decomposition.</doc>
+        <inflows>
+          <flow>photosynthesis</flow>
+          <flow>reaeration</flow>
+        </inflows>
+        <outflows>
+          <flow>respiration</flow>
+          <flow>decomposition</flow>
+        </outflows>
+      </stock>
+      <flow name="P_load">
+        <eqn>P_load_rate</eqn>
+        <units>mg/L/day</units>
+        <doc>External phosphorus loading (e.g., runoff, point sources).</doc>
+      </flow>
+      <flow name="uptake">
+        <eqn>growth * P_quota</eqn>
+        <units>mg/L/day</units>
+        <doc>Phosphorus assimilated into new algal biomass at a fixed cellular quota.</doc>
+      </flow>
+      <flow name="recycle">
+        <eqn>death * P_quota * recycle_frac</eqn>
+        <units>mg/L/day</units>
+        <doc>Phosphorus returned to the water column upon algal death (partial mineralization).</doc>
+      </flow>
+      <flow name="growth">
+        <eqn>mu_max * Algae * (P / (Ks + P)) * (1 - Algae / Algae_K)</eqn>
+        <units>mg/L/day</units>
+        <doc>Monod (phosphorus-limited) growth, tempered by a logistic self-shading term.</doc>
+      </flow>
+      <flow name="death">
+        <eqn>death_rate * Algae</eqn>
+        <units>mg/L/day</units>
+        <doc>First-order algal mortality.</doc>
+      </flow>
+      <flow name="photosynthesis">
+        <eqn>growth * photo_yield</eqn>
+        <units>mg/L/day</units>
+        <doc>Oxygen produced in proportion to primary production.</doc>
+      </flow>
+      <flow name="respiration">
+        <eqn>resp_rate * Algae</eqn>
+        <units>mg/L/day</units>
+        <doc>Community respiration consuming oxygen in proportion to biomass.</doc>
+      </flow>
+      <flow name="decomposition">
+        <eqn>death * decay_O_demand</eqn>
+        <units>mg/L/day</units>
+        <doc>Oxygen demand of decomposing dead algal biomass.</doc>
+      </flow>
+      <flow name="reaeration">
+        <eqn>rear_rate * (DO_sat - DO)</eqn>
+        <units>mg/L/day</units>
+        <doc>Atmospheric exchange driving DO toward saturation. Biflow: outgases when oversaturated.</doc>
+        <biflow>true</biflow>
+      </flow>
+      <aux name="P_load_rate">
+        <eqn>0.02</eqn>
+        <units>mg/L/day</units>
+        <doc>External phosphorus loading rate.</doc>
+      </aux>
+      <aux name="mu_max">
+        <eqn>0.8</eqn>
+        <units>1/day</units>
+        <doc>Maximum specific algal growth rate.</doc>
+      </aux>
+      <aux name="Ks">
+        <eqn>0.02</eqn>
+        <units>mg/L</units>
+        <doc>Half-saturation constant for phosphorus uptake.</doc>
+      </aux>
+      <aux name="Algae_K">
+        <eqn>20</eqn>
+        <units>mg/L</units>
+        <doc>Self-shading carrying capacity for algae.</doc>
+      </aux>
+      <aux name="P_quota">
+        <eqn>0.05</eqn>
+        <units>mg P / mg algae</units>
+        <doc>Cellular phosphorus content (mass P per mass algae).</doc>
+      </aux>
+      <aux name="death_rate">
+        <eqn>0.10</eqn>
+        <units>1/day</units>
+        <doc>Algal mortality rate.</doc>
+      </aux>
+      <aux name="recycle_frac">
+        <eqn>0.8</eqn>
+        <units>dimensionless</units>
+        <doc>Fraction of phosphorus in dead algae that is promptly mineralized.</doc>
+      </aux>
+      <aux name="rear_rate">
+        <eqn>0.4</eqn>
+        <units>1/day</units>
+        <doc>Reaeration exchange coefficient.</doc>
+      </aux>
+      <aux name="DO_sat">
+        <eqn>9.0</eqn>
+        <units>mg/L</units>
+        <doc>Saturation dissolved-oxygen concentration.</doc>
+      </aux>
+      <aux name="photo_yield">
+        <eqn>0.4</eqn>
+        <units>mg O2 / mg algae</units>
+        <doc>Oxygen produced per unit biomass growth.</doc>
+      </aux>
+      <aux name="resp_rate">
+        <eqn>0.12</eqn>
+        <units>mg O2 / mg algae / day</units>
+        <doc>Respiration oxygen demand per unit standing biomass.</doc>
+      </aux>
+      <aux name="decay_O_demand">
+        <eqn>0.2</eqn>
+        <units>mg O2 / mg algae</units>
+        <doc>Oxygen demand of decomposing dead algae.</doc>
+      </aux>
+    </variables>
+    <views>
+      <view type="stock_flow">
+        <connector from="P_load_rate" to="P_load"/>
+        <connector from="growth" to="uptake"/>
+        <connector from="P_quota" to="uptake"/>
+        <connector from="death" to="recycle"/>
+        <connector from="P_quota" to="recycle"/>
+        <connector from="recycle_frac" to="recycle"/>
+        <connector from="mu_max" to="growth"/>
+        <connector from="Algae" to="growth"/>
+        <connector from="P" to="growth"/>
+        <connector from="Ks" to="growth"/>
+        <connector from="Algae_K" to="growth"/>
+        <connector from="death_rate" to="death"/>
+        <connector from="Algae" to="death"/>
+        <connector from="growth" to="photosynthesis"/>
+        <connector from="photo_yield" to="photosynthesis"/>
+        <connector from="resp_rate" to="respiration"/>
+        <connector from="Algae" to="respiration"/>
+        <connector from="death" to="decomposition"/>
+        <connector from="decay_O_demand" to="decomposition"/>
+        <connector from="rear_rate" to="reaeration"/>
+        <connector from="DO_sat" to="reaeration"/>
+        <connector from="DO" to="reaeration"/>
+      </view>
+    </views>
+  </model>
+</xmile>

@@ -1,0 +1,188 @@
+[
+  {
+    "id": "streeter-phelps",
+    "file": "streeter-phelps.xmile",
+    "title": "Streeter-Phelps dissolved-oxygen sag",
+    "category": "environmental",
+    "level": "intro",
+    "summary": "A biodegradable waste load decays downstream, pulling dissolved oxygen into a sag that recovers toward saturation.",
+    "question": "After a waste load is discharged, how far does dissolved oxygen (DO) fall, and when/where does the minimum occur?",
+    "teaching": "Two stocks track BOD and the oxygen deficit: BOD decay feeds the deficit while reaeration drains it, so the difference between the two rate constants sets the critical time. Look for a single deficit maximum and a matching oxygen minimum near day 2.3, followed by monotonic recovery toward saturation.",
+    "references": [
+      {
+        "citation": "Streeter, H. W., & Phelps, E. B. (1925). A study of the pollution and natural purification of the Ohio River. III. Factors concerned in the phenomena of oxidation and reaeration. Public Health Bulletin No. 146, U.S. Public Health Service.",
+        "doi": ""
+      }
+    ],
+    "checks": [
+      { "type": "value", "series": "BOD", "time": 5, "expected": 4.3995, "tol": 0.03 },
+      { "type": "value", "series": "DO", "time": 2, "expected": 3.3839, "tol": 0.03 },
+      { "type": "max", "series": "DO_deficit", "expected": 5.6161, "tol": 0.02 },
+      { "type": "argmax", "series": "DO_deficit", "expected": 2, "tol": 0.3 },
+      { "type": "monotonic", "series": "BOD", "direction": "down" },
+      { "type": "final", "series": "DO_deficit", "expected": 0.0467, "tol": 0.01 },
+      { "type": "bounds", "series": "DO_deficit", "min": 0, "max": 6 }
+    ]
+  },
+  {
+    "id": "activated-sludge",
+    "file": "activated-sludge.xmile",
+    "title": "Activated-sludge BOD removal with recycle",
+    "category": "environmental",
+    "level": "intermediate",
+    "summary": "A recycled activated-sludge basin grows biomass on incoming BOD and settles at a low effluent substrate concentration.",
+    "question": "What effluent BOD and mixed-liquor solids does an activated-sludge basin achieve, and how does sludge recycle improve treatment?",
+    "teaching": "Substrate and biomass are coupled by Monod growth: biomass consumes BOD, and the recycle fraction lengthens solids retention so the reactor keeps enough biomass to polish the effluent. Watch substrate fall from 250 mg/L to about 5 mg/L while MLSS rises toward 1000 mg/L; reducing recycle washes solids out.",
+    "references": [
+      {
+        "citation": "Monod, J. (1949). The growth of bacterial cultures. Annual Review of Microbiology, 3, 371–394.",
+        "doi": "10.1146/annurev.mi.03.100149.002103"
+      }
+    ],
+    "checks": [
+      { "type": "value", "series": "S", "time": 10, "expected": 5.4574, "tol": 0.02 },
+      { "type": "value", "series": "S", "time": 30, "expected": 5.4545, "tol": 0.02 },
+      { "type": "final", "series": "X", "expected": 978.18, "tol": 2 },
+      { "type": "max", "series": "removal_efficiency", "expected": 97.818, "tol": 0.05 },
+      { "type": "monotonic", "series": "X", "direction": "up" },
+      { "type": "bounds", "series": "S", "min": 0, "max": 250 },
+      { "type": "bounds", "series": "X", "min": 700, "max": 1100 }
+    ]
+  },
+  {
+    "id": "eutrophication",
+    "file": "eutrophication.xmile",
+    "title": "Lake eutrophication: phosphorus, algae and dissolved oxygen",
+    "category": "environmental",
+    "level": "advanced",
+    "summary": "External phosphorus feeds a self-limiting algal bloom whose growth, death and respiration drive a dissolved-oxygen sag.",
+    "question": "How does an external phosphorus load drive an algal bloom that depletes dissolved oxygen, and how does phosphorus recycling on death close the loop?",
+    "teaching": "Phosphorus, algae and dissolved oxygen form coupled loops: growth takes up P and produces oxygen, while respiration and decomposition consume it and death recycles P to the available pool. The bloom is capped by self-shading, so P first dips while algae climb, and DO sags as respiration overtakes photosynthesis plus reaeration.",
+    "references": [
+      {
+        "citation": "Vollenweider, R. A. (1975). Input-output models with special reference to the phosphorus loading concept in limnology. Schweizerische Zeitschrift für Hydrologie, 37(1), 53–84.",
+        "doi": "10.1007/BF02505178"
+      }
+    ],
+    "checks": [
+      { "type": "min", "series": "P", "expected": 0.00709, "tol": 0.0006 },
+      { "type": "argmin", "series": "P", "expected": 15, "tol": 1 },
+      { "type": "max", "series": "DO", "expected": 8.9844, "tol": 0.03 },
+      { "type": "argmax", "series": "DO", "expected": 4, "tol": 0.5 },
+      { "type": "final", "series": "Algae", "expected": 16.373, "tol": 0.15 },
+      { "type": "monotonic", "series": "Algae", "direction": "up" },
+      { "type": "bounds", "series": "P", "min": 0, "max": 0.06 },
+      { "type": "bounds", "series": "DO", "min": 4.9, "max": 9.1 }
+    ]
+  },
+  {
+    "id": "groundwater-contaminant",
+    "file": "groundwater-contaminant.xmile",
+    "title": "Groundwater contaminant transport with first-order decay",
+    "category": "environmental",
+    "level": "intro",
+    "summary": "A finite contaminant source charges an aquifer while advection and first-order decay drain it, then the plume declines after the source stops.",
+    "question": "How does a contaminant mass evolve in an aquifer under advection and first-order decay, and how does the concentration respond when the source is removed?",
+    "teaching": "One mass stock collects the injection and loses mass through discharge (residence time) and first-order decay. Loading stops at year 20, so the stock peaks there and then decays with both sinks acting; concentration is the same signal scaled by aquifer volume.",
+    "references": [],
+    "original": true,
+    "checks": [
+      { "type": "max", "series": "Mass", "expected": 1080.63, "tol": 2 },
+      { "type": "argmax", "series": "Mass", "expected": 20, "tol": 0.3 },
+      { "type": "value", "series": "Mass", "time": 50, "expected": 129.89, "tol": 1 },
+      { "type": "final", "series": "Mass", "expected": 3.8027, "tol": 0.1 },
+      { "type": "max", "series": "concentration", "expected": 1.08063, "tol": 0.005 },
+      { "type": "bounds", "series": "Mass", "min": 0, "max": 1100 }
+    ]
+  },
+  {
+    "id": "logistic-harvest",
+    "file": "logistic-harvest.xmile",
+    "title": "Logistic population growth with harvest",
+    "category": "environmental",
+    "level": "intro",
+    "summary": "Logistic growth and proportional harvest settle a population at the shaved carrying capacity, or collapse it when effort is high.",
+    "question": "At what effort does a harvested population (fishery / invasive species) reach equilibrium, and when does it collapse?",
+    "teaching": "The population grows logistically and loses individuals at a rate proportional to abundance. With r = 0.3 and effort = 0.15 the stable equilibrium is K(1 - effort/r) = 500, approached from below; raising effort to r removes the equilibrium and drives the stock to zero.",
+    "references": [
+      {
+        "citation": "Schaefer, M. B. (1954). Some aspects of the dynamics of populations important to the management of the commercial marine fisheries. Bulletin of the Inter-American Tropical Tuna Commission, 1(2), 27–56.",
+        "doi": ""
+      }
+    ],
+    "checks": [
+      { "type": "value", "series": "Population", "time": 10, "expected": 263.155, "tol": 1 },
+      { "type": "final", "series": "Population", "expected": 498.983, "tol": 1.5 },
+      { "type": "max", "series": "harvest", "expected": 74.847, "tol": 0.5 },
+      { "type": "monotonic", "series": "Population", "direction": "up" },
+      { "type": "bounds", "series": "Population", "min": 100, "max": 1000 }
+    ]
+  },
+  {
+    "id": "reservoir-sedimentation",
+    "file": "reservoir-sedimentation.xmile",
+    "title": "Reservoir sedimentation",
+    "category": "environmental",
+    "level": "intermediate",
+    "summary": "A reservoir traps sediment until its trap efficiency falls, and dredging shifts the fill toward a lower dynamic equilibrium.",
+    "question": "How fast does a reservoir fill with sediment as trap efficiency declines, and how does maintenance dredging extend its life?",
+    "teaching": "Sediment accumulates from the trapped fraction of the upstream load, while trap efficiency declines linearly as storage fills. Before dredging the reservoir follows an S-shaped fill toward capacity; dredging after year 25 removes sediment faster than the declining trap efficiency supplies it, so the stock peaks and settles at a new, lower level.",
+    "references": [
+      {
+        "citation": "Brune, G. M. (1953). Trap efficiency of reservoirs. Transactions, American Geophysical Union, 34(3), 407–418.",
+        "doi": "10.1029/TR034i003p00407"
+      }
+    ],
+    "checks": [
+      { "type": "max", "series": "Sediment", "expected": 52896.68, "tol": 50 },
+      { "type": "argmax", "series": "Sediment", "expected": 25, "tol": 0.3 },
+      { "type": "value", "series": "Sediment", "time": 60, "expected": 40152.25, "tol": 100 },
+      { "type": "final", "series": "remaining_capacity", "expected": 59847.75, "tol": 100 },
+      { "type": "bounds", "series": "Sediment", "min": 0, "max": 53000 },
+      { "type": "bounds", "series": "trap_efficiency", "min": 0, "max": 1 }
+    ]
+  },
+  {
+    "id": "watershed-nutrient",
+    "file": "watershed-nutrient.xmile",
+    "title": "Watershed nonpoint-source nutrient export",
+    "category": "environmental",
+    "level": "intermediate",
+    "summary": "Seasonal precipitation drives runoff and land-use-dependent nutrient loads into a stream whose concentration follows the annual cycle.",
+    "question": "How much nitrogen does a watershed deliver to a stream as a function of land use and seasonal precipitation, and what is the resulting in-stream concentration?",
+    "teaching": "Runoff is the seasonal precipitation times a runoff coefficient, and each land use exports nutrients in proportion to its area and export coefficient, so urban land dominates the load. The stream mass is flushed at a one-month residence time, producing an annual oscillation in load and concentration with a peak each spring.",
+    "references": [],
+    "original": true,
+    "checks": [
+      { "type": "max", "series": "total_load", "expected": 46.305, "tol": 0.01 },
+      { "type": "argmax", "series": "total_load", "expected": 3, "tol": 0.2 },
+      { "type": "min", "series": "total_load", "expected": 19.845, "tol": 0.01 },
+      { "type": "argmin", "series": "total_load", "expected": 9, "tol": 0.2 },
+      { "type": "oscillates", "series": "loading", "minPeaks": 3 },
+      { "type": "max", "series": "Stream_N", "expected": 45.1209, "tol": 0.1 },
+      { "type": "argmax", "series": "Stream_N", "expected": 28, "tol": 0.3 },
+      { "type": "max", "series": "N_concentration", "expected": 4.5121, "tol": 0.01 },
+      { "type": "bounds", "series": "Stream_N", "min": 0, "max": 50 }
+    ]
+  },
+  {
+    "id": "co2-accumulation",
+    "file": "co2-accumulation.xmile",
+    "title": "Atmospheric CO2 accumulation with carbon-climate feedback",
+    "category": "environmental",
+    "level": "intermediate",
+    "summary": "Constant emissions raise atmospheric CO2 until a concentration-dependent sink balances them, with warming weakening that sink.",
+    "question": "Given constant emissions, to what new atmospheric CO2 and temperature does the Earth system settle once a carbon-climate feedback weakens natural uptake?",
+    "teaching": "CO2 is a single stock fed by emissions and drained by natural uptake proportional to the excess over preindustrial concentration. A carbon-climate feedback reduces uptake as temperature rises, so the equilibrium sits higher than it would without warming; the CO2 trajectory is monotonic and flattens toward roughly 412 ppm by 2200.",
+    "references": [],
+    "original": true,
+    "checks": [
+      { "type": "value", "series": "CO2", "time": 100, "expected": 393.125, "tol": 0.5 },
+      { "type": "final", "series": "CO2", "expected": 412.466, "tol": 0.5 },
+      { "type": "max", "series": "temp_anomaly", "expected": 1.6765, "tol": 0.01 },
+      { "type": "final", "series": "natural_uptake", "expected": 2.4272, "tol": 0.01 },
+      { "type": "monotonic", "series": "CO2", "direction": "up" },
+      { "type": "bounds", "series": "CO2", "min": 280, "max": 500 }
+    ]
+  }
+]

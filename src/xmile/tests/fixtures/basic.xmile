@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0" xmlns="http://docs.oasis-open.org/xmile/ns/XMILE/v1.0">
+  <header>
+    <name>Rabbit Population</name>
+    <vendor>SourceSink</vendor>
+    <product version="0.1.0">SourceSink</product>
+  </header>
+  <sim_specs method="RK4" time_units="Months">
+    <start>0</start>
+    <stop>24</stop>
+    <dt>0.5</dt>
+    <saveper>0.5</saveper>
+  </sim_specs>
+  <dimensions>
+    <dim name="Region" size="3">
+      <elem name="North"/>
+      <elem name="South"/>
+      <elem name="East"/>
+    </dim>
+  </dimensions>
+  <model>
+    <variables>
+      <stock name="rabbits">
+        <eqn>1000</eqn>
+        <units>rabbits</units>
+        <doc>Total rabbit population</doc>
+        <inflow>births</inflow>
+        <outflow>deaths</outflow>
+      </stock>
+      <flow name="births">
+        <eqn>rabbits * birth_fraction</eqn>
+      </flow>
+      <flow name="deaths">
+        <eqn>rabbits * death_fraction</eqn>
+      </flow>
+      <aux name="birth_fraction">
+        <eqn>0.02</eqn>
+        <units>1/Month</units>
+      </aux>
+      <gf name="seasonal_factor" interpolation="linear" extrapolation="clip">
+        <xpts>0, 6, 12, 18, 24</xpts>
+        <ypts>1.0, 0.8, 1.2, 0.9, 1.0</ypts>
+      </gf>
+    </variables>
+  </model>
+</xmile>

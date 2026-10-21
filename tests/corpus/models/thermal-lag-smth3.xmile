@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Third-Order Thermal Lag</name>
+    <vendor>SourceSink</vendor>
+    <product version="0.1.0">SourceSink</product>
+  </header>
+  <sim_specs method="Euler" time_units="day">
+    <start>0</start>
+    <stop>100</stop>
+    <dt>0.5</dt>
+    <saveper>1</saveper>
+  </sim_specs>
+  <model>
+    <variables>
+      <aux name="Air_temp">
+        <eqn>STEP(10, 5)</eqn>
+      </aux>
+      <aux name="Water_temp">
+        <eqn>SMTH3(Air_temp, 6)</eqn>
+      </aux>
+    </variables>
+  </model>
+</xmile>

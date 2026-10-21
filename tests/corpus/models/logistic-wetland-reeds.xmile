@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Logistic Wetland Reed Growth</name>
+    <vendor>SourceSink</vendor>
+    <product version="0.1.0">SourceSink</product>
+  </header>
+  <sim_specs method="Euler" time_units="year">
+    <start>0</start>
+    <stop>40</stop>
+    <dt>0.05</dt>
+    <saveper>1</saveper>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Reeds">
+        <eqn>20</eqn>
+        <inflow name="Growth"/>
+      </stock>
+      <flow name="Growth">
+        <eqn>0.4 * Reeds * (1 - Reeds / 1000)</eqn>
+      </flow>
+    </variables>
+  </model>
+</xmile>

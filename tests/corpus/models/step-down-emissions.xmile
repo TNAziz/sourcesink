@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Step-Down Emission Control</name>
+    <vendor>SourceSink</vendor>
+    <product version="0.1.0">SourceSink</product>
+  </header>
+  <sim_specs method="Euler" time_units="year">
+    <start>0</start>
+    <stop>40</stop>
+    <dt>0.5</dt>
+    <saveper>1</saveper>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="CO2">
+        <eqn>280</eqn>
+        <inflow name="Emissions"/>
+      </stock>
+      <flow name="Emissions">
+        <eqn>5 * (1 - STEP(1, 20))</eqn>
+      </flow>
+    </variables>
+  </model>
+</xmile>

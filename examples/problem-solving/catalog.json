@@ -1,0 +1,119 @@
+[
+  {
+    "id": "residence-time",
+    "file": "residence-time.xmile",
+    "title": "Residence time of a pollutant in a well-mixed lake",
+    "category": "problem-solving",
+    "level": "intro",
+    "summary": "A constant pollutant load approaches a steady mass equal to load times the lake's residence time.",
+    "question": "How long does a lake take to reach steady pollution, and how much pollutant does it hold then?",
+    "teaching": "A single mass stock gains pollutant at 50 kg/day and loses it through the outflow at the well-mixed concentration. With V = 1e7 m3 and Q = 1e5 m3/day, the residence time V/Q is 100 days, so the steady mass is 5,000 kg and the concentration is 0.5 mg/L. The mass reaches 63 % of steady state after one residence time, the signature of a first-order box model.",
+    "references": [
+      {
+        "citation": "Harte, J. (1988). Consider a Spherical Cow: A Course in Environmental Problem Solving. University Science Books."
+      }
+    ],
+    "checks": [
+      { "type": "value", "series": "Mass", "time": 100, "expected": 3160.6, "tol": 31.6 },
+      { "type": "final", "series": "Mass", "expected": 5000, "tol": 50 },
+      { "type": "final", "series": "concentration_mg_L", "expected": 0.5, "tol": 0.005 }
+    ]
+  },
+  {
+    "id": "doubling-time",
+    "file": "doubling-time.xmile",
+    "title": "Exponential growth and the rule of 70",
+    "category": "problem-solving",
+    "level": "intro",
+    "summary": "Exponential growth at 2 % per year doubles a population in about 35 years, as the rule of 70 estimates.",
+    "question": "How many times does a population double in a century at a 2 % annual growth rate?",
+    "teaching": "A single population stock grows at r*P with r = 0.02 per year. The exact doubling time is ln(2)/r = 34.66 years, while the rule of 70 gives 35 years; both are shown as converters, along with the number of doublings completed. After 100 years the population is e^2 = 7.39 million and has completed 2.89 doublings.",
+    "references": [
+      {
+        "citation": "Harte, J. (1988). Consider a Spherical Cow: A Course in Environmental Problem Solving. University Science Books."
+      }
+    ],
+    "checks": [
+      { "type": "value", "series": "Population", "time": 34.66, "expected": 2000000, "tol": 20000 },
+      { "type": "value", "series": "Population", "time": 100, "expected": 7389056, "tol": 73891 },
+      { "type": "value", "series": "doublings", "time": 34.66, "expected": 1, "tol": 0.01 }
+    ]
+  },
+  {
+    "id": "lake-phosphorus",
+    "file": "lake-phosphorus.xmile",
+    "title": "Lake phosphorus: Vollenweider steady state",
+    "category": "problem-solving",
+    "level": "intermediate",
+    "summary": "A phosphorus mass balance with flushing and sedimentation settles at the loading rate divided by total loss.",
+    "question": "What phosphorus concentration should a lake reach for a given external load, flushing rate and sedimentation rate?",
+    "teaching": "The water-column phosphorus mass gains the external load and loses (rho + sigma)*M, where rho is the flushing rate Q/V and sigma is sedimentation. With a 1,000 kg/yr load, a 0.5 per year flushing rate and a 0.5 per year sedimentation rate, the loss rate is 1 per year and the steady concentration is 100 ug/L. The approach time is 1 year, so the lake reaches 63 % of steady state after one year.",
+    "references": [
+      {
+        "citation": "Harte, J. (1988). Consider a Spherical Cow: A Course in Environmental Problem Solving. University Science Books."
+      },
+      {
+        "citation": "Vollenweider, R. A. (1975). Input-output models with special reference to the phosphorus loading concept in limnology. Schweizerische Zeitschrift für Hydrologie, 37(1), 53–84.",
+        "doi": "10.1007/BF02505178"
+      }
+    ],
+    "checks": [
+      { "type": "final", "series": "concentration_ug_L", "expected": 100, "tol": 1 },
+      { "type": "value", "series": "concentration_ug_L", "time": 1, "expected": 63.21, "tol": 0.63 },
+      { "type": "final", "series": "steady_state_concentration_ug_L", "expected": 100, "tol": 1 },
+      { "type": "final", "series": "response_time", "expected": 1, "tol": 0.01 }
+    ]
+  },
+  {
+    "id": "bioconcentration",
+    "file": "bioconcentration.xmile",
+    "title": "Bioconcentration of a contaminant in fish",
+    "category": "problem-solving",
+    "level": "intro",
+    "summary": "A fish takes up a water contaminant until depuration balances uptake, then clears it with a 6.9-day half-life when exposure stops.",
+    "question": "How high does a contaminant build up in fish tissue, and how fast does it leave after exposure ends?",
+    "teaching": "One fish-concentration stock gains k1*C_water and loses k2*C_fish, giving a bioconcentration factor k1/k2 = 5,000 L/kg and a steady tissue concentration of 5,000 ug/kg. The time to 95 % of steady state is 3/k2 = 30 days. Exposure stops at day 60; the depuration half-life is ln(2)/k2 = 6.93 days, so tissue concentration halves in about a week.",
+    "references": [
+      {
+        "citation": "Harte, J. (1988). Consider a Spherical Cow: A Course in Environmental Problem Solving. University Science Books."
+      },
+      {
+        "citation": "Mackay, D. (1982). Correlation of bioconcentration factors. Environmental Science & Technology, 16(5), 274–278.",
+        "doi": "10.1021/es00099a008"
+      }
+    ],
+    "checks": [
+      { "type": "value", "series": "Fish_concentration", "time": 30, "expected": 4751.1, "tol": 47.5 },
+      { "type": "value", "series": "Fish_concentration", "time": 60, "expected": 4987.6, "tol": 49.9 },
+      { "type": "value", "series": "Fish_concentration", "time": 66.93, "expected": 2493.8, "tol": 49.9 },
+      { "type": "max", "series": "Fish_concentration", "expected": 4987.7, "tol": 49.9 },
+      { "type": "final", "series": "BCF", "expected": 5000, "tol": 1 },
+      { "type": "final", "series": "half_life", "expected": 6.931, "tol": 0.01 }
+    ]
+  },
+  {
+    "id": "indoor-radon",
+    "file": "indoor-radon.xmile",
+    "title": "Radon in a house",
+    "category": "problem-solving",
+    "level": "intro",
+    "summary": "Soil-gas radon entering a house balances ventilation and radioactive decay at a steady indoor concentration.",
+    "question": "How much does reducing the air-exchange rate raise indoor radon?",
+    "teaching": "A radon-activity stock gains a constant soil-gas entry and loses activity through ventilation and radioactive decay. In a 300 m3 house with 0.5 air changes per hour, the steady concentration is 19.7 Bq/m3; a tight house with 0.1 air changes per hour approaches 92.9 Bq/m3. The approach time is 1.97 h, so the normal house is essentially at steady state within 48 hours.",
+    "references": [
+      {
+        "citation": "Harte, J. (1988). Consider a Spherical Cow: A Course in Environmental Problem Solving. University Science Books."
+      },
+      {
+        "citation": "Nazaroff, W. W. (1992). Radon transport from soil to air. Reviews of Geophysics, 30(2), 137–160.",
+        "doi": "10.1029/92RG00055"
+      }
+    ],
+    "checks": [
+      { "type": "final", "series": "concentration", "expected": 19.7025, "tol": 0.197 },
+      { "type": "value", "series": "concentration", "time": 2, "expected": 12.58, "tol": 0.25 },
+      { "type": "final", "series": "tight_house_concentration", "expected": 92.98, "tol": 0.93 },
+      { "type": "final", "series": "time_constant", "expected": 1.97025, "tol": 0.01 }
+    ]
+  }
+]

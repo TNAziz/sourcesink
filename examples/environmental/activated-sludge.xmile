@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Activated-Sludge BOD Removal with Recycle</name>
+    <vendor>sourcesink</vendor>
+    <product version="0.1">sourcesink</product>
+  </header>
+  <sim_specs method="RK45" time_units="day">
+    <start>0</start>
+    <stop>30</stop>
+    <dt>0.05</dt>
+    <saveEvery>0.5</saveEvery>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="S">
+        <eqn>250</eqn>
+        <units>mg/L</units>
+        <doc>Substrate (BOD) concentration in the aeration basin. Initialized at the influent value.</doc>
+        <inflows>
+          <flow>BOD_in</flow>
+        </inflows>
+        <outflows>
+          <flow>BOD_out</flow>
+          <flow>uptake</flow>
+        </outflows>
+      </stock>
+      <stock name="X">
+        <eqn>800</eqn>
+        <units>mg/L</units>
+        <doc>Mixed-liquor suspended solids (biomass) in the aeration basin.</doc>
+        <inflows>
+          <flow>growth</flow>
+          <flow>recycle_return</flow>
+        </inflows>
+        <outflows>
+          <flow>to_clarifier</flow>
+          <flow>decay</flow>
+        </outflows>
+      </stock>
+      <flow name="BOD_in">
+        <eqn>D * S_in</eqn>
+        <units>mg/L/day</units>
+        <doc>Influent BOD loading (dilution inflow).</doc>
+      </flow>
+      <flow name="BOD_out">
+        <eqn>D * S</eqn>
+        <units>mg/L/day</units>
+        <doc>BOD leaving the basin with the effluent (hydraulic washout).</doc>
+      </flow>
+      <flow name="uptake">
+        <eqn>growth / Y</eqn>
+        <units>mg/L/day</units>
+        <doc>BOD consumed by biomass growth at yield Y.</doc>
+      </flow>
+      <flow name="growth">
+        <eqn>mu_max * X * S / (Ks + S)</eqn>
+        <units>mg/L/day</units>
+        <doc>Monod biomass growth on substrate.</doc>
+      </flow>
+      <flow name="decay">
+        <eqn>kd * X</eqn>
+        <units>mg/L/day</units>
+        <doc>Endogenous decay of biomass.</doc>
+      </flow>
+      <flow name="to_clarifier">
+        <eqn>D * X</eqn>
+        <units>mg/L/day</units>
+        <doc>Solids sent to the secondary clarifier.</doc>
+      </flow>
+      <flow name="recycle_return">
+        <eqn>b * D * X</eqn>
+        <units>mg/L/day</units>
+        <doc>Settled sludge returned to the aeration basin (return-sludge recycle).</doc>
+      </flow>
+      <aux name="D">
+        <eqn>4.0</eqn>
+        <units>1/day</units>
+        <doc>Dilution rate Q/V (hydraulic residence time = 1/D = 0.25 day).</doc>
+      </aux>
+      <aux name="S_in">
+        <eqn>250</eqn>
+        <units>mg/L</units>
+        <doc>Influent BOD concentration.</doc>
+      </aux>
+      <aux name="mu_max">
+        <eqn>6.0</eqn>
+        <units>1/day</units>
+        <doc>Maximum specific growth rate.</doc>
+      </aux>
+      <aux name="Ks">
+        <eqn>60</eqn>
+        <units>mg/L</units>
+        <doc>Half-saturation constant for substrate.</doc>
+      </aux>
+      <aux name="Y">
+        <eqn>0.5</eqn>
+        <units>mg biomass / mg BOD</units>
+        <doc>Biomass yield coefficient.</doc>
+      </aux>
+      <aux name="kd">
+        <eqn>0.10</eqn>
+        <units>1/day</units>
+        <doc>Endogenous decay rate.</doc>
+      </aux>
+      <aux name="b">
+        <eqn>0.9</eqn>
+        <units>dimensionless</units>
+        <doc>Recycle fraction of clarifier solids returned to the basin. Higher b lengthens solids retention and improves removal and MLSS.</doc>
+      </aux>
+      <aux name="removal_efficiency">
+        <eqn>100 * (1 - S / S_in)</eqn>
+        <units>percent</units>
+        <doc>Percent BOD removal relative to the influent.</doc>
+      </aux>
+    </variables>
+    <views>
+      <view type="stock_flow">
+        <connector from="D" to="BOD_in"/>
+        <connector from="S_in" to="BOD_in"/>
+        <connector from="D" to="BOD_out"/>
+        <connector from="S" to="BOD_out"/>
+        <connector from="growth" to="uptake"/>
+        <connector from="Y" to="uptake"/>
+        <connector from="mu_max" to="growth"/>
+        <connector from="X" to="growth"/>
+        <connector from="S" to="growth"/>
+        <connector from="Ks" to="growth"/>
+        <connector from="kd" to="decay"/>
+        <connector from="X" to="decay"/>
+        <connector from="D" to="to_clarifier"/>
+        <connector from="X" to="to_clarifier"/>
+        <connector from="b" to="recycle_return"/>
+        <connector from="D" to="recycle_return"/>
+        <connector from="X" to="recycle_return"/>
+        <connector from="S" to="removal_efficiency"/>
+        <connector from="S_in" to="removal_efficiency"/>
+      </view>
+    </views>
+  </model>
+</xmile>

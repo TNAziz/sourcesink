@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Lotka-Volterra Predator and Prey</name>
+    <vendor>sourcesink</vendor>
+    <product version="0.1">sourcesink</product>
+    <doc>Based on Lotka (1925) and Volterra (1926).</doc>
+  </header>
+  <sim_specs method="RK4" time_units="year">
+    <start>0</start>
+    <stop>60</stop>
+    <dt>0.01</dt>
+    <saveEvery>0.1</saveEvery>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Hares">
+        <eqn>40</eqn>
+        <units>individuals</units>
+        <doc>Prey population H, in hares; the source model's prey stock.</doc>
+        <inflows>
+          <flow>hare_births</flow>
+        </inflows>
+        <outflows>
+          <flow>predation</flow>
+        </outflows>
+      </stock>
+      <stock name="Lynx">
+        <eqn>9</eqn>
+        <units>individuals</units>
+        <doc>Predator population L, in lynx; the source model's predator stock.</doc>
+        <inflows>
+          <flow>lynx_births</flow>
+        </inflows>
+        <outflows>
+          <flow>lynx_deaths</flow>
+        </outflows>
+      </stock>
+      <flow name="hare_births">
+        <eqn>a * Hares</eqn>
+        <units>individuals/year</units>
+        <doc>Exponential prey reproduction a*H, limited only by predation.</doc>
+      </flow>
+      <flow name="predation">
+        <eqn>b * Hares * Lynx</eqn>
+        <units>individuals/year</units>
+        <doc>Predation loss b*H*L, proportional to encounters between the two populations.</doc>
+      </flow>
+      <flow name="lynx_births">
+        <eqn>c * b * Hares * Lynx</eqn>
+        <units>individuals/year</units>
+        <doc>Predator reproduction c*b*H*L, the fraction c of prey consumed that becomes new lynx.</doc>
+      </flow>
+      <flow name="lynx_deaths">
+        <eqn>d * Lynx</eqn>
+        <units>individuals/year</units>
+        <doc>Predator mortality d*L, at a constant per-capita rate.</doc>
+      </flow>
+      <aux name="a">
+        <eqn>0.5</eqn>
+        <units>1/year</units>
+        <doc>Prey intrinsic growth rate a.</doc>
+      </aux>
+      <aux name="b">
+        <eqn>0.02</eqn>
+        <units>1/individuals/year</units>
+        <doc>Predation (encounter) coefficient b, per prey-predator pair per year.</doc>
+      </aux>
+      <aux name="c">
+        <eqn>0.5</eqn>
+        <units>dimensionless</units>
+        <doc>Conversion efficiency c: predator offspring produced per prey consumed.</doc>
+      </aux>
+      <aux name="d">
+        <eqn>0.4</eqn>
+        <units>1/year</units>
+        <doc>Predator mortality rate d.</doc>
+      </aux>
+      <aux name="reference_population">
+        <eqn>1</eqn>
+        <units>individuals</units>
+        <doc>Unit reference population, used only to make the logarithms dimensionless.</doc>
+      </aux>
+      <aux name="conserved_quantity">
+        <eqn>c * b * Hares - d * LN(Hares / reference_population) + b * Lynx - a * LN(Lynx / reference_population)</eqn>
+        <units>1/year</units>
+        <doc>First integral V = c*b*H - d*ln H + b*L - a*ln L, constant along every trajectory of the neutral cycle.</doc>
+      </aux>
+    </variables>
+    <views>
+      <view type="stock_flow">
+        <connector from="a" to="hare_births"/>
+        <connector from="Hares" to="hare_births"/>
+        <connector from="b" to="predation"/>
+        <connector from="Hares" to="predation"/>
+        <connector from="Lynx" to="predation"/>
+        <connector from="c" to="lynx_births"/>
+        <connector from="b" to="lynx_births"/>
+        <connector from="Hares" to="lynx_births"/>
+        <connector from="Lynx" to="lynx_births"/>
+        <connector from="d" to="lynx_deaths"/>
+        <connector from="Lynx" to="lynx_deaths"/>
+        <connector from="a" to="conserved_quantity"/>
+        <connector from="b" to="conserved_quantity"/>
+        <connector from="c" to="conserved_quantity"/>
+        <connector from="d" to="conserved_quantity"/>
+        <connector from="Hares" to="conserved_quantity"/>
+        <connector from="Lynx" to="conserved_quantity"/>
+        <connector from="reference_population" to="conserved_quantity"/>
+      </view>
+    </views>
+  </model>
+</xmile>

@@ -1,0 +1,112 @@
+[
+  {
+    "file": "malformed-xml.xmile",
+    "defect": "The XML document is truncated and never closes its model or xmile elements.",
+    "failsAt": "parse"
+  },
+  {
+    "file": "unbalanced-parens.xmile",
+    "defect": "The stock initial-value equation opens a parenthesis that is never closed.",
+    "failsAt": "parse"
+  },
+  {
+    "file": "missing-flow-equation.xmile",
+    "defect": "A flow has an empty <eqn> element, so its equation cannot be parsed.",
+    "failsAt": "parse"
+  },
+  {
+    "file": "unexpected-character.xmile",
+    "defect": "A converter equation contains an illegal '$' character.",
+    "failsAt": "parse"
+  },
+  {
+    "file": "if-without-else.xmile",
+    "defect": "An inline IF expression has a THEN branch but no ELSE branch.",
+    "failsAt": "parse"
+  },
+  {
+    "file": "duplicate-names.xmile",
+    "defect": "Two converters share the name Rate, so the model has no unique identity for them.",
+    "failsAt": "validate"
+  },
+  {
+    "file": "negative-dt.xmile",
+    "defect": "The integration step DT is negative.",
+    "failsAt": "validate"
+  },
+  {
+    "file": "stop-before-start.xmile",
+    "defect": "The run stops at year 5 before it starts at year 10.",
+    "failsAt": "validate"
+  },
+  {
+    "file": "zero-saveper.xmile",
+    "defect": "The save interval is zero, so no sampling cadence is defined.",
+    "failsAt": "validate"
+  },
+  {
+    "file": "unknown-reference.xmile",
+    "defect": "A flow equation reads Missing_rate, which is not defined anywhere in the model.",
+    "failsAt": "simulate"
+  },
+  {
+    "file": "algebraic-loop.xmile",
+    "defect": "Converters A and B depend on each other with no stock to break the algebraic loop.",
+    "failsAt": "simulate"
+  },
+  {
+    "file": "self-referential-converter.xmile",
+    "defect": "Converter A reads itself with no stock to provide a previous value.",
+    "failsAt": "simulate"
+  },
+  {
+    "file": "unknown-flow-wiring.xmile",
+    "defect": "A stock lists Ghost_flow as an outflow, but no flow with that name exists.",
+    "failsAt": "simulate"
+  },
+  {
+    "file": "division-nan.xmile",
+    "defect": "A converter computes 0/0 and feeds the resulting NaN into a stock.",
+    "failsAt": "nonfinite"
+  },
+  {
+    "file": "sqrt-negative.xmile",
+    "defect": "A converter takes the square root of a negative number and feeds the NaN into a stock.",
+    "failsAt": "nonfinite"
+  },
+  {
+    "file": "graph-arity.xmile",
+    "defect": "A graphical function is called with two arguments even though it accepts exactly one.",
+    "failsAt": "simulate"
+  },
+  {
+    "file": "graph-no-points.xmile",
+    "defect": "A graphical function has no points and is read as a variable, so its value is NaN.",
+    "failsAt": "nonfinite"
+  },
+  {
+    "file": "infinite-initial.xmile",
+    "defect": "A stock initial value is 1/0, which is infinite.",
+    "failsAt": "nonfinite"
+  },
+  {
+    "file": "missing-stock-equation.xmile",
+    "defect": "A stock has an empty <eqn> element, so its initial value cannot be parsed.",
+    "failsAt": "parse"
+  },
+  {
+    "file": "unterminated-quote.xmile",
+    "defect": "A converter equation opens a quoted name that is never closed.",
+    "failsAt": "parse"
+  },
+  {
+    "file": "connector-into-stock.xmile",
+    "defect": "A connector carries information into a stock, but only flows may change a stock.",
+    "failsAt": "validate"
+  },
+  {
+    "file": "flow-two-inflows.xmile",
+    "defect": "The same flow is listed as an inflow of two different stocks.",
+    "failsAt": "validate"
+  }
+]

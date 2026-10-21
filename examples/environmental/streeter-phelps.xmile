@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Streeter-Phelps Dissolved Oxygen Sag</name>
+    <vendor>sourcesink</vendor>
+    <product version="0.1">sourcesink</product>
+  </header>
+  <sim_specs method="Euler" time_units="day">
+    <start>0</start>
+    <stop>20</stop>
+    <dt>0.0625</dt>
+    <saveEvery>0.25</saveEvery>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="BOD">
+        <eqn>20</eqn>
+        <units>mg/L</units>
+        <doc>Ultimate carbonaceous BOD of a water parcel at the discharge point (time = 0).</doc>
+        <outflows>
+          <flow>deoxygenation</flow>
+        </outflows>
+      </stock>
+      <stock name="DO_deficit">
+        <eqn>2</eqn>
+        <units>mg/L</units>
+        <doc>Dissolved-oxygen deficit D = Cs - C, the gap between saturation and actual DO. Initial DO of 7 mg/L with Cs = 9 mg/L gives D(0) = 2 mg/L.</doc>
+        <inflows>
+          <flow>deoxygenation</flow>
+        </inflows>
+        <outflows>
+          <flow>reaeration</flow>
+        </outflows>
+      </stock>
+      <flow name="deoxygenation">
+        <eqn>kd * BOD</eqn>
+        <units>mg/L/day</units>
+        <doc>Rate at which BOD is biologically oxidized, consuming oxygen at first-order rate kd. This same rate appears as the source of the DO deficit.</doc>
+      </flow>
+      <flow name="reaeration">
+        <eqn>ka * DO_deficit</eqn>
+        <units>mg/L/day</units>
+        <doc>Atmospheric reaeration, proportional to the existing DO deficit (two-film model).</doc>
+      </flow>
+      <aux name="kd">
+        <eqn>0.3</eqn>
+        <units>1/day</units>
+        <doc>Deoxygenation (BOD decay) rate coefficient.</doc>
+      </aux>
+      <aux name="ka">
+        <eqn>0.6</eqn>
+        <units>1/day</units>
+        <doc>Reaeration rate coefficient. ka greater than kd produces the classic DO sag curve.</doc>
+      </aux>
+      <aux name="DO_sat">
+        <eqn>9.0</eqn>
+        <units>mg/L</units>
+        <doc>Saturation dissolved-oxygen concentration.</doc>
+      </aux>
+      <aux name="DO">
+        <eqn>DO_sat - DO_deficit</eqn>
+        <units>mg/L</units>
+        <doc>Actual dissolved-oxygen concentration.</doc>
+      </aux>
+      <aux name="time_of_max_deficit">
+        <eqn>LN(ka / kd) / (ka - kd)</eqn>
+        <units>day</units>
+        <doc>Streeter-Phelps critical time at which the DO deficit reaches its maximum (valid when ka &gt; kd).</doc>
+      </aux>
+    </variables>
+    <views>
+      <view type="stock_flow">
+        <connector from="kd" to="deoxygenation"/>
+        <connector from="BOD" to="deoxygenation"/>
+        <connector from="ka" to="reaeration"/>
+        <connector from="DO_deficit" to="reaeration"/>
+        <connector from="DO_sat" to="DO"/>
+        <connector from="DO_deficit" to="DO"/>
+        <connector from="ka" to="time_of_max_deficit"/>
+        <connector from="kd" to="time_of_max_deficit"/>
+      </view>
+    </views>
+  </model>
+</xmile>

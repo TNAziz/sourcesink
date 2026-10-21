@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Kaibab Deer: Predator Removal and Overshoot</name>
+    <vendor>sourcesink</vendor>
+    <product version="0.1">sourcesink</product>
+  </header>
+  <sim_specs method="Euler" time_units="year">
+    <start>1900</start>
+    <stop>1950</stop>
+    <dt>0.02</dt>
+    <saveEvery>1</saveEvery>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Deer">
+        <eqn>4000</eqn>
+        <units>deer</units>
+        <doc>Deer population on the Kaibab Plateau.</doc>
+        <non_negative>true</non_negative>
+        <inflows>
+          <flow>deer_births</flow>
+        </inflows>
+        <outflows>
+          <flow>deer_deaths</flow>
+          <flow>predation</flow>
+        </outflows>
+      </stock>
+      <stock name="Range_damage">
+        <eqn>0</eqn>
+        <units>dimensionless</units>
+        <doc>Fraction of the range's forage capacity lost to overgrazing; damage is effectively permanent on the timescale of the model.</doc>
+        <non_negative>true</non_negative>
+        <inflows>
+          <flow>range_damage_rate</flow>
+        </inflows>
+      </stock>
+      <stock name="Forage">
+        <eqn>200000</eqn>
+        <units>tonne</units>
+        <doc>Available forage (food) biomass on the range, starting near its carrying capacity.</doc>
+        <non_negative>true</non_negative>
+        <inflows>
+          <flow>forage_growth</flow>
+        </inflows>
+        <outflows>
+          <flow>forage_consumption</flow>
+        </outflows>
+      </stock>
+      <flow name="deer_births">
+        <eqn>birth_rate * Deer</eqn>
+        <units>deer/year</units>
+        <doc>Deer births at a constant per-capita birth rate.</doc>
+      </flow>
+      <flow name="deer_deaths">
+        <eqn>Deer * death_fraction(forage_per_deer)</eqn>
+        <units>deer/year</units>
+        <doc>Natural deer deaths: the death fraction rises sharply as forage per deer falls.</doc>
+      </flow>
+      <flow name="predation">
+        <eqn>predation_rate * Deer * (1 - STEP(1, 1907))</eqn>
+        <units>deer/year</units>
+        <doc>Losses to predators, which are removed in 1907 so this flow falls to zero.</doc>
+      </flow>
+      <flow name="range_damage_rate">
+        <eqn>damage_rate * MAX(0, MIN(1, (Deer - damage_threshold) / damage_threshold)) * (1 - Range_damage)</eqn>
+        <units>1/year</units>
+        <doc>Accumulation of range damage while the deer herd exceeds the damage threshold.</doc>
+      </flow>
+      <flow name="forage_growth">
+        <eqn>forage_growth_rate * Forage * (1 - Forage / forage_capacity)</eqn>
+        <units>tonne/year</units>
+        <doc>Logistic regrowth of the range vegetation.</doc>
+      </flow>
+      <flow name="forage_consumption">
+        <eqn>forage_per_deer_year * Deer</eqn>
+        <units>tonne/year</units>
+        <doc>Forage eaten by the herd, proportional to deer numbers.</doc>
+      </flow>
+      <gf name="death_fraction" interpolation="linear" extrapolation="clip">
+        <units>1/year</units>
+        <doc>Per-capita deer death rate as a function of forage available per deer.</doc>
+        <xpts>0, 1, 2, 3, 4, 6, 10, 15, 30, 50</xpts>
+        <ypts>1.2, 1.1, 1.0, 0.8, 0.5, 0.3, 0.17, 0.12, 0.1, 0.1</ypts>
+      </gf>
+      <aux name="birth_rate">
+        <eqn>0.5</eqn>
+        <units>1/year</units>
+        <doc>Per-capita deer birth rate.</doc>
+      </aux>
+      <aux name="predation_rate">
+        <eqn>0.4</eqn>
+        <units>1/year</units>
+        <doc>Per-capita predation rate before predators are removed.</doc>
+      </aux>
+      <aux name="forage_growth_rate">
+        <eqn>0.4</eqn>
+        <units>1/year</units>
+        <doc>Intrinsic regrowth rate of the forage.</doc>
+      </aux>
+      <aux name="initial_forage_capacity">
+        <eqn>200000</eqn>
+        <units>tonne</units>
+        <doc>Carrying capacity of the undamaged range for forage biomass.</doc>
+      </aux>
+      <aux name="forage_capacity">
+        <eqn>initial_forage_capacity * (1 - Range_damage)</eqn>
+        <units>tonne</units>
+        <doc>Remaining forage capacity after overgrazing damage.</doc>
+      </aux>
+      <aux name="damage_rate">
+        <eqn>0.15</eqn>
+        <units>1/year</units>
+        <doc>Maximum rate at which heavy grazing converts forage capacity into range damage.</doc>
+      </aux>
+      <aux name="damage_threshold">
+        <eqn>15000</eqn>
+        <units>deer</units>
+        <doc>Herd size above which grazing damages the range.</doc>
+      </aux>
+      <aux name="forage_per_deer_year">
+        <eqn>0.5</eqn>
+        <units>tonne/deer/year</units>
+        <doc>Forage consumed per deer per year.</doc>
+      </aux>
+      <aux name="forage_per_deer">
+        <eqn>Forage / Deer</eqn>
+        <units>tonne/deer</units>
+        <doc>Forage available per deer; the input to the death-rate graph.</doc>
+      </aux>
+    </variables>
+    <views>
+      <view type="stock_flow">
+        <connector from="birth_rate" to="deer_births"/>
+        <connector from="Deer" to="deer_births"/>
+        <connector from="Deer" to="deer_deaths"/>
+        <connector from="forage_per_deer" to="deer_deaths"/>
+        <connector from="Forage" to="forage_per_deer"/>
+        <connector from="Deer" to="forage_per_deer"/>
+        <connector from="predation_rate" to="predation"/>
+        <connector from="Deer" to="predation"/>
+        <connector from="damage_rate" to="range_damage_rate"/>
+        <connector from="damage_threshold" to="range_damage_rate"/>
+        <connector from="Deer" to="range_damage_rate"/>
+        <connector from="Range_damage" to="range_damage_rate"/>
+        <connector from="initial_forage_capacity" to="forage_capacity"/>
+        <connector from="Range_damage" to="forage_capacity"/>
+        <connector from="forage_growth_rate" to="forage_growth"/>
+        <connector from="Forage" to="forage_growth"/>
+        <connector from="forage_capacity" to="forage_growth"/>
+        <connector from="forage_per_deer_year" to="forage_consumption"/>
+        <connector from="Deer" to="forage_consumption"/>
+      </view>
+    </views>
+  </model>
+</xmile>

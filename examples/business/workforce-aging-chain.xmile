@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0" xmlns="http://docs.oasis-open.org/xmile/ns/XMILE/v1.0" xmlns:ss="https://sourcesink.dev/xmile/1">
+  <header>
+    <name>Workforce Aging Chain</name>
+    <vendor>sourcesink</vendor>
+    <product version="0.1">sourcesink</product>
+    <doc>Based on Sterman (2000), Business Dynamics: hiring, training, and attrition in an aging chain.</doc>
+  </header>
+  <sim_specs method="Euler" time_units="year">
+    <start>0</start>
+    <stop>15</stop>
+    <dt>0.01</dt>
+    <saveper>0.1</saveper>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Rookies">
+        <eqn>20</eqn>
+        <units>people</units>
+        <doc>Newly hired workers who are still learning the job; starts at 20 people.</doc>
+        <inflows>
+          <flow>hiring</flow>
+        </inflows>
+        <outflows>
+          <flow>assimilation</flow>
+          <flow>rookie_quits</flow>
+        </outflows>
+      </stock>
+      <stock name="Experienced">
+        <eqn>80</eqn>
+        <units>people</units>
+        <doc>Fully trained workers; starts at 80 people, so the initial workforce is 100.</doc>
+        <inflows>
+          <flow>assimilation</flow>
+        </inflows>
+        <outflows>
+          <flow>experienced_quits</flow>
+        </outflows>
+      </stock>
+      <flow name="hiring">
+        <eqn>MAX(0 * total_quits, hiring_gap)</eqn>
+        <units>people/year</units>
+        <doc>Hiring rate, never negative: closes the workforce gap after a hiring delay and replaces expected quits.</doc>
+      </flow>
+      <flow name="assimilation">
+        <eqn>Rookies / assimilation_time</eqn>
+        <units>people/year</units>
+        <doc>Rate at which rookies become experienced after their training period.</doc>
+      </flow>
+      <flow name="rookie_quits">
+        <eqn>Rookies / rookie_tenure</eqn>
+        <units>people/year</units>
+        <doc>Attrition of rookies, who leave after an average rookie tenure.</doc>
+      </flow>
+      <flow name="experienced_quits">
+        <eqn>Experienced / experienced_tenure</eqn>
+        <units>people/year</units>
+        <doc>Attrition of experienced workers.</doc>
+      </flow>
+      <aux name="hiring_gap">
+        <eqn>(desired_workforce - total_workforce) / hiring_delay + total_quits</eqn>
+        <units>people/year</units>
+        <doc>Hiring needed to reach the desired workforce over the hiring delay, plus replacement of current quits.</doc>
+      </aux>
+      <aux name="desired_workforce">
+        <eqn>100 + STEP(50, 2)</eqn>
+        <units>people</units>
+        <doc>Target workforce, 100 people stepping to 150 at year 2.</doc>
+      </aux>
+      <aux name="total_workforce">
+        <eqn>Rookies + Experienced</eqn>
+        <units>people</units>
+        <doc>Total headcount, the sum of rookies and experienced workers.</doc>
+      </aux>
+      <aux name="total_quits">
+        <eqn>rookie_quits + experienced_quits</eqn>
+        <units>people/year</units>
+        <doc>Total attrition rate from both stocks.</doc>
+      </aux>
+      <aux name="assimilation_time">
+        <eqn>1</eqn>
+        <units>year</units>
+        <doc>Time for a rookie to become fully experienced.</doc>
+      </aux>
+      <aux name="hiring_delay">
+        <eqn>1</eqn>
+        <units>year</units>
+        <doc>Delay in adjusting hiring to close the workforce gap.</doc>
+      </aux>
+      <aux name="rookie_tenure">
+        <eqn>2</eqn>
+        <units>year</units>
+        <doc>Average tenure of a rookie before quitting.</doc>
+      </aux>
+      <aux name="experienced_tenure">
+        <eqn>8</eqn>
+        <units>year</units>
+        <doc>Average tenure of an experienced worker before quitting.</doc>
+      </aux>
+      <aux name="rookie_productivity">
+        <eqn>0.5</eqn>
+        <units>1</units>
+        <doc>Productivity of a rookie relative to an experienced worker.</doc>
+      </aux>
+      <aux name="experienced_productivity">
+        <eqn>1</eqn>
+        <units>1</units>
+        <doc>Productivity of an experienced worker (the reference level).</doc>
+      </aux>
+      <aux name="effective_workforce">
+        <eqn>Rookies * rookie_productivity + Experienced * experienced_productivity</eqn>
+        <units>people</units>
+        <doc>Productivity-weighted workforce in experienced-worker equivalents.</doc>
+      </aux>
+      <aux name="experience_ratio">
+        <eqn>Experienced / total_workforce</eqn>
+        <units>1</units>
+        <doc>Share of the workforce that is experienced; falls when hiring surges and recovers as rookies mature.</doc>
+      </aux>
+    </variables>
+    <views>
+      <view type="stock_flow">
+        <connector from="hiring_gap" to="hiring"/>
+        <connector from="total_quits" to="hiring_gap"/>
+        <connector from="desired_workforce" to="hiring_gap"/>
+        <connector from="total_workforce" to="hiring_gap"/>
+        <connector from="hiring_delay" to="hiring_gap"/>
+        <connector from="Rookies" to="assimilation"/>
+        <connector from="assimilation_time" to="assimilation"/>
+        <connector from="Rookies" to="rookie_quits"/>
+        <connector from="rookie_tenure" to="rookie_quits"/>
+        <connector from="Experienced" to="experienced_quits"/>
+        <connector from="experienced_tenure" to="experienced_quits"/>
+        <connector from="rookie_quits" to="total_quits"/>
+        <connector from="experienced_quits" to="total_quits"/>
+        <connector from="Rookies" to="total_workforce"/>
+        <connector from="Experienced" to="total_workforce"/>
+        <connector from="Rookies" to="effective_workforce"/>
+        <connector from="rookie_productivity" to="effective_workforce"/>
+        <connector from="Experienced" to="effective_workforce"/>
+        <connector from="experienced_productivity" to="effective_workforce"/>
+        <connector from="Experienced" to="experience_ratio"/>
+        <connector from="total_workforce" to="experience_ratio"/>
+      </view>
+    </views>
+  </model>
+</xmile>

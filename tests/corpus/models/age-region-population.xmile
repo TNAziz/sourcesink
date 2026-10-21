@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Age and Region Population</name>
+    <vendor>SourceSink</vendor>
+    <product version="0.1.0">SourceSink</product>
+  </header>
+  <sim_specs method="Euler" time_units="year">
+    <start>0</start>
+    <stop>2</stop>
+    <dt>1</dt>
+    <saveper>1</saveper>
+  </sim_specs>
+  <dimensions>
+    <dim name="Region">
+      <elem name="North"/>
+      <elem name="South"/>
+    </dim>
+    <dim name="Age">
+      <elem name="Young"/>
+      <elem name="Old"/>
+    </dim>
+  </dimensions>
+  <model>
+    <variables>
+      <stock name="Pop">
+        <dimensions><dim name="Region"/><dim name="Age"/></dimensions>
+        <eqn>100</eqn>
+        <element subscript="North, Old"><eqn>50</eqn></element>
+        <inflow name="Births"/>
+      </stock>
+      <flow name="Births">
+        <dimensions><dim name="Region"/><dim name="Age"/></dimensions>
+        <eqn>Pop * growth_rate</eqn>
+      </flow>
+      <aux name="growth_rate">
+        <dimensions><dim name="Region"/><dim name="Age"/></dimensions>
+        <eqn>0.1</eqn>
+        <element subscript="North, Old"><eqn>0.2</eqn></element>
+        <element subscript="South, Young"><eqn>0.3</eqn></element>
+      </aux>
+      <aux name="Region_total">
+        <dimensions><dim name="Region"/></dimensions>
+        <eqn>SUM(Pop[Region, *])</eqn>
+      </aux>
+    </variables>
+  </model>
+</xmile>

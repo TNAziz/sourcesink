@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Step Fertilizer Load</name>
+    <vendor>SourceSink</vendor>
+    <product version="0.1.0">SourceSink</product>
+  </header>
+  <sim_specs method="Euler" time_units="month">
+    <start>0</start>
+    <stop>8</stop>
+    <dt>0.5</dt>
+    <saveper>1</saveper>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Nutrient">
+        <eqn>0</eqn>
+        <inflow name="Load"/>
+      </stock>
+      <flow name="Load">
+        <eqn>STEP(2, 3)</eqn>
+      </flow>
+    </variables>
+  </model>
+</xmile>

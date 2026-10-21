@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0" xmlns:ss="https://sourcesink.dev/xmile/1">
+  <header>
+    <name>Reservoir Inflow Scenarios</name>
+    <vendor>SourceSink</vendor>
+    <product version="0.1.0">SourceSink</product>
+  </header>
+  <sim_specs method="Euler" time_units="day">
+    <start>0</start>
+    <stop>10</stop>
+    <dt>1</dt>
+    <saveper>1</saveper>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Reservoir">
+        <eqn>0</eqn>
+        <inflow name="Inflow"/>
+      </stock>
+      <flow name="Inflow">
+        <eqn>2</eqn>
+      </flow>
+    </variables>
+    <ss:scenarios>
+      <ss:scenario id="drought" name="Drought">
+        <ss:override name="Inflow">0.5</ss:override>
+        <ss:run stop="20" dt="1" saveper="1"/>
+      </ss:scenario>
+    </ss:scenarios>
+  </model>
+</xmile>

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Hubbert-Style Nonrenewable Resource Depletion</name>
+    <vendor>sourcesink</vendor>
+    <product version="0.1">sourcesink</product>
+  </header>
+  <sim_specs method="Euler" time_units="year">
+    <start>0</start>
+    <stop>200</stop>
+    <dt>0.1</dt>
+    <saveEvery>1</saveEvery>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Resource_remaining">
+        <eqn>2000</eqn>
+        <units>billionbbl</units>
+        <doc>Oil remaining in the ground, starting at 2,000 billion barrels.</doc>
+        <non_negative>true</non_negative>
+        <outflows>
+          <flow>production</flow>
+        </outflows>
+      </stock>
+      <stock name="Cumulative_production">
+        <eqn>0</eqn>
+        <units>billionbbl</units>
+        <doc>Oil produced and consumed to date.</doc>
+        <non_negative>true</non_negative>
+        <inflows>
+          <flow>production</flow>
+        </inflows>
+      </stock>
+      <stock name="Capital">
+        <eqn>200</eqn>
+        <units>well</units>
+        <doc>Producing capital stock, measured in wells (production capacity).</doc>
+        <non_negative>true</non_negative>
+        <inflows>
+          <flow>investment</flow>
+        </inflows>
+        <outflows>
+          <flow>depreciation</flow>
+        </outflows>
+      </stock>
+      <flow name="production">
+        <eqn>Capital * productivity * (Resource_remaining / initial_resource)</eqn>
+        <units>billionbbl/year</units>
+        <doc>Annual production; it falls as the remaining resource makes extraction harder.</doc>
+      </flow>
+      <flow name="investment">
+        <eqn>reinvestment_fraction * revenue / capital_cost</eqn>
+        <units>well/year</units>
+        <doc>New wells financed by reinvesting a share of oil revenue.</doc>
+      </flow>
+      <flow name="depreciation">
+        <eqn>depreciation_rate * Capital</eqn>
+        <units>well/year</units>
+        <doc>Retirement of producing wells at a constant fractional rate.</doc>
+      </flow>
+      <aux name="productivity">
+        <eqn>0.001</eqn>
+        <units>billionbbl/well/year</units>
+        <doc>Production per well per year when the resource is undepleted.</doc>
+      </aux>
+      <aux name="initial_resource">
+        <eqn>2000</eqn>
+        <units>billionbbl</units>
+        <doc>Initial resource endowment used to normalize depletion.</doc>
+      </aux>
+      <aux name="price">
+        <eqn>20000000000</eqn>
+        <units>dollar/billionbbl</units>
+        <doc>Oil price, constant at 20 dollars per barrel.</doc>
+      </aux>
+      <aux name="revenue">
+        <eqn>production * price</eqn>
+        <units>dollar/year</units>
+        <doc>Annual revenue from oil sales.</doc>
+      </aux>
+      <aux name="reinvestment_fraction">
+        <eqn>0.8</eqn>
+        <units>dimensionless</units>
+        <doc>Share of revenue reinvested in new production capacity.</doc>
+      </aux>
+      <aux name="capital_cost">
+        <eqn>150000000</eqn>
+        <units>dollar/well</units>
+        <doc>Cost to drill and equip one well.</doc>
+      </aux>
+      <aux name="depreciation_rate">
+        <eqn>0.05</eqn>
+        <units>1/year</units>
+        <doc>Fraction of the well stock retired each year.</doc>
+      </aux>
+      <aux name="cumulative_share">
+        <eqn>Cumulative_production / initial_resource</eqn>
+        <units>dimensionless</units>
+        <doc>Fraction of the initial endowment produced so far.</doc>
+      </aux>
+    </variables>
+    <views>
+      <view type="stock_flow">
+        <connector from="Capital" to="production"/>
+        <connector from="productivity" to="production"/>
+        <connector from="Resource_remaining" to="production"/>
+        <connector from="initial_resource" to="production"/>
+        <connector from="reinvestment_fraction" to="investment"/>
+        <connector from="revenue" to="investment"/>
+        <connector from="capital_cost" to="investment"/>
+        <connector from="production" to="revenue"/>
+        <connector from="price" to="revenue"/>
+        <connector from="depreciation_rate" to="depreciation"/>
+        <connector from="Capital" to="depreciation"/>
+        <connector from="Cumulative_production" to="cumulative_share"/>
+        <connector from="initial_resource" to="cumulative_share"/>
+      </view>
+    </views>
+  </model>
+</xmile>

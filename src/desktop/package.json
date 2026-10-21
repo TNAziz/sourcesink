@@ -1,0 +1,141 @@
+{
+  "name": "@sourcesink/desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "SourceSink \u2014 desktop application shell (Electron).",
+  "author": "SourceSink contributors",
+  "license": "MIT",
+  "main": "dist/main.cjs",
+  "devDependencies": {
+    "electron": "^44.9.0",
+    "electron-builder": "^26.15.3",
+    "esbuild": "^0.25.12"
+  },
+  "exports": {
+    "./api": {
+      "types": "./src/api.ts"
+    }
+  },
+  "dependencies": {
+    "@sourcesink/assistant": "0.1.0"
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "start": "node build.mjs && electron .",
+    "dev": "node build.mjs --shell-only && SOURCESINK_DEV_URL=http://localhost:5173 electron .",
+    "package": "node build.mjs && electron-builder --linux AppImage dir",
+    "install-local": "npm run package && sh install-local.sh",
+    "dist": "node build.mjs && electron-builder --publish never"
+  },
+  "build": {
+    "appId": "org.sourcesink.app",
+    "productName": "SourceSink",
+    "executableName": "sourcesink",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "dist/**",
+      "ui/**",
+      "build/icon.png",
+      "package.json"
+    ],
+    "fileAssociations": [
+      {
+        "ext": "xmile",
+        "name": "XMILE model",
+        "description": "System dynamics model",
+        "mimeType": "application/x-xmile"
+      },
+      {
+        "ext": [
+          "stm",
+          "itm"
+        ],
+        "name": "Legacy system dynamics model",
+        "description": "Legacy system dynamics model (import)",
+        "mimeType": "application/x-sd-legacy-model"
+      }
+    ],
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb",
+        "pacman",
+        "tar.gz"
+      ],
+      "category": "Education",
+      "icon": "build/icon.png",
+      "synopsis": "System dynamics modeling",
+      "maintainer": "SourceSink contributors <sourcesink@users.noreply.github.com>",
+      "desktop": {
+        "entry": {
+          "StartupWMClass": "sourcesink"
+        }
+      },
+      "syncDesktopName": true
+    },
+    "electronVersion": "44.9.0",
+    "artifactName": "SourceSink-${version}-${arch}.${ext}",
+    "deb": {
+      "depends": [
+        "libgtk-3-0",
+        "libnotify4",
+        "libnss3",
+        "libxss1",
+        "libxtst6",
+        "xdg-utils",
+        "libatspi2.0-0",
+        "libuuid1",
+        "libsecret-1-0"
+      ]
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "category": "public.app-category.education",
+      "icon": "build/icon.png",
+      "identity": null
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "anonymousacademe",
+        "repo": "sourcesink"
+      }
+    ],
+    "extraResources": [
+      {
+        "from": "build/icon.png",
+        "to": "icon.png"
+      }
+    ]
+  },
+  "desktopName": "sourcesink.desktop",
+  "homepage": "https://github.com/anonymousacademe/sourcesink"
+}

@@ -1,0 +1,255 @@
+/*
+ * SourceSink — Describe drawer. Scoped to `.exp-` and built only from the
+ * design tokens in theme.css.
+ */
+
+.exp-backdrop {
+  position: fixed;
+  inset: 48px 0 0;
+  z-index: 25;
+  background: color-mix(in srgb, var(--bg) 35%, transparent);
+  backdrop-filter: blur(1px);
+}
+
+.exp-panel {
+  position: fixed;
+  top: 48px;
+  right: 0;
+  bottom: 0;
+  z-index: 26;
+  display: flex;
+  flex-direction: column;
+  width: min(460px, 94vw);
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 13px;
+}
+
+.exp-head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px 0 16px;
+  height: 44px;
+  border-bottom: 1px solid var(--border);
+}
+
+.exp-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.exp-model {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.exp-close {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex: none;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+}
+
+.exp-close:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.exp-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 4px 18px 22px;
+}
+
+/* --- rendered description ------------------------------------------------ */
+
+.exp-md h1,
+.exp-md h2,
+.exp-md h3,
+.exp-md h4,
+.exp-md h5,
+.exp-md h6 {
+  margin: 20px 0 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.exp-md h1:first-child,
+.exp-md h2:first-child {
+  margin-top: 12px;
+}
+
+.exp-md p {
+  margin: 0 0 10px;
+  line-height: 1.55;
+}
+
+.exp-md ul {
+  margin: 0 0 10px;
+  padding-left: 18px;
+}
+
+.exp-md li {
+  margin: 0 0 6px;
+  line-height: 1.5;
+}
+
+.exp-md strong {
+  font-weight: 650;
+}
+
+.exp-md em {
+  font-style: italic;
+}
+
+.exp-md code {
+  padding: 1px 4px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface-2);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+}
+
+/* --- loop list ----------------------------------------------------------- */
+
+.exp-section {
+  margin-top: 20px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.exp-section-title {
+  margin: 0 0 10px;
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.exp-loops {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.exp-loop {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: center;
+  gap: 7px;
+  padding: 7px 9px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+
+.exp-badge {
+  flex: none;
+  padding: 1px 7px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.exp-badge-reinforcing {
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+.exp-badge-balancing {
+  color: var(--connector);
+  background: color-mix(in srgb, var(--connector) 12%, var(--surface));
+  border-color: color-mix(in srgb, var(--connector) 28%, transparent);
+}
+
+.exp-badge-unknown {
+  color: var(--text-muted);
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+.exp-loop-type {
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: capitalize;
+  color: var(--text-muted);
+}
+
+.exp-loop-type-reinforcing {
+  color: var(--accent);
+}
+
+.exp-loop-type-balancing {
+  color: var(--connector);
+}
+
+.exp-loop-chain {
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.exp-muted {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+/* --- coverage ------------------------------------------------------------ */
+
+.exp-coverage-ok {
+  margin: 0;
+  color: var(--success);
+  font-weight: 500;
+}
+
+.exp-coverage-missing {
+  margin: 0;
+  color: var(--text);
+}
+
+.exp-coverage-missing p {
+  margin: 0 0 6px;
+}
+
+.exp-missing-label {
+  font-weight: 650;
+  color: var(--danger);
+}

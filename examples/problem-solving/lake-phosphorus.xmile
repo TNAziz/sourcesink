@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Lake Phosphorus: Vollenweider Steady State</name>
+    <vendor>sourcesink</vendor>
+    <product version="0.1">sourcesink</product>
+    <doc>Based on Vollenweider (1975), with Harte (1988) as inspiration.</doc>
+  </header>
+  <sim_specs method="Euler" time_units="year">
+    <start>0</start>
+    <stop>20</stop>
+    <dt>0.01</dt>
+    <saveEvery>0.1</saveEvery>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Phosphorus_mass">
+        <eqn>0</eqn>
+        <units>ug</units>
+        <doc>Total phosphorus mass M in the lake water column, in micrograms, starting at zero.</doc>
+        <inflows>
+          <flow>external_load</flow>
+        </inflows>
+        <outflows>
+          <flow>loss</flow>
+        </outflows>
+      </stock>
+      <flow name="external_load">
+        <eqn>1e12</eqn>
+        <units>ug/year</units>
+        <doc>External phosphorus load L_P entering the lake each year (1e12 ug = 1000 kg).</doc>
+      </flow>
+      <flow name="loss">
+        <eqn>loss_rate * Phosphorus_mass</eqn>
+        <units>ug/year</units>
+        <doc>Combined flushing and sedimentation loss (rho + sigma)*M.</doc>
+      </flow>
+      <aux name="V">
+        <eqn>1e7</eqn>
+        <units>m3</units>
+        <doc>Lake volume V = area times mean depth.</doc>
+      </aux>
+      <aux name="area">
+        <eqn>1e6</eqn>
+        <units>m2</units>
+        <doc>Lake surface area.</doc>
+      </aux>
+      <aux name="mean_depth">
+        <eqn>10</eqn>
+        <units>m</units>
+        <doc>Mean depth, consistent with V = 1e7 m3 and area = 1e6 m2.</doc>
+      </aux>
+      <aux name="Q">
+        <eqn>5e6</eqn>
+        <units>m3/year</units>
+        <doc>Annual water inflow and outflow Q.</doc>
+      </aux>
+      <aux name="rho">
+        <eqn>Q / V</eqn>
+        <units>1/year</units>
+        <doc>Hydraulic flushing rate rho = Q/V = 0.5 per year.</doc>
+      </aux>
+      <aux name="sigma">
+        <eqn>0.5</eqn>
+        <units>1/year</units>
+        <doc>Sedimentation rate sigma for phosphorus.</doc>
+      </aux>
+      <aux name="loss_rate">
+        <eqn>rho + sigma</eqn>
+        <units>1/year</units>
+        <doc>Total first-order loss rate rho + sigma = 1 per year.</doc>
+      </aux>
+      <aux name="concentration_ug_L">
+        <eqn>Phosphorus_mass / V / 1000</eqn>
+        <units>ug/L</units>
+        <doc>Phosphorus concentration expressed in micrograms per litre (ug/L = ug/m3 / 1000).</doc>
+      </aux>
+      <aux name="steady_state_concentration_ug_L">
+        <eqn>external_load / (V * loss_rate) / 1000</eqn>
+        <units>ug/L</units>
+        <doc>Vollenweider steady-state concentration L_P/(V*(rho+sigma)), here 100 ug/L.</doc>
+      </aux>
+      <aux name="response_time">
+        <eqn>1 / loss_rate</eqn>
+        <units>year</units>
+        <doc>Approach time 1/(rho+sigma) = 1 year.</doc>
+      </aux>
+    </variables>
+    <views>
+      <view type="stock_flow">
+        <connector from="loss_rate" to="loss"/>
+        <connector from="Phosphorus_mass" to="loss"/>
+        <connector from="Q" to="rho"/>
+        <connector from="V" to="rho"/>
+        <connector from="rho" to="loss_rate"/>
+        <connector from="sigma" to="loss_rate"/>
+        <connector from="Phosphorus_mass" to="concentration_ug_L"/>
+        <connector from="V" to="concentration_ug_L"/>
+        <connector from="V" to="steady_state_concentration_ug_L"/>
+        <connector from="loss_rate" to="steady_state_concentration_ug_L"/>
+        <connector from="loss_rate" to="response_time"/>
+      </view>
+    </views>
+  </model>
+</xmile>

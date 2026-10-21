@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Groundwater Commons</name>
+    <vendor>sourcesink</vendor>
+    <product version="0.1">sourcesink</product>
+  </header>
+  <sim_specs method="Euler" time_units="year">
+    <start>0</start>
+    <stop>100</stop>
+    <dt>0.05</dt>
+    <saveEvery>1</saveEvery>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Aquifer">
+        <eqn>20000000</eqn>
+        <units>m3</units>
+        <doc>Groundwater stored in the shared aquifer.</doc>
+        <non_negative>true</non_negative>
+        <inflows>
+          <flow>recharge</flow>
+        </inflows>
+        <outflows>
+          <flow>pumping</flow>
+        </outflows>
+      </stock>
+      <stock name="Farm1_area">
+        <eqn>50</eqn>
+        <units>ha</units>
+        <doc>Irrigated area of the first farm.</doc>
+        <inflows>
+          <flow>farm1_expansion</flow>
+        </inflows>
+      </stock>
+      <stock name="Farm2_area">
+        <eqn>50</eqn>
+        <units>ha</units>
+        <doc>Irrigated area of the second farm.</doc>
+        <inflows>
+          <flow>farm2_expansion</flow>
+        </inflows>
+      </stock>
+      <flow name="recharge">
+        <eqn>200000</eqn>
+        <units>m3/year</units>
+        <doc>Natural recharge to the aquifer.</doc>
+      </flow>
+      <flow name="pumping">
+        <eqn>(Farm1_area + Farm2_area) * pumping_per_hectare * IF(profit_per_hectare &gt; 0, 1, 0)</eqn>
+        <units>m3/year</units>
+        <doc>Total groundwater pumped by both farms.</doc>
+      </flow>
+      <flow name="farm1_expansion">
+        <eqn>Farm1_area * area_growth_rate * IF(profit_per_hectare &gt; 0, profit_per_hectare / reference_profit, 0)</eqn>
+        <units>ha/year</units>
+        <doc>Farm 1 adds irrigated area while profit per hectare is positive.</doc>
+      </flow>
+      <flow name="farm2_expansion">
+        <eqn>Farm2_area * area_growth_rate * IF(profit_per_hectare &gt; 0, profit_per_hectare / reference_profit, 0)</eqn>
+        <units>ha/year</units>
+        <doc>Farm 2 adds irrigated area while profit per hectare is positive.</doc>
+      </flow>
+      <aux name="aquifer_area">
+        <eqn>50000</eqn>
+        <units>m2</units>
+        <doc>Area over which the aquifer's storage change is spread.</doc>
+      </aux>
+      <aux name="initial_aquifer">
+        <eqn>20000000</eqn>
+        <units>m3</units>
+        <doc>Storage at the start of the simulation.</doc>
+      </aux>
+      <aux name="initial_lift">
+        <eqn>20</eqn>
+        <units>m</units>
+        <doc>Initial pumping lift above the water table.</doc>
+      </aux>
+      <aux name="water_table_drop">
+        <eqn>(initial_aquifer - Aquifer) / aquifer_area</eqn>
+        <units>m</units>
+        <doc>Fall of the water table caused by storage depletion.</doc>
+      </aux>
+      <aux name="lift">
+        <eqn>initial_lift + water_table_drop</eqn>
+        <units>m</units>
+        <doc>Current pumping lift.</doc>
+      </aux>
+      <aux name="crop_revenue_per_hectare">
+        <eqn>200</eqn>
+        <units>dollar/ha/year</units>
+        <doc>Gross crop revenue per irrigated hectare.</doc>
+      </aux>
+      <aux name="other_cost_per_hectare">
+        <eqn>120</eqn>
+        <units>dollar/ha/year</units>
+        <doc>Non-energy production cost per hectare.</doc>
+      </aux>
+      <aux name="pumping_per_hectare">
+        <eqn>2000</eqn>
+        <units>m3/ha/year</units>
+        <doc>Water pumped per irrigated hectare per year.</doc>
+      </aux>
+      <aux name="energy_cost_per_m3_m">
+        <eqn>0.001</eqn>
+        <units>dollar/m3/m</units>
+        <doc>Energy cost of lifting one cubic metre by one metre.</doc>
+      </aux>
+      <aux name="pumping_cost_per_hectare">
+        <eqn>pumping_per_hectare * energy_cost_per_m3_m * lift</eqn>
+        <units>dollar/ha/year</units>
+        <doc>Pumping energy cost per irrigated hectare.</doc>
+      </aux>
+      <aux name="profit_per_hectare">
+        <eqn>crop_revenue_per_hectare - other_cost_per_hectare - pumping_cost_per_hectare</eqn>
+        <units>dollar/ha/year</units>
+        <doc>Profit per irrigated hectare; it falls as the lift rises.</doc>
+      </aux>
+      <aux name="reference_profit">
+        <eqn>80</eqn>
+        <units>dollar/ha/year</units>
+        <doc>Profit scale used to convert profitability into an area growth rate.</doc>
+      </aux>
+      <aux name="area_growth_rate">
+        <eqn>0.1</eqn>
+        <units>1/year</units>
+        <doc>Maximum fractional rate at which a profitable farm expands.</doc>
+      </aux>
+    </variables>
+    <views>
+      <view type="stock_flow">
+        <connector from="Aquifer" to="pumping"/>
+        <connector from="Farm1_area" to="pumping"/>
+        <connector from="Farm2_area" to="pumping"/>
+        <connector from="pumping_per_hectare" to="pumping"/>
+        <connector from="Farm1_area" to="farm1_expansion"/>
+        <connector from="area_growth_rate" to="farm1_expansion"/>
+        <connector from="profit_per_hectare" to="farm1_expansion"/>
+        <connector from="reference_profit" to="farm1_expansion"/>
+        <connector from="Farm2_area" to="farm2_expansion"/>
+        <connector from="area_growth_rate" to="farm2_expansion"/>
+        <connector from="profit_per_hectare" to="farm2_expansion"/>
+        <connector from="reference_profit" to="farm2_expansion"/>
+        <connector from="initial_aquifer" to="water_table_drop"/>
+        <connector from="Aquifer" to="water_table_drop"/>
+        <connector from="aquifer_area" to="water_table_drop"/>
+        <connector from="initial_lift" to="lift"/>
+        <connector from="water_table_drop" to="lift"/>
+        <connector from="pumping_per_hectare" to="pumping_cost_per_hectare"/>
+        <connector from="energy_cost_per_m3_m" to="pumping_cost_per_hectare"/>
+        <connector from="lift" to="pumping_cost_per_hectare"/>
+        <connector from="crop_revenue_per_hectare" to="profit_per_hectare"/>
+        <connector from="other_cost_per_hectare" to="profit_per_hectare"/>
+        <connector from="pumping_cost_per_hectare" to="profit_per_hectare"/>
+      </view>
+    </views>
+  </model>
+</xmile>

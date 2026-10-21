@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Doubling Time and the Rule of 70</name>
+    <vendor>sourcesink</vendor>
+    <product version="0.1">sourcesink</product>
+    <doc>Based on Harte (1988); this box model is an original SourceSink calculation.</doc>
+  </header>
+  <sim_specs method="Euler" time_units="year">
+    <start>0</start>
+    <stop>100</stop>
+    <dt>0.01</dt>
+    <saveEvery>0.01</saveEvery>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Population">
+        <eqn>1e6</eqn>
+        <units>people</units>
+        <doc>Population P growing exponentially from one million people.</doc>
+        <inflows>
+          <flow>growth</flow>
+        </inflows>
+      </stock>
+      <flow name="growth">
+        <eqn>r * Population</eqn>
+        <units>people/year</units>
+        <doc>Exponential net growth r*P, with no density limitation.</doc>
+      </flow>
+      <aux name="r">
+        <eqn>0.02</eqn>
+        <units>1/year</units>
+        <doc>Constant per-capita growth rate r = 2 %/year.</doc>
+      </aux>
+      <aux name="initial_population">
+        <eqn>1e6</eqn>
+        <units>people</units>
+        <doc>Initial population P0 = 1 million.</doc>
+      </aux>
+      <aux name="doubling_time">
+        <eqn>LN(2) / r</eqn>
+        <units>year</units>
+        <doc>Exact doubling time ln(2)/r = 34.66 years; the rule of 70 approximates it as 70/2 = 35 years.</doc>
+      </aux>
+      <aux name="doublings">
+        <eqn>LN(Population / initial_population) / LN(2)</eqn>
+        <units>dimensionless</units>
+        <doc>Number of doublings completed since the start, ln(P/P0)/ln(2).</doc>
+      </aux>
+      <aux name="rule_of_70_estimate">
+        <eqn>70 / (r * 100)</eqn>
+        <units>year</units>
+        <doc>Rule-of-70 estimate 70/(growth in percent) = 35 years.</doc>
+      </aux>
+    </variables>
+    <views>
+      <view type="stock_flow">
+        <connector from="r" to="growth"/>
+        <connector from="Population" to="growth"/>
+        <connector from="r" to="doubling_time"/>
+        <connector from="Population" to="doublings"/>
+        <connector from="initial_population" to="doublings"/>
+      </view>
+    </views>
+  </model>
+</xmile>

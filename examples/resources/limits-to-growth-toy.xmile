@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Limits to Growth: A Teaching Toy</name>
+    <vendor>sourcesink</vendor>
+    <product version="0.1">sourcesink</product>
+  </header>
+  <sim_specs method="Euler" time_units="year">
+    <start>1900</start>
+    <stop>2100</stop>
+    <dt>0.25</dt>
+    <saveEvery>1</saveEvery>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Population">
+        <eqn>1.6</eqn>
+        <units>billionpeople</units>
+        <doc>World population, in billions of people.</doc>
+        <non_negative>true</non_negative>
+        <inflows>
+          <flow>births</flow>
+        </inflows>
+        <outflows>
+          <flow>deaths</flow>
+        </outflows>
+      </stock>
+      <stock name="Resource">
+        <eqn>1000</eqn>
+        <units>resource</units>
+        <doc>Stock of a nonrenewable resource, in resource units.</doc>
+        <non_negative>true</non_negative>
+        <outflows>
+          <flow>resource_use</flow>
+        </outflows>
+      </stock>
+      <stock name="Pollution">
+        <eqn>0</eqn>
+        <units>pollution</units>
+        <doc>Accumulated pollution in the environment, in pollution units.</doc>
+        <non_negative>true</non_negative>
+        <inflows>
+          <flow>pollution_generation</flow>
+        </inflows>
+        <outflows>
+          <flow>pollution_decay</flow>
+        </outflows>
+      </stock>
+      <flow name="births">
+        <eqn>Population * birth_rate</eqn>
+        <units>billionpeople/year</units>
+        <doc>Births at a constant per-capita birth rate.</doc>
+      </flow>
+      <flow name="deaths">
+        <eqn>Population * death_rate</eqn>
+        <units>billionpeople/year</units>
+        <doc>Deaths; the death rate rises with accumulated pollution.</doc>
+      </flow>
+      <flow name="resource_use">
+        <eqn>Population * per_capita_use * resource_availability</eqn>
+        <units>resource/year</units>
+        <doc>Resource extraction, which falls as the remaining resource is harder to obtain.</doc>
+      </flow>
+      <flow name="pollution_generation">
+        <eqn>Population * pollution_per_capita</eqn>
+        <units>pollution/year</units>
+        <doc>Pollution emitted by production and consumption.</doc>
+      </flow>
+      <flow name="pollution_decay">
+        <eqn>Pollution / pollution_lifetime</eqn>
+        <units>pollution/year</units>
+        <doc>Natural breakdown of pollution.</doc>
+      </flow>
+      <aux name="birth_rate">
+        <eqn>0.035</eqn>
+        <units>1/year</units>
+        <doc>Per-capita birth rate.</doc>
+      </aux>
+      <aux name="base_death_rate">
+        <eqn>0.02</eqn>
+        <units>1/year</units>
+        <doc>Per-capita death rate in a clean environment.</doc>
+      </aux>
+      <aux name="pollution_death_coefficient">
+        <eqn>0.0001</eqn>
+        <units>1/pollution/year</units>
+        <doc>Extra deaths per unit of accumulated pollution.</doc>
+      </aux>
+      <aux name="death_rate">
+        <eqn>base_death_rate + pollution_death_coefficient * Pollution</eqn>
+        <units>1/year</units>
+        <doc>Total per-capita death rate.</doc>
+      </aux>
+      <aux name="initial_resource">
+        <eqn>1000</eqn>
+        <units>resource</units>
+        <doc>Initial resource endowment.</doc>
+      </aux>
+      <aux name="resource_availability">
+        <eqn>Resource / initial_resource</eqn>
+        <units>dimensionless</units>
+        <doc>Fraction of the original resource still available.</doc>
+      </aux>
+      <aux name="per_capita_use">
+        <eqn>2</eqn>
+        <units>resource/billionpeople/year</units>
+        <doc>Resource use per billion people per year when the resource is abundant.</doc>
+      </aux>
+      <aux name="output_per_capita">
+        <eqn>resource_use / Population</eqn>
+        <units>resource/billionpeople/year</units>
+        <doc>Resource output per billion people; declines as extraction gets harder.</doc>
+      </aux>
+      <aux name="pollution_per_capita">
+        <eqn>1</eqn>
+        <units>pollution/billionpeople/year</units>
+        <doc>Pollution emitted per billion people per year.</doc>
+      </aux>
+      <aux name="pollution_lifetime">
+        <eqn>50</eqn>
+        <units>year</units>
+        <doc>Average time pollution remains in the environment.</doc>
+      </aux>
+    </variables>
+    <views>
+      <view type="stock_flow">
+        <connector from="Population" to="births"/>
+        <connector from="birth_rate" to="births"/>
+        <connector from="Population" to="deaths"/>
+        <connector from="death_rate" to="deaths"/>
+        <connector from="base_death_rate" to="death_rate"/>
+        <connector from="pollution_death_coefficient" to="death_rate"/>
+        <connector from="Pollution" to="death_rate"/>
+        <connector from="Population" to="resource_use"/>
+        <connector from="per_capita_use" to="resource_use"/>
+        <connector from="resource_availability" to="resource_use"/>
+        <connector from="Resource" to="resource_availability"/>
+        <connector from="initial_resource" to="resource_availability"/>
+        <connector from="Population" to="pollution_generation"/>
+        <connector from="pollution_per_capita" to="pollution_generation"/>
+        <connector from="Pollution" to="pollution_decay"/>
+        <connector from="pollution_lifetime" to="pollution_decay"/>
+        <connector from="resource_use" to="output_per_capita"/>
+        <connector from="Population" to="output_per_capita"/>
+      </view>
+    </views>
+  </model>
+</xmile>

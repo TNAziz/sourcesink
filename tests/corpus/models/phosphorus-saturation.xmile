@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Phosphorus Uptake Saturation</name>
+    <vendor>SourceSink</vendor>
+    <product version="0.1.0">SourceSink</product>
+  </header>
+  <sim_specs method="Euler" time_units="day">
+    <start>0</start>
+    <stop>100</stop>
+    <dt>0.01</dt>
+    <saveper>1</saveper>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="P">
+        <eqn>100</eqn>
+        <outflow name="Uptake"/>
+      </stock>
+      <flow name="Uptake">
+        <eqn>Vmax * P / (Ks + P)</eqn>
+      </flow>
+      <aux name="Vmax">
+        <eqn>5</eqn>
+      </aux>
+      <aux name="Ks">
+        <eqn>10</eqn>
+      </aux>
+    </variables>
+  </model>
+</xmile>

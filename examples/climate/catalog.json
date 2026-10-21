@@ -1,0 +1,212 @@
+[
+  {
+    "id": "energy-balance",
+    "file": "energy-balance.xmile",
+    "title": "Zero-dimensional energy balance of the Earth",
+    "category": "climate",
+    "level": "intro",
+    "summary": "A single global temperature settles where absorbed sunlight balances outgoing longwave radiation.",
+    "question": "Why does the Earth's average surface temperature settle near 288 K rather than heating without limit or freezing?",
+    "teaching": "One stock (temperature) is warmed by absorbed solar radiation and cooled by longwave emission, with the greenhouse effect represented by an effective emissivity. The temperature relaxes exponentially to the equilibrium T* = [S0 (1 - alpha) / (4 epsilon sigma)]^1/4 = 287.8 K, and the imbalance goes to zero. The model is the simplest possible climate model and sets up every later model in this category.",
+    "references": [
+      {
+        "citation": "North, G. R., Cahalan, R. F., & Coakley, J. A. (1981). Energy balance climate models. Reviews of Geophysics, 19(1), 91–121.",
+        "doi": "10.1029/RG019i001p00091"
+      }
+    ],
+    "checks": [
+      {
+        "type": "final",
+        "series": "Temperature",
+        "expected": 287.83,
+        "tol": 0.3
+      },
+      {
+        "type": "monotonic",
+        "series": "Temperature",
+        "direction": "up"
+      },
+      {
+        "type": "bounds",
+        "series": "Temperature",
+        "min": 255,
+        "max": 288
+      }
+    ]
+  },
+  {
+    "id": "ice-albedo",
+    "file": "ice-albedo.xmile",
+    "title": "Ice-albedo feedback: warm Earth and snowball Earth",
+    "category": "climate",
+    "level": "intermediate",
+    "summary": "A temperature-dependent albedo creates a cold snowball state and a warm ice-free state for the same solar forcing.",
+    "question": "Can the same amount of sunlight support either a warm Earth or a frozen Earth, and what decides which one you get?",
+    "teaching": "The energy-balance model is extended with an albedo that falls from 0.62 when the planet is ice covered (below 250 K) to 0.30 when it is warm (above 280 K), linearly in between, a positive feedback: warming melts ice, which lowers albedo and causes more warming. The default run starts at 288 K and stays warm at 287.8 K; a cold start at 230 K settles into the snowball equilibrium, [S0 (1 - 0.62) / (4 epsilon sigma)]^1/4, about 247 K. The large gap between the two states shows why the ice-albedo feedback is a source of abrupt climate change and hysteresis.",
+    "references": [
+      {
+        "citation": "Budyko, M. I. (1969). The effect of solar radiation variations on the climate of the Earth. Tellus, 21(5), 611–619.",
+        "doi": "10.3402/tellusa.v21i5.10109"
+      },
+      {
+        "citation": "Sellers, W. D. (1969). A global climatic model based on the energy balance of the earth-atmosphere system. Journal of Applied Meteorology, 8(3), 392–400.",
+        "doi": "10.1175/1520-0450(1969)008<0392:AGCMBO>2.0.CO;2"
+      }
+    ],
+    "checks": [
+      {
+        "type": "final",
+        "series": "Temperature",
+        "expected": 287.8,
+        "tol": 1
+      },
+      {
+        "type": "bounds",
+        "series": "Temperature",
+        "min": 287,
+        "max": 288.5
+      }
+    ]
+  },
+  {
+    "id": "daisyworld",
+    "file": "daisyworld.xmile",
+    "title": "Daisyworld: biological regulation of planetary temperature",
+    "category": "climate",
+    "level": "advanced",
+    "summary": "Light and dark daisies together hold a planet's temperature nearly constant while its star brightens.",
+    "question": "How can life regulate a planet's temperature without any foresight or feedback controller?",
+    "teaching": "Two stocks record the area covered by white and black daisies, whose albedos of 0.75 and 0.25 change the planetary albedo and therefore the planet temperature; each daisy type grows fastest at 295.5 K. Black daisies warm the planet and spread first at low luminosity, and white daisies take over as the star brightens, so the planetary temperature stays within roughly 290–305 K across the middle of a luminosity ramp from 0.6 to 1.6. The regulation fails at the extremes: both types die out at low luminosity, and the white daisies decline as the star becomes too bright.",
+    "references": [
+      {
+        "citation": "Watson, A. J., & Lovelock, J. E. (1983). Biological homeostasis of the global environment: The parable of Daisyworld. Tellus B, 35(4), 284–289.",
+        "doi": "10.1111/j.1600-0889.1983.tb00031.x"
+      }
+    ],
+    "checks": [
+      {
+        "type": "bounds",
+        "series": "regulated_temperature",
+        "min": 285,
+        "max": 310
+      },
+      {
+        "type": "value",
+        "series": "black_daisies",
+        "time": 50,
+        "expected": 0.511,
+        "tol": 0.03
+      },
+      {
+        "type": "value",
+        "series": "white_daisies",
+        "time": 50,
+        "expected": 0.0073,
+        "tol": 0.01
+      },
+      {
+        "type": "value",
+        "series": "white_daisies",
+        "time": 190,
+        "expected": 0.682,
+        "tol": 0.03
+      },
+      {
+        "type": "value",
+        "series": "black_daisies",
+        "time": 190,
+        "expected": 0.0011,
+        "tol": 0.005
+      }
+    ]
+  },
+  {
+    "id": "two-layer-warming",
+    "file": "two-layer-warming.xmile",
+    "title": "Two-layer ocean warming: fast and slow responses to CO2 forcing",
+    "category": "climate",
+    "level": "intermediate",
+    "summary": "After CO2 doubles, surface warming jumps quickly to about 1.9 K and then creeps toward 2.85 K over centuries as the deep ocean catches up.",
+    "question": "Why does most of the surface warming from CO2 happen in a few decades while the rest takes centuries?",
+    "teaching": "A surface mixed layer and a deep ocean are coupled by a heat-exchange flow, while the surface loses heat through a stabilizing climate feedback. Within about 20 years the surface reaches the fast-response level F / (lambda + gamma) of about 1.85 K; the deep ocean then slowly absorbs heat and the surface continues toward the equilibrium F / lambda of 2.85 K. The model explains the difference between transient and equilibrium climate sensitivity and the commitment to future warming.",
+    "references": [
+      {
+        "citation": "Held, I. M., Winton, M., Takahashi, K., Delworth, T., Zeng, F., & Vallis, G. K. (2010). Probing the fast and slow components of global warming by returning abruptly to preindustrial forcing. Journal of Climate, 23(9), 2418–2427.",
+        "doi": "10.1175/2009JCLI3466.1"
+      },
+      {
+        "citation": "Gregory, J. M. (2000). Vertical heat transports in the ocean and their effect on time-dependent climate change. Climate Dynamics, 16(7), 501–515.",
+        "doi": "10.1007/s003820000059"
+      }
+    ],
+    "checks": [
+      {
+        "type": "value",
+        "series": "surface_warming",
+        "time": 20,
+        "expected": 1.89,
+        "tol": 0.2
+      },
+      {
+        "type": "final",
+        "series": "surface_warming",
+        "expected": 2.85,
+        "tol": 0.09
+      },
+      {
+        "type": "monotonic",
+        "series": "surface_warming",
+        "direction": "up"
+      },
+      {
+        "type": "final",
+        "series": "deep_ocean_warming",
+        "expected": 2.81,
+        "tol": 0.05
+      }
+    ]
+  },
+  {
+    "id": "carbon-pulse",
+    "file": "carbon-pulse.xmile",
+    "title": "Carbon pulse: how long does emitted CO2 stay in the air?",
+    "category": "climate",
+    "level": "intermediate",
+    "summary": "A 100 GtC pulse of CO2 decays through four reservoirs of very different lifetimes, leaving about 41 percent airborne after a century.",
+    "question": "If we emit a pulse of CO2 today, how much of it is still warming the climate in 20 years, in 100 years, and in 1000 years?",
+    "teaching": "The Bern impulse-response function is represented as four parallel boxes that drain at rates set by their e-folding times (4.3, 37, 394 years, plus a permanent fraction of 0.2173). The airborne fraction falls quickly at first and then very slowly, reaching about 0.41 at 100 years and levelling near 0.235 at 1000 years. The long tail of the slow and permanent boxes is why CO2 emissions have effects lasting many centuries.",
+    "references": [
+      {
+        "citation": "Joos, F., Roth, R., Fuglestvedt, J. S., Peters, G. P., Enting, I. G., von Bloh, W., et al. (2013). Carbon dioxide and climate impulse response functions for the computation of greenhouse gas metrics: A multi-model analysis. Atmospheric Chemistry and Physics, 13(5), 2793–2825.",
+        "doi": "10.5194/acp-13-2793-2013"
+      }
+    ],
+    "checks": [
+      {
+        "type": "value",
+        "series": "airborne",
+        "time": 20,
+        "expected": 59.6,
+        "tol": 0.3
+      },
+      {
+        "type": "value",
+        "series": "airborne",
+        "time": 100,
+        "expected": 40.94,
+        "tol": 0.3
+      },
+      {
+        "type": "monotonic",
+        "series": "airborne",
+        "direction": "down"
+      },
+      {
+        "type": "final",
+        "series": "airborne",
+        "expected": 23.5,
+        "tol": 0.5
+      }
+    ]
+  }
+]

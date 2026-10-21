@@ -1,0 +1,417 @@
+[
+  {
+    "file": "linear-reservoir-fill.xmile",
+    "story": "A pond is filled by a constant diversion, so its storage grows linearly.",
+    "checks": [
+      { "type": "value", "series": "Storage", "time": 10, "expected": 30, "tol": 1e-9 },
+      { "type": "final", "series": "Storage", "expected": 30, "tol": 1e-9 },
+      { "type": "monotonic", "series": "Storage", "direction": "up" }
+    ]
+  },
+  {
+    "file": "exponential-algal-growth.xmile",
+    "story": "An algal population grows at a constant per-capita rate with unlimited resources.",
+    "checks": [
+      { "type": "value", "series": "Algae", "time": 5, "expected": 135.9141, "tol": 0.005 },
+      { "type": "value", "series": "Algae", "time": 10, "expected": 369.4526, "tol": 0.005 },
+      { "type": "monotonic", "series": "Algae", "direction": "up" },
+      { "type": "bounds", "series": "Algae", "min": 0, "max": 500 }
+    ]
+  },
+  {
+    "file": "aquifer-decay.xmile",
+    "story": "A contaminant in a well-mixed aquifer degrades by first-order decay.",
+    "checks": [
+      { "type": "value", "series": "Contaminant", "time": 10, "expected": 36.7879, "tol": 0.005 },
+      { "type": "monotonic", "series": "Contaminant", "direction": "down" },
+      { "type": "bounds", "series": "Contaminant", "min": 0, "max": 100 }
+    ]
+  },
+  {
+    "file": "logistic-wetland-reeds.xmile",
+    "story": "Reeds in a wetland grow logistically toward a carrying capacity of 1000.",
+    "checks": [
+      { "type": "final", "series": "Reeds", "expected": 1000, "tol": 0.01 },
+      { "type": "monotonic", "series": "Reeds", "direction": "up" },
+      { "type": "bounds", "series": "Reeds", "min": 0, "max": 1000.5 }
+    ]
+  },
+  {
+    "file": "goal-seeking-reservoir.xmile",
+    "story": "Reservoir operations seek a target level with a four-day adjustment time.",
+    "checks": [
+      { "type": "value", "series": "Level", "time": 4, "expected": 35.2824, "tol": 0.005 },
+      { "type": "final", "series": "Level", "expected": 50, "tol": 0.001 },
+      { "type": "monotonic", "series": "Level", "direction": "up" }
+    ]
+  },
+  {
+    "file": "surge-tank-oscillation.xmile",
+    "story": "A unit-mass surge tank oscillates with period 2*pi seconds after an initial displacement.",
+    "checks": [
+      { "type": "value", "series": "Displacement", "time": 3.141592653589793, "expected": -1, "tol": 0.02 },
+      { "type": "value", "series": "Displacement", "time": 6.283185307179586, "expected": 1, "tol": 0.02 },
+      { "type": "bounds", "series": "Displacement", "min": -1.01, "max": 1.01 }
+    ]
+  },
+  {
+    "file": "watershed-nitrogen-chain.xmile",
+    "story": "Nitrogen moves from soil to stream to estuary without loss across the three stocks.",
+    "checks": [
+      { "type": "conserved", "series": ["Soil", "Stream", "Estuary"], "tol": 1e-9 },
+      { "type": "monotonic", "series": "Soil", "direction": "down" },
+      { "type": "bounds", "series": "Estuary", "min": 0, "max": 100 }
+    ]
+  },
+  {
+    "file": "lake-biflow-exchange.xmile",
+    "story": "Two lake basins exchange water through a biflow whose direction reverses as the basins trade the dominant level.",
+    "checks": [
+      { "type": "value", "series": "Exchange", "time": 0, "expected": 2, "tol": 1e-9 },
+      { "type": "value", "series": "Exchange", "time": 50, "expected": -0.5, "tol": 0.005 },
+      { "type": "conserved", "series": ["NorthBasin", "SouthBasin"], "tol": 1e-9 },
+      { "type": "monotonic", "series": "Exchange", "direction": "down" }
+    ]
+  },
+  {
+    "file": "spill-nonnegative.xmile",
+    "story": "A non-negative tank spills at a fixed rate until it is empty, passing all material to the creek.",
+    "checks": [
+      { "type": "value", "series": "Tank", "time": 2, "expected": 2, "tol": 1e-9 },
+      { "type": "final", "series": "Tank", "expected": 0, "tol": 1e-9 },
+      { "type": "value", "series": "Creek", "time": 4, "expected": 10, "tol": 1e-9 },
+      { "type": "conserved", "series": ["Tank", "Creek"], "tol": 1e-9 }
+    ]
+  },
+  {
+    "file": "step-fertilizer-load.xmile",
+    "story": "Fertilizer loading switches on at month 3 as a step of two units per month.",
+    "checks": [
+      { "type": "value", "series": "Nutrient", "time": 4, "expected": 2, "tol": 1e-9 },
+      { "type": "final", "series": "Nutrient", "expected": 10, "tol": 1e-9 },
+      { "type": "monotonic", "series": "Nutrient", "direction": "up" }
+    ]
+  },
+  {
+    "file": "ramp-pollution-load.xmile",
+    "story": "A pollution load ramps up linearly after year 2 at half a unit per year squared.",
+    "checks": [
+      { "type": "value", "series": "LoadStock", "time": 10, "expected": 16, "tol": 0.002 },
+      { "type": "final", "series": "LoadStock", "expected": 25, "tol": 0.002 },
+      { "type": "monotonic", "series": "LoadStock", "direction": "up" }
+    ]
+  },
+  {
+    "file": "pulse-chlorine-dose.xmile",
+    "story": "Chlorine is dosed in two twelve-unit pulses five days apart.",
+    "checks": [
+      { "type": "value", "series": "Dose", "time": 3, "expected": 24, "tol": 1e-9 },
+      { "type": "value", "series": "Chlorine", "time": 4, "expected": 12, "tol": 1e-9 },
+      { "type": "value", "series": "Chlorine", "time": 9, "expected": 24, "tol": 1e-9 },
+      { "type": "final", "series": "Chlorine", "expected": 24, "tol": 1e-9 }
+    ]
+  },
+  {
+    "file": "smth1-sensor-lag.xmile",
+    "story": "A first-order sensor smooth lags a unit step by one DT initially and then approaches the input.",
+    "checks": [
+      { "type": "value", "series": "Smooth_reading", "time": 2, "expected": 0, "tol": 1e-9 },
+      { "type": "value", "series": "Smooth_reading", "time": 2.5, "expected": 0.1, "tol": 1e-9 },
+      { "type": "final", "series": "Smooth_reading", "expected": 1, "tol": 0.01 },
+      { "type": "monotonic", "series": "Smooth_reading", "direction": "up" }
+    ]
+  },
+  {
+    "file": "pipeline-delay.xmile",
+    "story": "A pipeline transports a ramp inflow with a pure three-hour delay.",
+    "checks": [
+      { "type": "value", "series": "Delayed", "time": 2.5, "expected": 0, "tol": 1e-9 },
+      { "type": "value", "series": "Delayed", "time": 5, "expected": 2, "tol": 1e-9 },
+      { "type": "final", "series": "Delayed", "expected": 7, "tol": 1e-9 }
+    ]
+  },
+  {
+    "file": "stage-discharge-lookup.xmile",
+    "story": "A linear rating curve converts a rising stage into discharge and clips above the highest tabulated stage.",
+    "checks": [
+      { "type": "value", "series": "Discharge", "time": 4, "expected": 8, "tol": 1e-9 },
+      { "type": "value", "series": "Discharge", "time": 10, "expected": 18, "tol": 1e-9 }
+    ]
+  },
+  {
+    "file": "held-pump-curve.xmile",
+    "story": "A held pump curve uses the left-hand value within each interval and clips beyond the last point.",
+    "checks": [
+      { "type": "value", "series": "Pump", "time": 1.5, "expected": 8, "tol": 1e-9 },
+      { "type": "value", "series": "Pump", "time": 4.5, "expected": 4, "tol": 1e-9 }
+    ]
+  },
+  {
+    "file": "if-then-else-gate.xmile",
+    "story": "A delivery gate stays closed until hour five and then passes two units per hour.",
+    "checks": [
+      { "type": "value", "series": "Delivered", "time": 4, "expected": 0, "tol": 1e-9 },
+      { "type": "final", "series": "Delivered", "expected": 10, "tol": 1e-9 }
+    ]
+  },
+  {
+    "file": "min-max-clip.xmile",
+    "story": "A release rule clips a rising signal between zero and eight units per day.",
+    "checks": [
+      { "type": "value", "series": "Release", "time": 2, "expected": 4, "tol": 1e-9 },
+      { "type": "value", "series": "Release", "time": 8, "expected": 8, "tol": 1e-9 },
+      { "type": "final", "series": "Released", "expected": 62, "tol": 1e-9 }
+    ]
+  },
+  {
+    "file": "conveyor-transit.xmile",
+    "story": "A six-slat conveyor with a three-day transit time delays a constant feed before releasing it.",
+    "checks": [
+      { "type": "value", "series": "Belt", "time": 2.5, "expected": 5, "tol": 1e-9 },
+      { "type": "value", "series": "Belt", "time": 5, "expected": 6, "tol": 1e-9 },
+      { "type": "value", "series": "Exit", "time": 2.5, "expected": 0, "tol": 1e-9 },
+      { "type": "value", "series": "Exit", "time": 3, "expected": 2, "tol": 1e-9 }
+    ]
+  },
+  {
+    "file": "queue-pass-through.xmile",
+    "story": "A FIFO queue empties its initial contents and then passes the steady arrival stream straight through.",
+    "checks": [
+      { "type": "value", "series": "Buffer", "time": 1, "expected": 0, "tol": 1e-9 },
+      { "type": "value", "series": "Downstream", "time": 10, "expected": 35, "tol": 1e-9 },
+      { "type": "monotonic", "series": "Downstream", "direction": "up" }
+    ]
+  },
+  {
+    "file": "seeded-random-inflow.xmile",
+    "story": "A seeded uniform random inflow is reproducible run to run.",
+    "checks": [
+      { "type": "bounds", "series": "Random_inflow", "min": 0, "max": 2 },
+      { "type": "value", "series": "Catch", "time": 5, "expected": 6.10752353, "tol": 1e-7 },
+      { "type": "final", "series": "Catch", "expected": 12.66573742, "tol": 1e-7 },
+      { "type": "monotonic", "series": "Catch", "direction": "up" }
+    ]
+  },
+  {
+    "file": "sir-epidemic.xmile",
+    "story": "A closed SIR epidemic conserves the population while susceptibles are depleted and recovered individuals accumulate.",
+    "checks": [
+      { "type": "conserved", "series": ["S", "I", "R"], "tol": 1e-9 },
+      { "type": "monotonic", "series": "S", "direction": "down" },
+      { "type": "bounds", "series": "I", "min": 0, "max": 1000 },
+      { "type": "bounds", "series": "R", "min": 0, "max": 1000 }
+    ]
+  },
+  {
+    "file": "lotka-volterra.xmile",
+    "story": "A Lotka-Volterra predator-prey system cycles within bounded abundance ranges.",
+    "checks": [
+      { "type": "bounds", "series": "Prey", "min": 0.1, "max": 500 },
+      { "type": "bounds", "series": "Predator", "min": 0.1, "max": 100 }
+    ]
+  },
+  {
+    "file": "two-box-carbon-exchange.xmile",
+    "story": "Atmosphere and ocean exchange carbon through a biflow that conserves the total.",
+    "checks": [
+      { "type": "conserved", "series": ["Atmosphere", "Ocean"], "tol": 1e-9 },
+      { "type": "value", "series": "Atmosphere", "time": 200, "expected": 333.3333, "tol": 0.005 },
+      { "type": "monotonic", "series": "Atmosphere", "direction": "down" },
+      { "type": "monotonic", "series": "Ocean", "direction": "up" }
+    ]
+  },
+  {
+    "file": "reservoir-spillway.xmile",
+    "story": "A reservoir fills to an overflow threshold and then reaches a spill equilibrium.",
+    "checks": [
+      { "type": "final", "series": "Storage", "expected": 106, "tol": 1e-6 },
+      { "type": "monotonic", "series": "Storage", "direction": "up" },
+      { "type": "bounds", "series": "Storage", "min": 0, "max": 107 }
+    ]
+  },
+  {
+    "file": "aquifer-pumping.xmile",
+    "story": "Pumping exceeds recharge, so aquifer storage declines linearly by six units per year.",
+    "checks": [
+      { "type": "value", "series": "Aquifer", "time": 10, "expected": 40, "tol": 1e-9 },
+      { "type": "final", "series": "Aquifer", "expected": 40, "tol": 1e-9 },
+      { "type": "monotonic", "series": "Aquifer", "direction": "down" }
+    ]
+  },
+  {
+    "file": "thermal-lag-smth3.xmile",
+    "story": "A third-order water-temperature lag responds smoothly to a step change in air temperature.",
+    "checks": [
+      { "type": "value", "series": "Water_temp", "time": 5, "expected": 0, "tol": 1e-9 },
+      { "type": "final", "series": "Water_temp", "expected": 10, "tol": 0.001 },
+      { "type": "monotonic", "series": "Water_temp", "direction": "up" },
+      { "type": "bounds", "series": "Water_temp", "min": 0, "max": 10 }
+    ]
+  },
+  {
+    "file": "phosphorus-saturation.xmile",
+    "story": "Algal phosphorus uptake follows a saturating Michaelis-Menten rate as the pool is drawn down.",
+    "checks": [
+      { "type": "monotonic", "series": "P", "direction": "down" },
+      { "type": "bounds", "series": "P", "min": 0, "max": 100 },
+      { "type": "bounds", "series": "Uptake", "min": 0, "max": 5 }
+    ]
+  },
+  {
+    "file": "sir-vaccination.xmile",
+    "story": "A one-off vaccination pulse during an SIR epidemic conserves the population and reduces the final outbreak size.",
+    "checks": [
+      { "type": "conserved", "series": ["S", "I", "R"], "tol": 1e-9 },
+      { "type": "value", "series": "Vaccination", "time": 20, "expected": 20000, "tol": 1e-9 },
+      { "type": "monotonic", "series": "S", "direction": "down" },
+      { "type": "bounds", "series": "I", "min": 0, "max": 1000 },
+      { "type": "bounds", "series": "R", "min": 0, "max": 1000 }
+    ]
+  },
+  {
+    "file": "sediment-trap.xmile",
+    "story": "A reservoir traps sediment with declining efficiency and begins dredging in year 25.",
+    "checks": [
+      { "type": "bounds", "series": "Sediment", "min": 0, "max": 100000 },
+      { "type": "value", "series": "Dredging", "time": 10, "expected": 0, "tol": 1e-9 },
+      { "type": "value", "series": "Dredging", "time": 25, "expected": 2000, "tol": 1e-9 },
+      { "type": "bounds", "series": "Dredging", "min": 0, "max": 2000 }
+    ]
+  },
+  {
+    "file": "lake-flushing.xmile",
+    "story": "A lake loaded at a constant rate approaches a flushing equilibrium of five units.",
+    "checks": [
+      { "type": "value", "series": "LakeP", "time": 5, "expected": 3.1606, "tol": 0.005 },
+      { "type": "final", "series": "LakeP", "expected": 5, "tol": 0.001 },
+      { "type": "monotonic", "series": "LakeP", "direction": "up" }
+    ]
+  },
+  {
+    "file": "step-down-emissions.xmile",
+    "story": "Emissions run at five units per year until year 20 and then fall to zero as a step.",
+    "checks": [
+      { "type": "value", "series": "CO2", "time": 10, "expected": 330, "tol": 1e-9 },
+      { "type": "value", "series": "CO2", "time": 20, "expected": 380, "tol": 1e-9 },
+      { "type": "final", "series": "CO2", "expected": 380, "tol": 1e-9 },
+      { "type": "monotonic", "series": "CO2", "direction": "up" }
+    ]
+  },
+  {
+    "file": "seasonal-sine-runoff.xmile",
+    "story": "A seasonal sine hydrograph integrates to zero net anomaly over each year.",
+    "checks": [
+      { "type": "value", "series": "Runoff", "time": 6, "expected": 6, "tol": 1e-6 },
+      { "type": "final", "series": "Runoff", "expected": 12, "tol": 1e-6 },
+      { "type": "monotonic", "series": "Runoff", "direction": "up" },
+      { "type": "bounds", "series": "Rate", "min": 0.3, "max": 1.7 }
+    ]
+  },
+  {
+    "file": "pulse-train-reservoir.xmile",
+    "story": "A reservoir receives six-unit releases every four days and accumulates them exactly.",
+    "checks": [
+      { "type": "value", "series": "Reservoir", "time": 3, "expected": 6, "tol": 1e-9 },
+      { "type": "value", "series": "Release", "time": 6, "expected": 12, "tol": 1e-9 },
+      { "type": "final", "series": "Reservoir", "expected": 18, "tol": 1e-9 }
+    ]
+  },
+  {
+    "file": "regional-population.xmile",
+    "story": "Two regions grow from an apply-to-all rate, with a North-specific override, and SUM reports the total.",
+    "note": "Arrayed results are reported per element as Population[Region]; the scalar total uses SUM(Population[*]).",
+    "checks": [
+      { "type": "value", "series": "Population[North]", "time": 10, "expected": 619.17364224, "tol": 1e-9 },
+      { "type": "value", "series": "Population[South]", "time": 10, "expected": 259.37424601, "tol": 1e-9 },
+      { "type": "value", "series": "Total_population", "time": 10, "expected": 878.54788825, "tol": 1e-9 },
+      { "type": "monotonic", "series": "Population[North]", "direction": "up" },
+      { "type": "monotonic", "series": "Population[South]", "direction": "up" }
+    ]
+  },
+  {
+    "file": "age-region-population.xmile",
+    "story": "Four age-by-region cohorts grow with element-specific rates, and a partial wildcard totals each region over age.",
+    "note": "Region_total is arrayed over Region only: SUM(Pop[Region, *]) sums the Age dimension.",
+    "checks": [
+      { "type": "value", "series": "Pop[North,Young]", "time": 2, "expected": 121, "tol": 1e-9 },
+      { "type": "value", "series": "Pop[North,Old]", "time": 2, "expected": 72, "tol": 1e-9 },
+      { "type": "value", "series": "Region_total[North]", "time": 2, "expected": 193, "tol": 1e-9 },
+      { "type": "value", "series": "Region_total[South]", "time": 2, "expected": 290, "tol": 1e-9 }
+    ]
+  },
+  {
+    "file": "arrayed-conveyor.xmile",
+    "story": "Two parallel conveyor belts with a three-day transit time carry different constant feeds.",
+    "checks": [
+      { "type": "value", "series": "Belt[East]", "time": 2.5, "expected": 5, "tol": 1e-9 },
+      { "type": "value", "series": "Belt[West]", "time": 2.5, "expected": 2.5, "tol": 1e-9 },
+      { "type": "value", "series": "Exit[East]", "time": 3, "expected": 2, "tol": 1e-9 },
+      { "type": "value", "series": "Exit[West]", "time": 3, "expected": 1, "tol": 1e-9 },
+      { "type": "value", "series": "Belt[East]", "time": 6, "expected": 6, "tol": 1e-9 },
+      { "type": "value", "series": "Belt[West]", "time": 6, "expected": 3, "tol": 1e-9 }
+    ]
+  },
+  {
+    "file": "arrayed-nonnegative-chain.xmile",
+    "story": "Per-region tank, creek and river stocks form a non-negative chain whose outflows are cut when empty.",
+    "checks": [
+      { "type": "value", "series": "Tank[North]", "time": 1, "expected": 6, "tol": 1e-9 },
+      { "type": "value", "series": "Spill[North]", "time": 2, "expected": 2, "tol": 1e-9 },
+      { "type": "value", "series": "Creek[North]", "time": 3, "expected": 7, "tol": 1e-9 },
+      { "type": "final", "series": "Tank[North]", "expected": 0, "tol": 1e-9 },
+      { "type": "final", "series": "River[North]", "expected": 5, "tol": 1e-9 },
+      { "type": "conserved", "series": ["Tank[North]", "Creek[North]", "River[North]"], "tol": 1e-9 },
+      { "type": "conserved", "series": ["Tank[South]", "Creek[South]", "River[South]"], "tol": 1e-9 }
+    ]
+  },
+  {
+    "file": "rk4-exponential-decay.xmile",
+    "story": "First-order contaminant decay integrated with RK4 at a coarse DT of 0.5 years.",
+    "note": "The 0.1% checks are met only by RK4: at t=10 Euler gives 0.317 and Heun RK2 about 0.717, versus the analytic 0.673795.",
+    "checks": [
+      { "type": "value", "series": "Contaminant", "time": 5, "expected": 8.208499862, "tol": 0.001 },
+      { "type": "value", "series": "Contaminant", "time": 10, "expected": 0.673794699, "tol": 0.001 },
+      { "type": "monotonic", "series": "Contaminant", "direction": "down" }
+    ]
+  },
+  {
+    "file": "rk4-harmonic-oscillator.xmile",
+    "story": "A unit harmonic oscillator integrated with RK4 at DT=0.5 over one full period.",
+    "note": "Euler at DT=0.5 reaches 3.58 and Heun RK2 1.069 at t=2*pi; only RK4 stays within 0.2% of the analytic cosine.",
+    "checks": [
+      { "type": "value", "series": "Displacement", "time": 3, "expected": -0.9899924966, "tol": 0.002 },
+      { "type": "value", "series": "Velocity", "time": 3, "expected": -0.1411200081, "tol": 0.002 },
+      { "type": "final", "series": "Displacement", "expected": 1, "tol": 0.002 }
+    ]
+  },
+  {
+    "file": "rk2-harmonic-oscillator.xmile",
+    "story": "The same harmonic oscillator integrated with Heun RK2 at a coarse DT of 0.1.",
+    "note": "Euler at DT=0.1 reaches 1.366 at t=2*pi (37% high); RK2 stays within 0.2% of the analytic cosine.",
+    "checks": [
+      { "type": "value", "series": "Displacement", "time": 3, "expected": -0.9899924966, "tol": 0.002 },
+      { "type": "final", "series": "Displacement", "expected": 1, "tol": 0.002 }
+    ]
+  },
+  {
+    "file": "scenario-population-growth.xmile",
+    "story": "A population model with a baseline growth rate and a high-growth scenario override.",
+    "note": "The high scenario overrides Growth_rate from 0.1 to 0.2; Euler with DT=1 gives exact geometric values.",
+    "checks": [
+      { "type": "value", "series": "Population", "time": 5, "expected": 161.051, "tol": 1e-9 },
+      { "type": "final", "series": "Population", "expected": 259.37424601, "tol": 1e-9 },
+      { "type": "value", "series": "Population", "time": 5, "expected": 248.832, "tol": 1e-9, "scenario": "high" },
+      { "type": "final", "series": "Population", "expected": 619.17364224, "tol": 1e-9, "scenario": "high" }
+    ]
+  },
+  {
+    "file": "scenario-reservoir-inflow.xmile",
+    "story": "A reservoir inflow model whose drought scenario lowers the inflow and extends the run.",
+    "note": "The drought scenario overrides Inflow to 0.5 and the run stop to 20 days.",
+    "checks": [
+      { "type": "final", "series": "Reservoir", "expected": 20, "tol": 1e-9 },
+      { "type": "value", "series": "Reservoir", "time": 10, "expected": 5, "tol": 1e-9, "scenario": "drought" },
+      { "type": "final", "series": "Reservoir", "expected": 10, "tol": 1e-9, "scenario": "drought" }
+    ]
+  }
+]

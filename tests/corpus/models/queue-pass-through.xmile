@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Queue Pass-Through</name>
+    <vendor>SourceSink</vendor>
+    <product version="0.1.0">SourceSink</product>
+  </header>
+  <sim_specs method="Euler" time_units="day">
+    <start>0</start>
+    <stop>10</stop>
+    <dt>0.5</dt>
+    <saveper>1</saveper>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Buffer">
+        <eqn>5</eqn>
+        <inflow name="Arrive"/>
+        <outflow name="Serve"/>
+        <queue/>
+      </stock>
+      <stock name="Downstream">
+        <eqn>0</eqn>
+        <inflow name="Serve"/>
+      </stock>
+      <flow name="Arrive">
+        <eqn>3</eqn>
+      </flow>
+      <flow name="Serve">
+        <eqn>0</eqn>
+      </flow>
+    </variables>
+  </model>
+</xmile>

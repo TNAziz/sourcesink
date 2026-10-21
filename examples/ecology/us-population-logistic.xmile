@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>U.S. Population: Pearl-Reed Logistic Curve</name>
+    <vendor>sourcesink</vendor>
+    <product version="0.1">sourcesink</product>
+    <doc>Based on Pearl and Reed (1920).</doc>
+  </header>
+  <sim_specs method="RK4" time_units="year">
+    <start>1790</start>
+    <stop>2000</stop>
+    <dt>0.25</dt>
+    <saveEvery>1</saveEvery>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Population">
+        <eqn>3.9e6</eqn>
+        <units>people</units>
+        <doc>U.S. population P in people; the 3.9 million 1790 census value is the initial condition.</doc>
+        <inflows>
+          <flow>growth</flow>
+        </inflows>
+      </stock>
+      <flow name="growth">
+        <eqn>r * Population * (1 - Population / K)</eqn>
+        <units>people/year</units>
+        <doc>Logistic net growth r*P*(1-P/K), slowing as the population approaches K.</doc>
+      </flow>
+      <aux name="r">
+        <eqn>0.03134</eqn>
+        <units>1/year</units>
+        <doc>Pearl and Reed's fitted intrinsic growth rate r.</doc>
+      </aux>
+      <aux name="K">
+        <eqn>197.27e6</eqn>
+        <units>people</units>
+        <doc>Fitted carrying capacity K = 197.27 million people.</doc>
+      </aux>
+      <aux name="initial_population">
+        <eqn>3.9e6</eqn>
+        <units>people</units>
+        <doc>Population at the 1790 start of the fit, P0 = 3.9 million.</doc>
+      </aux>
+      <aux name="census_2000">
+        <eqn>281e6</eqn>
+        <units>people</units>
+        <doc>Actual 2000 census population (281 million), included for comparison with the fitted curve.</doc>
+      </aux>
+      <aux name="model_minus_census_2000">
+        <eqn>Population - census_2000</eqn>
+        <units>people</units>
+        <doc>Gap at any time between the logistic curve and the actual 2000 census; meaningful at year 2000.</doc>
+      </aux>
+    </variables>
+    <views>
+      <view type="stock_flow">
+        <connector from="r" to="growth"/>
+        <connector from="Population" to="growth"/>
+        <connector from="K" to="growth"/>
+        <connector from="Population" to="model_minus_census_2000"/>
+        <connector from="census_2000" to="model_minus_census_2000"/>
+      </view>
+    </views>
+  </model>
+</xmile>

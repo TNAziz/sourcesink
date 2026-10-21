@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Seasonal Sine Runoff</name>
+    <vendor>SourceSink</vendor>
+    <product version="0.1.0">SourceSink</product>
+  </header>
+  <sim_specs method="Euler" time_units="year">
+    <start>0</start>
+    <stop>12</stop>
+    <dt>0.01</dt>
+    <saveper>1</saveper>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Runoff">
+        <eqn>0</eqn>
+        <inflow name="Rate"/>
+      </stock>
+      <flow name="Rate">
+        <eqn>MAX(0, 1 + 0.8 * SIN(PI * TIME / 3))</eqn>
+      </flow>
+    </variables>
+  </model>
+</xmile>

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Ice-Albedo Feedback: Warm Earth and Snowball Earth</name>
+    <vendor>sourcesink</vendor>
+    <product version="0.1">sourcesink</product>
+  </header>
+  <sim_specs method="RK4" time_units="year">
+    <start>0</start>
+    <stop>60</stop>
+    <dt>0.05</dt>
+    <saveEvery>1</saveEvery>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Temperature">
+        <eqn>initial_temperature</eqn>
+        <units>K</units>
+        <doc>Planetary surface temperature T. Based on Budyko (1969) and Sellers (1969).</doc>
+        <inflows>
+          <flow>absorbed_heating</flow>
+        </inflows>
+        <outflows>
+          <flow>longwave_cooling</flow>
+        </outflows>
+      </stock>
+      <flow name="absorbed_heating">
+        <eqn>absorbed_solar / heat_capacity</eqn>
+        <units>K/year</units>
+        <doc>Rate at which absorbed sunlight raises the surface temperature, absorbed_solar / C.</doc>
+      </flow>
+      <flow name="longwave_cooling">
+        <eqn>outgoing_longwave / heat_capacity</eqn>
+        <units>K/year</units>
+        <doc>Rate at which emitted longwave radiation cools the surface, outgoing_longwave / C.</doc>
+      </flow>
+      <aux name="initial_temperature">
+        <eqn>288</eqn>
+        <units>K</units>
+        <doc>Starting surface temperature. 288 K is the warm Earth; set it to 230 K to start from a snowball.</doc>
+      </aux>
+      <aux name="solar_constant">
+        <eqn>1361</eqn>
+        <units>W/m^2</units>
+        <doc>Total solar irradiance S0 at the top of the atmosphere.</doc>
+      </aux>
+      <aux name="albedo">
+        <eqn>IF Temperature &lt; albedo_ice_threshold THEN albedo_cold ELSE IF Temperature &gt; albedo_warm_threshold THEN albedo_warm ELSE albedo_cold - albedo_slope * (Temperature - albedo_ice_threshold)</eqn>
+        <units>1</units>
+        <doc>Planetary albedo alpha(T): 0.62 while the planet is ice covered, 0.30 once it is warm, and linear between 250 K and 280 K. The ice-albedo feedback makes the albedo fall as the planet warms.</doc>
+      </aux>
+      <aux name="albedo_cold">
+        <eqn>0.62</eqn>
+        <units>1</units>
+        <doc>Albedo of the ice-covered (snowball) planet.</doc>
+      </aux>
+      <aux name="albedo_warm">
+        <eqn>0.30</eqn>
+        <units>1</units>
+        <doc>Albedo of the ice-free warm planet.</doc>
+      </aux>
+      <aux name="albedo_ice_threshold">
+        <eqn>250</eqn>
+        <units>K</units>
+        <doc>Temperature at or below which the surface is fully ice covered and the albedo holds its cold value.</doc>
+      </aux>
+      <aux name="albedo_warm_threshold">
+        <eqn>280</eqn>
+        <units>K</units>
+        <doc>Temperature at or above which the planet is ice free and the albedo holds its warm value.</doc>
+      </aux>
+      <aux name="albedo_slope">
+        <eqn>0.32 / 30</eqn>
+        <units>1/K</units>
+        <doc>Rate at which albedo falls between the ice and warm thresholds.</doc>
+      </aux>
+      <aux name="emissivity">
+        <eqn>0.612</eqn>
+        <units>1</units>
+        <doc>Effective longwave emissivity epsilon, standing in for the greenhouse effect.</doc>
+      </aux>
+      <aux name="stefan_boltzmann">
+        <eqn>5.67e-8</eqn>
+        <units>W/m^2/K^4</units>
+        <doc>Stefan-Boltzmann constant sigma.</doc>
+      </aux>
+      <aux name="heat_capacity">
+        <eqn>8</eqn>
+        <units>W*yr/m^2/K</units>
+        <doc>Effective heat capacity C of the ocean mixed layer.</doc>
+      </aux>
+      <aux name="absorbed_solar">
+        <eqn>solar_constant * (1 - albedo) / 4</eqn>
+        <units>W/m^2</units>
+        <doc>Globally averaged solar energy absorbed at the surface, S0 (1 - alpha(T)) / 4.</doc>
+      </aux>
+      <aux name="outgoing_longwave">
+        <eqn>emissivity * stefan_boltzmann * Temperature^4</eqn>
+        <units>W/m^2</units>
+        <doc>Longwave energy radiated to space, epsilon sigma T^4.</doc>
+      </aux>
+      <aux name="imbalance">
+        <eqn>absorbed_solar - outgoing_longwave</eqn>
+        <units>W/m^2</units>
+        <doc>Net radiative energy balance; positive warms the planet, negative cools it.</doc>
+      </aux>
+    </variables>
+    <views>
+      <view type="stock_flow">
+        <connector from="heat_capacity" to="absorbed_heating"/>
+        <connector from="absorbed_solar" to="absorbed_heating"/>
+        <connector from="heat_capacity" to="longwave_cooling"/>
+        <connector from="outgoing_longwave" to="longwave_cooling"/>
+        <connector from="solar_constant" to="absorbed_solar"/>
+        <connector from="Temperature" to="albedo"/>
+        <connector from="albedo_cold" to="albedo"/>
+        <connector from="albedo_warm" to="albedo"/>
+        <connector from="albedo_ice_threshold" to="albedo"/>
+        <connector from="albedo_warm_threshold" to="albedo"/>
+        <connector from="albedo_slope" to="albedo"/>
+        <connector from="albedo" to="absorbed_solar"/>
+        <connector from="emissivity" to="outgoing_longwave"/>
+        <connector from="stefan_boltzmann" to="outgoing_longwave"/>
+        <connector from="Temperature" to="outgoing_longwave"/>
+        <connector from="absorbed_solar" to="imbalance"/>
+        <connector from="outgoing_longwave" to="imbalance"/>
+        <connector from="Temperature" to="longwave_cooling"/>
+      </view>
+    </views>
+  </model>
+</xmile>

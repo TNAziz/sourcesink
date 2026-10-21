@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Held Pump Curve</name>
+    <vendor>SourceSink</vendor>
+    <product version="0.1.0">SourceSink</product>
+  </header>
+  <sim_specs method="Euler" time_units="hour">
+    <start>0</start>
+    <stop>5</stop>
+    <dt>0.5</dt>
+    <saveper>0.5</saveper>
+  </sim_specs>
+  <model>
+    <variables>
+      <aux name="Demand">
+        <eqn>RAMP(1, 0)</eqn>
+      </aux>
+      <aux name="Pump">
+        <eqn>Pump_curve(Demand)</eqn>
+      </aux>
+      <gf name="Pump_curve" interpolation="held" extrapolation="clip">
+        <xpts>0,1,2</xpts>
+        <ypts>10,8,4</ypts>
+      </gf>
+    </variables>
+  </model>
+</xmile>

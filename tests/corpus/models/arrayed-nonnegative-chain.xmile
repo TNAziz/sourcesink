@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Arrayed Non-Negative Chain</name>
+    <vendor>SourceSink</vendor>
+    <product version="0.1.0">SourceSink</product>
+  </header>
+  <sim_specs method="Euler" time_units="day">
+    <start>0</start>
+    <stop>5</stop>
+    <dt>1</dt>
+    <saveper>1</saveper>
+  </sim_specs>
+  <dimensions>
+    <dim name="Region">
+      <elem name="North"/>
+      <elem name="South"/>
+    </dim>
+  </dimensions>
+  <model>
+    <variables>
+      <stock name="Tank" non_negative="true">
+        <dimensions><dim name="Region"/></dimensions>
+        <eqn>10</eqn>
+        <outflow name="Spill"/>
+      </stock>
+      <stock name="Creek" non_negative="true">
+        <dimensions><dim name="Region"/></dimensions>
+        <eqn>0</eqn>
+        <inflow name="Spill"/>
+        <outflow name="Seep"/>
+      </stock>
+      <stock name="River">
+        <dimensions><dim name="Region"/></dimensions>
+        <eqn>0</eqn>
+        <inflow name="Seep"/>
+      </stock>
+      <flow name="Spill">
+        <dimensions><dim name="Region"/></dimensions>
+        <eqn>4</eqn>
+      </flow>
+      <flow name="Seep">
+        <dimensions><dim name="Region"/></dimensions>
+        <eqn>1</eqn>
+      </flow>
+    </variables>
+  </model>
+</xmile>

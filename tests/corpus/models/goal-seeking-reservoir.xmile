@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Goal-Seeking Reservoir Level</name>
+    <vendor>SourceSink</vendor>
+    <product version="0.1.0">SourceSink</product>
+  </header>
+  <sim_specs method="Euler" time_units="day">
+    <start>0</start>
+    <stop>60</stop>
+    <dt>0.01</dt>
+    <saveper>1</saveper>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Level">
+        <eqn>10</eqn>
+        <inflow name="Adjust"/>
+      </stock>
+      <flow name="Adjust">
+        <eqn>(Target - Level) / Tau</eqn>
+      </flow>
+      <aux name="Target">
+        <eqn>50</eqn>
+      </aux>
+      <aux name="Tau">
+        <eqn>4</eqn>
+      </aux>
+    </variables>
+  </model>
+</xmile>

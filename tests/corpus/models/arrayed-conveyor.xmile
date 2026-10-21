@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Arrayed Conveyor Belts</name>
+    <vendor>SourceSink</vendor>
+    <product version="0.1.0">SourceSink</product>
+  </header>
+  <sim_specs method="Euler" time_units="day">
+    <start>0</start>
+    <stop>6</stop>
+    <dt>0.5</dt>
+    <saveper>0.5</saveper>
+  </sim_specs>
+  <dimensions>
+    <dim name="Region">
+      <elem name="East"/>
+      <elem name="West"/>
+    </dim>
+  </dimensions>
+  <model>
+    <variables>
+      <stock name="Belt">
+        <dimensions><dim name="Region"/></dimensions>
+        <eqn>0</eqn>
+        <inflow name="Feed"/>
+        <outflow name="Exit"/>
+        <conveyor>
+          <len>3</len>
+        </conveyor>
+      </stock>
+      <flow name="Feed">
+        <dimensions><dim name="Region"/></dimensions>
+        <eqn>2</eqn>
+        <element subscript="West"><eqn>1</eqn></element>
+      </flow>
+      <flow name="Exit">
+        <dimensions><dim name="Region"/></dimensions>
+        <eqn>0</eqn>
+      </flow>
+    </variables>
+  </model>
+</xmile>

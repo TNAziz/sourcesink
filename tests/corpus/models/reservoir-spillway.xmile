@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Reservoir with Overflow Spillway</name>
+    <vendor>SourceSink</vendor>
+    <product version="0.1.0">SourceSink</product>
+  </header>
+  <sim_specs method="Euler" time_units="day">
+    <start>0</start>
+    <stop>100</stop>
+    <dt>0.5</dt>
+    <saveper>1</saveper>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Storage">
+        <eqn>0</eqn>
+        <inflow name="Inflow"/>
+        <outflow name="Spill"/>
+      </stock>
+      <flow name="Inflow">
+        <eqn>3</eqn>
+      </flow>
+      <flow name="Spill">
+        <eqn>MAX(0, Storage - 100) / 2</eqn>
+      </flow>
+    </variables>
+  </model>
+</xmile>

@@ -1,0 +1,15 @@
+node_modules/
+dist/
+build/
+*.log
+.env
+.env.*
+.DS_Store
+*.tsbuildinfo
+coverage/
+.vitest/
+extraction/
+fixtures/bin/
+.cache/
+.briefs/
+!src/desktop/build/

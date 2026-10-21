@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Lotka-Volterra Predator-Prey</name>
+    <vendor>SourceSink</vendor>
+    <product version="0.1.0">SourceSink</product>
+  </header>
+  <sim_specs method="Euler" time_units="year">
+    <start>0</start>
+    <stop>50</stop>
+    <dt>0.01</dt>
+    <saveper>1</saveper>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Prey">
+        <eqn>100</eqn>
+        <inflow name="Birth"/>
+        <outflow name="Predation"/>
+      </stock>
+      <stock name="Predator">
+        <eqn>20</eqn>
+        <inflow name="Growth"/>
+        <outflow name="Death"/>
+      </stock>
+      <flow name="Birth">
+        <eqn>0.5 * Prey</eqn>
+      </flow>
+      <flow name="Predation">
+        <eqn>0.02 * Prey * Predator</eqn>
+      </flow>
+      <flow name="Growth">
+        <eqn>0.005 * Prey * Predator</eqn>
+      </flow>
+      <flow name="Death">
+        <eqn>0.3 * Predator</eqn>
+      </flow>
+    </variables>
+  </model>
+</xmile>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Regional Population</name>
+    <vendor>SourceSink</vendor>
+    <product version="0.1.0">SourceSink</product>
+  </header>
+  <sim_specs method="Euler" time_units="year">
+    <start>0</start>
+    <stop>10</stop>
+    <dt>1</dt>
+    <saveper>1</saveper>
+  </sim_specs>
+  <dimensions>
+    <dim name="Region">
+      <elem name="North"/>
+      <elem name="South"/>
+    </dim>
+  </dimensions>
+  <model>
+    <variables>
+      <stock name="Population">
+        <dimensions><dim name="Region"/></dimensions>
+        <eqn>100</eqn>
+        <inflow name="Births"/>
+      </stock>
+      <flow name="Births">
+        <dimensions><dim name="Region"/></dimensions>
+        <eqn>Population * r</eqn>
+      </flow>
+      <aux name="r">
+        <dimensions><dim name="Region"/></dimensions>
+        <eqn>0.1</eqn>
+        <element subscript="North"><eqn>0.2</eqn></element>
+      </aux>
+      <aux name="Total_population">
+        <eqn>SUM(Population[*])</eqn>
+      </aux>
+    </variables>
+  </model>
+</xmile>

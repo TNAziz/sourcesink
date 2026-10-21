@@ -1,0 +1,31 @@
+{
+  "name": "sourcesink",
+  "description": "SourceSink — an open-source system dynamics modeling environment.",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.19"
+  },
+  "workspaces": [
+    "src/*"
+  ],
+  "scripts": {
+    "build": "tsc --build",
+    "typecheck": "for p in src/*/; do tsc --noEmit -p \"$p\" || exit 1; done",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "start": "npm run dev -w @sourcesink/ui",
+    "simulate": "tsx src/cli/src/run.ts run",
+    "examples:index": "tsx scripts/examples-index.ts",
+    "eval:assistant": "tsx tests/assistant-eval/run.ts",
+    "desktop": "npm run start -w @sourcesink/desktop",
+    "package:desktop": "npm run package -w @sourcesink/desktop",
+    "install:desktop": "npm run install-local -w @sourcesink/desktop"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.8"
+  }
+}

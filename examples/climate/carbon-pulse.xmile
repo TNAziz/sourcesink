@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Carbon Pulse: How Long Does Emitted CO2 Stay in the Air?</name>
+    <vendor>sourcesink</vendor>
+    <product version="0.1">sourcesink</product>
+  </header>
+  <sim_specs method="Euler" time_units="year">
+    <start>0</start>
+    <stop>1000</stop>
+    <dt>0.1</dt>
+    <saveEvery>1</saveEvery>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="permanent_box">
+        <eqn>pulse_size * fraction_permanent</eqn>
+        <units>GtC</units>
+        <doc>Carbon held permanently in the atmosphere, the fraction that never leaves. Bern impulse-response model of Joos et al. (2013).</doc>
+      </stock>
+      <stock name="box_1">
+        <eqn>pulse_size * fraction_1</eqn>
+        <units>GtC</units>
+        <doc>Slow carbon reservoir with an e-folding time of about 394 years.</doc>
+        <outflows>
+          <flow>box_1_release</flow>
+        </outflows>
+      </stock>
+      <stock name="box_2">
+        <eqn>pulse_size * fraction_2</eqn>
+        <units>GtC</units>
+        <doc>Intermediate carbon reservoir with an e-folding time of about 37 years.</doc>
+        <outflows>
+          <flow>box_2_release</flow>
+        </outflows>
+      </stock>
+      <stock name="box_3">
+        <eqn>pulse_size * fraction_3</eqn>
+        <units>GtC</units>
+        <doc>Fast carbon reservoir with an e-folding time of about 4.3 years.</doc>
+        <outflows>
+          <flow>box_3_release</flow>
+        </outflows>
+      </stock>
+      <flow name="box_1_release">
+        <eqn>box_1 / tau_1</eqn>
+        <units>GtC/year</units>
+        <doc>Carbon leaving the slow reservoir, Box_1 / tau_1.</doc>
+      </flow>
+      <flow name="box_2_release">
+        <eqn>box_2 / tau_2</eqn>
+        <units>GtC/year</units>
+        <doc>Carbon leaving the intermediate reservoir, Box_2 / tau_2.</doc>
+      </flow>
+      <flow name="box_3_release">
+        <eqn>box_3 / tau_3</eqn>
+        <units>GtC/year</units>
+        <doc>Carbon leaving the fast reservoir, Box_3 / tau_3.</doc>
+      </flow>
+      <aux name="pulse_size">
+        <eqn>100</eqn>
+        <units>GtC</units>
+        <doc>Size of the initial CO2 pulse, 100 GtC.</doc>
+      </aux>
+      <aux name="fraction_permanent">
+        <eqn>0.2173</eqn>
+        <units>1</units>
+        <doc>Fraction of the pulse that stays airborne permanently, a0.</doc>
+      </aux>
+      <aux name="fraction_1">
+        <eqn>0.2240</eqn>
+        <units>1</units>
+        <doc>Fraction of the pulse assigned to the slow reservoir, a1.</doc>
+      </aux>
+      <aux name="fraction_2">
+        <eqn>0.2824</eqn>
+        <units>1</units>
+        <doc>Fraction of the pulse assigned to the intermediate reservoir, a2.</doc>
+      </aux>
+      <aux name="fraction_3">
+        <eqn>0.2763</eqn>
+        <units>1</units>
+        <doc>Fraction of the pulse assigned to the fast reservoir, a3.</doc>
+      </aux>
+      <aux name="tau_1">
+        <eqn>394.4</eqn>
+        <units>year</units>
+        <doc>E-folding time tau_1 of the slow reservoir.</doc>
+      </aux>
+      <aux name="tau_2">
+        <eqn>36.54</eqn>
+        <units>year</units>
+        <doc>E-folding time tau_2 of the intermediate reservoir.</doc>
+      </aux>
+      <aux name="tau_3">
+        <eqn>4.304</eqn>
+        <units>year</units>
+        <doc>E-folding time tau_3 of the fast reservoir.</doc>
+      </aux>
+      <aux name="airborne">
+        <eqn>permanent_box + box_1 + box_2 + box_3</eqn>
+        <units>GtC</units>
+        <doc>Total carbon still airborne, the sum of the four reservoirs.</doc>
+      </aux>
+      <aux name="airborne_fraction">
+        <eqn>airborne / pulse_size</eqn>
+        <units>1</units>
+        <doc>Fraction of the original pulse still in the atmosphere.</doc>
+      </aux>
+    </variables>
+    <views>
+      <view type="stock_flow">
+        <connector from="box_1" to="box_1_release"/>
+        <connector from="tau_1" to="box_1_release"/>
+        <connector from="box_2" to="box_2_release"/>
+        <connector from="tau_2" to="box_2_release"/>
+        <connector from="box_3" to="box_3_release"/>
+        <connector from="tau_3" to="box_3_release"/>
+        <connector from="permanent_box" to="airborne"/>
+        <connector from="box_1" to="airborne"/>
+        <connector from="box_2" to="airborne"/>
+        <connector from="box_3" to="airborne"/>
+        <connector from="airborne" to="airborne_fraction"/>
+        <connector from="pulse_size" to="airborne_fraction"/>
+      </view>
+    </views>
+  </model>
+</xmile>

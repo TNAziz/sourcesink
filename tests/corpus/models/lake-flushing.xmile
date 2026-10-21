@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Lake Phosphorus Flushing</name>
+    <vendor>SourceSink</vendor>
+    <product version="0.1.0">SourceSink</product>
+  </header>
+  <sim_specs method="Euler" time_units="year">
+    <start>0</start>
+    <stop>60</stop>
+    <dt>0.01</dt>
+    <saveper>1</saveper>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="LakeP">
+        <eqn>0</eqn>
+        <inflow name="Load"/>
+        <outflow name="Flush"/>
+      </stock>
+      <flow name="Load">
+        <eqn>1</eqn>
+      </flow>
+      <flow name="Flush">
+        <eqn>0.2 * LakeP</eqn>
+      </flow>
+    </variables>
+  </model>
+</xmile>

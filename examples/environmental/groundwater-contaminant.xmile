@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Groundwater Contaminant Transport with First-Order Decay</name>
+    <vendor>sourcesink</vendor>
+    <product version="0.1">sourcesink</product>
+  </header>
+  <sim_specs method="Euler" time_units="year">
+    <start>0</start>
+    <stop>100</stop>
+    <dt>0.25</dt>
+    <saveEvery>1</saveEvery>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Mass">
+        <eqn>0</eqn>
+        <units>kg</units>
+        <doc>Contaminant mass resident in the aquifer compartment.</doc>
+        <inflows>
+          <flow>injection</flow>
+        </inflows>
+        <outflows>
+          <flow>discharge</flow>
+          <flow>decay</flow>
+        </outflows>
+      </stock>
+      <flow name="injection">
+        <eqn>loading_rate * (1 - STEP(1, spill_stop))</eqn>
+        <units>kg/year</units>
+        <doc>Source loading into the aquifer. STEP switches the source off at spill_stop, representing cleanup or source removal.</doc>
+      </flow>
+      <flow name="discharge">
+        <eqn>Mass / residence_time</eqn>
+        <units>kg/year</units>
+        <doc>Advective export of contaminant with groundwater flow (lumped as a well-mixed residence time).</doc>
+      </flow>
+      <flow name="decay">
+        <eqn>decay_rate * Mass</eqn>
+        <units>kg/year</units>
+        <doc>First-order biochemical/abiotic degradation.</doc>
+      </flow>
+      <aux name="loading_rate">
+        <eqn>100</eqn>
+        <units>kg/year</units>
+        <doc>Continuous contaminant release rate while active.</doc>
+      </aux>
+      <aux name="spill_stop">
+        <eqn>20</eqn>
+        <units>year</units>
+        <doc>Year at which the source is removed.</doc>
+      </aux>
+      <aux name="residence_time">
+        <eqn>50</eqn>
+        <units>year</units>
+        <doc>Mean hydraulic residence time (V / Q).</doc>
+      </aux>
+      <aux name="decay_rate">
+        <eqn>0.05</eqn>
+        <units>1/year</units>
+        <doc>First-order decay coefficient (half-life LN(2) / decay_rate = 13.9 years).</doc>
+      </aux>
+      <aux name="aquifer_volume">
+        <eqn>1000000</eqn>
+        <units>m3</units>
+        <doc>Volume of the aquifer compartment.</doc>
+      </aux>
+      <aux name="concentration">
+        <eqn>1000 * Mass / aquifer_volume</eqn>
+        <units>mg/L</units>
+        <doc>Bulk aqueous concentration (1 kg/m3 = 1000 mg/L).</doc>
+      </aux>
+    </variables>
+    <views>
+      <view type="stock_flow">
+        <connector from="loading_rate" to="injection"/>
+        <connector from="spill_stop" to="injection"/>
+        <connector from="Mass" to="discharge"/>
+        <connector from="residence_time" to="discharge"/>
+        <connector from="decay_rate" to="decay"/>
+        <connector from="Mass" to="decay"/>
+        <connector from="Mass" to="concentration"/>
+        <connector from="aquifer_volume" to="concentration"/>
+      </view>
+    </views>
+  </model>
+</xmile>

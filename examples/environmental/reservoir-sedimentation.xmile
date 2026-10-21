@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Reservoir Sedimentation</name>
+    <vendor>sourcesink</vendor>
+    <product version="0.1">sourcesink</product>
+  </header>
+  <sim_specs method="Euler" time_units="year">
+    <start>0</start>
+    <stop>60</stop>
+    <dt>0.25</dt>
+    <saveEvery>1</saveEvery>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Sediment">
+        <eqn>0</eqn>
+        <units>m3</units>
+        <doc>Accumulated sediment volume behind the dam.</doc>
+        <inflows>
+          <flow>trapped</flow>
+        </inflows>
+        <outflows>
+          <flow>dredging</flow>
+        </outflows>
+      </stock>
+      <flow name="trapped">
+        <eqn>upstream_load * trap_efficiency</eqn>
+        <units>m3/year</units>
+        <doc>Sediment retained in the reservoir; the trapped fraction of the incoming load.</doc>
+      </flow>
+      <flow name="dredging">
+        <eqn>STEP(dredge_capacity, dredge_start)</eqn>
+        <units>m3/year</units>
+        <doc>Maintenance dredging that begins at dredge_start to manage sedimentation.</doc>
+      </flow>
+      <aux name="upstream_load">
+        <eqn>3000</eqn>
+        <units>m3/year</units>
+        <doc>Annual sediment delivery from the upstream watershed.</doc>
+      </aux>
+      <aux name="trap_efficiency">
+        <eqn>MAX(0, 1 - Sediment / capacity)</eqn>
+        <units>dimensionless</units>
+        <doc>Trap efficiency declines as the reservoir fills, so a full reservoir passes all incoming sediment.</doc>
+      </aux>
+      <aux name="capacity">
+        <eqn>100000</eqn>
+        <units>m3</units>
+        <doc>Original storage capacity of the reservoir.</doc>
+      </aux>
+      <aux name="remaining_capacity">
+        <eqn>capacity - Sediment</eqn>
+        <units>m3</units>
+        <doc>Storage capacity still available.</doc>
+      </aux>
+      <aux name="pass_through">
+        <eqn>upstream_load - trapped</eqn>
+        <units>m3/year</units>
+        <doc>Sediment that flushes past the dam without being retained.</doc>
+      </aux>
+      <aux name="dredge_capacity">
+        <eqn>2000</eqn>
+        <units>m3/year</units>
+        <doc>Dredging removal rate once active.</doc>
+      </aux>
+      <aux name="dredge_start">
+        <eqn>25</eqn>
+        <units>year</units>
+        <doc>Year at which dredging begins.</doc>
+      </aux>
+    </variables>
+    <views>
+      <view type="stock_flow">
+        <connector from="upstream_load" to="trapped"/>
+        <connector from="trap_efficiency" to="trapped"/>
+        <connector from="dredge_capacity" to="dredging"/>
+        <connector from="dredge_start" to="dredging"/>
+        <connector from="Sediment" to="trap_efficiency"/>
+        <connector from="capacity" to="trap_efficiency"/>
+        <connector from="capacity" to="remaining_capacity"/>
+        <connector from="Sediment" to="remaining_capacity"/>
+        <connector from="upstream_load" to="pass_through"/>
+        <connector from="trapped" to="pass_through"/>
+      </view>
+    </views>
+  </model>
+</xmile>

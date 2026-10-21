@@ -1,0 +1,604 @@
+/*
+ * Example gallery modal. All colors come from theme.css variables; class names
+ * are prefixed `file-` to avoid collisions with the other UI modules.
+ */
+
+.file-examples-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgb(15 18 22 / 45%);
+  backdrop-filter: blur(2px);
+  animation: file-fade-in 150ms var(--ease);
+}
+
+.file-examples {
+  display: flex;
+  flex-direction: column;
+  width: min(1080px, 100%);
+  max-height: min(86vh, 820px);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  outline: none;
+  animation: file-pop-in 150ms var(--ease);
+}
+
+.file-examples:focus-visible {
+  box-shadow: var(--shadow), 0 0 0 2px var(--accent);
+}
+
+.file-examples-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 22px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.file-examples-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+.file-examples-sub {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.file-examples-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 150ms var(--ease), color 150ms var(--ease),
+    border-color 150ms var(--ease);
+}
+
+.file-examples-close:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.file-examples-close:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+/* --- filters ------------------------------------------------------------ */
+
+.file-examples-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 22px 0;
+}
+
+.file-examples-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--faint);
+}
+
+.file-examples-search:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+  background: var(--surface);
+}
+
+.file-examples-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+}
+
+.file-examples-search input::placeholder {
+  color: var(--faint);
+}
+
+.file-examples-levels {
+  display: flex;
+  gap: 4px;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.file-examples-level {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 9px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 550;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.file-examples-level:hover {
+  color: var(--text);
+}
+
+.file-examples-level-on {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+}
+
+.file-examples-level:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.file-examples-level-count {
+  font-variant-numeric: tabular-nums;
+  color: var(--faint);
+}
+
+.file-examples-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 12px 22px 10px;
+}
+
+.file-examples-chip,
+.file-example-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 9px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 550;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.file-examples-chip {
+  cursor: pointer;
+}
+
+.file-examples-chip:hover {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.file-examples-chip:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.file-examples-chip-on {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.file-examples-chip-count {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.75;
+}
+
+/* Pastel category chips: a quiet wash with readable ink in both themes. */
+.file-examples-chip[data-category="environmental"],
+.file-example-chip[data-category="environmental"] {
+  --chip-fill: #dcf5e7;
+  --chip-ink: #1d6a45;
+  border-color: transparent;
+  background: var(--chip-fill);
+  color: var(--chip-ink);
+}
+
+.file-examples-chip[data-category="business"],
+.file-example-chip[data-category="business"] {
+  --chip-fill: #e2ebfc;
+  --chip-ink: #26478f;
+  border-color: transparent;
+  background: var(--chip-fill);
+  color: var(--chip-ink);
+}
+
+.file-examples-chip[data-category="resources"],
+.file-example-chip[data-category="resources"] {
+  --chip-fill: #faecd4;
+  --chip-ink: #7a4a12;
+  border-color: transparent;
+  background: var(--chip-fill);
+  color: var(--chip-ink);
+}
+
+.file-examples-chip[data-category="climate"],
+.file-example-chip[data-category="climate"] {
+  --chip-fill: #d9f1f7;
+  --chip-ink: #175c70;
+  border-color: transparent;
+  background: var(--chip-fill);
+  color: var(--chip-ink);
+}
+
+.file-examples-chip[data-category="ecology"],
+.file-example-chip[data-category="ecology"] {
+  --chip-fill: #f8e1ee;
+  --chip-ink: #7c2b57;
+  border-color: transparent;
+  background: var(--chip-fill);
+  color: var(--chip-ink);
+}
+
+.file-examples-chip[data-category="problem-solving"],
+.file-example-chip[data-category="problem-solving"] {
+  --chip-fill: #ece4fb;
+  --chip-ink: #4b2d88;
+  border-color: transparent;
+  background: var(--chip-fill);
+  color: var(--chip-ink);
+}
+
+:root[data-theme="dark"] .file-examples-chip[data-category],
+:root[data-theme="dark"] .file-example-chip[data-category] {
+  background: color-mix(in srgb, var(--chip-fill) 18%, transparent);
+  color: color-mix(in srgb, var(--chip-fill) 72%, white);
+}
+
+/* --- body, cards and detail -------------------------------------------- */
+
+.file-examples-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  border-top: 1px solid var(--border);
+}
+
+.file-examples-main {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+.file-examples-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+  padding: 16px 22px 22px;
+}
+
+.file-examples-empty {
+  margin: 0;
+  padding: 32px 22px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.file-example-card {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 14px;
+  text-align: left;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 150ms var(--ease), background 150ms var(--ease),
+    box-shadow 150ms var(--ease), transform 150ms var(--ease);
+}
+
+.file-example-card:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow);
+  transform: translateY(-1px);
+}
+
+.file-example-card:focus-visible,
+.file-example-card-on {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft), var(--shadow-sm);
+}
+
+.file-example-card-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.file-example-level-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--faint);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.file-example-title {
+  font-size: 14px;
+  font-weight: 620;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.file-example-summary {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.file-example-question {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--faint);
+  font-style: italic;
+}
+
+.file-example-source {
+  margin-top: auto;
+  padding-top: 2px;
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+
+.file-example-counts {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--faint);
+}
+
+.file-example-dot {
+  opacity: 0.6;
+}
+
+.file-example-detail {
+  display: flex;
+  flex-direction: column;
+  width: 330px;
+  flex: none;
+  gap: 8px;
+  padding: 18px 20px 22px;
+  border-left: 1px solid var(--border);
+  background: var(--surface-2);
+  overflow-y: auto;
+  animation: file-detail-in 150ms var(--ease);
+}
+
+.file-example-detail-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.file-example-detail-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-left: auto;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.file-example-detail-close:hover {
+  background: var(--surface);
+  color: var(--text);
+}
+
+.file-example-detail-title {
+  margin: 4px 0 0;
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.file-example-detail-summary {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.file-example-detail-heading {
+  margin: 10px 0 2px;
+  font-size: 10.5px;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.file-example-detail-text {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.file-example-references {
+  margin: 0;
+  padding-left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.file-example-references a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.file-example-references a:hover {
+  text-decoration: underline;
+}
+
+.file-example-detail-counts {
+  margin: 10px 0 0;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--faint);
+}
+
+.file-example-open {
+  margin-top: 4px;
+  padding: 8px 12px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: #ffffff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 150ms var(--ease), box-shadow 150ms var(--ease);
+}
+
+.file-example-open:hover {
+  filter: brightness(1.05);
+}
+
+.file-example-open:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+@keyframes file-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes file-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes file-detail-in {
+  from {
+    opacity: 0;
+    transform: translateX(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .file-examples-backdrop,
+  .file-examples,
+  .file-example-card,
+  .file-example-detail {
+    animation: none;
+    transition: none;
+  }
+}
+
+@media (max-width: 820px) {
+  .file-examples-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .file-examples-levels {
+    align-self: flex-start;
+  }
+
+  .file-examples-body {
+    flex-direction: column;
+  }
+
+  .file-example-detail {
+    width: auto;
+    border-left: 0;
+    border-top: 1px solid var(--border);
+  }
+}
+
+@media (max-width: 560px) {
+  .file-examples-backdrop {
+    padding: 12px;
+  }
+
+  .file-examples-grid {
+    grid-template-columns: 1fr;
+    padding: 14px;
+  }
+
+  .file-examples-toolbar,
+  .file-examples-chips {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+}

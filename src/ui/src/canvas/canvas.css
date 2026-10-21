@@ -1,0 +1,475 @@
+/*
+ * SourceSink — canvas styles. Only theme.css variables; all classes prefixed cv-.
+ */
+
+.cv-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  user-select: none;
+}
+
+.cv-flow {
+  background: var(--bg);
+}
+
+/* dotted background follows the theme */
+.cv-flow .react-flow__background-pattern.dots {
+  fill: var(--dots);
+}
+
+/* anchor handles are invisible attachment points only */
+.cv-flow .react-flow__handle {
+  opacity: 0;
+  pointer-events: none;
+  width: 2px;
+  height: 2px;
+  min-width: 2px;
+  min-height: 2px;
+  border: 0;
+  background: transparent;
+}
+
+/* drawing cursors */
+.cv-wrap[data-tool="stock"] .react-flow__pane,
+.cv-wrap[data-tool="converter"] .react-flow__pane,
+.cv-wrap[data-tool="flow"] .react-flow__pane,
+.cv-wrap[data-tool="connector"] .react-flow__pane,
+.cv-wrap[data-tool="stock"] .react-flow__node,
+.cv-wrap[data-tool="converter"] .react-flow__node,
+.cv-wrap[data-tool="flow"] .react-flow__node,
+.cv-wrap[data-tool="connector"] .react-flow__node {
+  cursor: crosshair;
+}
+
+/* --- nodes -------------------------------------------------------------- */
+/* Cards and chips in the AgenticNodes style: white surfaces, 1px borders, soft
+ * shadows, a pastel band keyed to the element kind, and text that never
+ * floats free of its shape. */
+
+.cv-stock {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  transition:
+    box-shadow 0.15s var(--ease),
+    border-color 0.15s var(--ease);
+}
+
+.cv-stock-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 11px 11px 0 0;
+  background: var(--stock-fill);
+  color: var(--stock-ink);
+}
+
+.cv-stock-name {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cv-stock-tag {
+  flex: none;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.cv-stock-body {
+  flex: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  padding: 6px 10px 0;
+  min-width: 0;
+}
+
+.cv-stock-final {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.cv-stock-units {
+  font-size: 11px;
+  color: var(--faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Discrete stocks keep a quiet hint of their mechanics in the body. */
+.cv-stock-conveyor .cv-stock-body {
+  background: repeating-linear-gradient(90deg, var(--border-strong) 0 1px, transparent 1px 10px) bottom / 100% 4px no-repeat;
+}
+
+.cv-stock-queue .cv-stock-body {
+  background: repeating-linear-gradient(90deg, transparent 0 18px, var(--border) 18px 19px);
+}
+
+.cv-stock-oven {
+  border-style: double;
+  border-width: 3px;
+}
+
+/* Arrayed elements: a stack of copies behind the shape. */
+.cv-arrayed {
+  box-shadow:
+    4px 4px 0 -1px var(--surface),
+    4px 4px 0 0 var(--border-strong),
+    var(--shadow);
+}
+
+.cv-converter,
+.cv-valve {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  line-height: 1;
+  transition:
+    box-shadow 0.15s var(--ease),
+    border-color 0.15s var(--ease);
+}
+
+.cv-converter {
+  justify-content: center;
+  background: var(--converter-fill);
+  color: var(--converter-ink);
+  border: 1px solid transparent;
+}
+
+.cv-converter.cv-arrayed-converter {
+  box-shadow:
+    3px 3px 0 -1px var(--converter-fill),
+    3px 3px 0 0 var(--border-strong);
+}
+
+.cv-valve {
+  background: var(--surface);
+  color: var(--flow-ink);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  padding-left: 8px;
+}
+
+.cv-chip-name {
+  min-width: 0;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cv-chip-value {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.cv-valve .cv-chip-name {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.cv-valve-bow {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  background: var(--flow);
+  clip-path: polygon(0 0, 50% 50%, 0 100%, 100% 100%, 50% 50%, 100% 0);
+  transition: background 0.15s var(--ease);
+}
+
+.cv-cloud {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+}
+
+.cv-cloud-shape {
+  fill: var(--surface);
+  stroke: var(--cloud);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+/* hover + selection */
+.cv-flow .react-flow__node:hover .cv-stock,
+.cv-flow .react-flow__node:hover .cv-valve {
+  border-color: var(--border-strong);
+}
+
+.cv-flow .react-flow__node:hover .cv-converter {
+  border-color: color-mix(in srgb, var(--converter) 35%, transparent);
+}
+
+.cv-flow .react-flow__node.selected .cv-stock,
+.cv-flow .react-flow__node.selected .cv-converter,
+.cv-flow .react-flow__node.selected .cv-valve {
+  border-color: var(--accent);
+  box-shadow:
+    0 0 0 3px var(--accent-soft),
+    var(--shadow);
+}
+
+.cv-flow .react-flow__node.selected .cv-valve-bow {
+  background: var(--accent);
+}
+
+/* AI-proposed elements: a small accent dot on the corner. */
+.cv-ai-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 2px var(--surface);
+  cursor: help;
+  z-index: 1;
+}
+
+/* --- edges --------------------------------------------------------------- */
+
+.cv-flow .react-flow__edge.selected .react-flow__edge-path,
+.cv-flow .react-flow__edge:hover .react-flow__edge-path {
+  stroke: var(--accent) !important;
+}
+
+/* --- ghost connector line -------------------------------------------------- */
+
+.cv-ghost {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 30;
+}
+
+.cv-ghost circle {
+  fill: var(--accent);
+}
+
+.cv-ghost-flow {
+  stroke: var(--pipe);
+  stroke-width: 3;
+  stroke-dasharray: 8 5;
+  stroke-linecap: round;
+}
+
+.cv-ghost-conn {
+  stroke: var(--connector);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 4;
+  stroke-linecap: round;
+}
+
+/* --- zoom controls: a floating vertical pill ----------------------------------- */
+
+.cv-flow .react-flow__controls {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  box-shadow: var(--shadow);
+}
+
+.cv-flow .react-flow__controls-button {
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  transition: background 0.15s var(--ease), color 0.15s var(--ease);
+}
+
+.cv-flow .react-flow__controls-button:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.cv-flow .react-flow__controls-button svg {
+  fill: currentColor;
+  stroke: currentColor;
+  max-width: 11px;
+  max-height: 11px;
+}
+
+/* The library credit stays (its authors ask that it be kept), quietly. */
+.cv-flow .react-flow__attribution {
+  background: transparent;
+  color: var(--faint);
+  opacity: 0.6;
+  font-size: 9px;
+}
+
+.cv-flow .react-flow__attribution a {
+  color: inherit;
+}
+
+/* --- "Tidy up" hint: a floating pill, top center --------------------------- */
+
+.cv-tidy-hint {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 6px 5px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  box-shadow: var(--shadow);
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+.cv-tidy-btn {
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.cv-tidy-btn:hover {
+  filter: brightness(1.08);
+}
+
+.cv-tidy-dismiss {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  color: var(--faint);
+  font-size: 15px;
+  line-height: 1;
+}
+
+.cv-tidy-dismiss:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+/* --- empty state ------------------------------------------------------------ */
+
+.cv-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.cv-empty-card {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13.5px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  padding: 18px 26px;
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.cv-empty-sub {
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+.cv-empty-card kbd {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  padding: 1px 7px;
+  color: var(--text);
+  margin: 0 2px;
+}
+
+/* --- toasts ------------------------------------------------------------------ */
+
+.cv-toasts {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  z-index: 50;
+  pointer-events: none;
+}
+
+.cv-toast {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  box-shadow: var(--shadow);
+  border-radius: var(--radius-sm);
+  padding: 8px 14px;
+  font-size: 12.5px;
+  max-width: 420px;
+  animation: cv-toast-in 0.18s var(--ease);
+}
+
+.cv-toast-error {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.cv-toast-success {
+  border-color: var(--success);
+  color: var(--success);
+}
+
+@keyframes cv-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Watershed Nitrogen Chain</name>
+    <vendor>SourceSink</vendor>
+    <product version="0.1.0">SourceSink</product>
+  </header>
+  <sim_specs method="Euler" time_units="month">
+    <start>0</start>
+    <stop>50</stop>
+    <dt>0.01</dt>
+    <saveper>1</saveper>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Soil">
+        <eqn>100</eqn>
+        <outflow name="Leach"/>
+      </stock>
+      <stock name="Stream">
+        <eqn>0</eqn>
+        <inflow name="Leach"/>
+        <outflow name="Export"/>
+      </stock>
+      <stock name="Estuary">
+        <eqn>0</eqn>
+        <inflow name="Export"/>
+      </stock>
+      <flow name="Leach">
+        <eqn>0.1 * Soil</eqn>
+      </flow>
+      <flow name="Export">
+        <eqn>0.2 * Stream</eqn>
+      </flow>
+    </variables>
+  </model>
+</xmile>

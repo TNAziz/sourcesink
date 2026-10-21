@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>SIR Epidemic with Vaccination</name>
+    <vendor>SourceSink</vendor>
+    <product version="0.1.0">SourceSink</product>
+  </header>
+  <sim_specs method="Euler" time_units="day">
+    <start>0</start>
+    <stop>100</stop>
+    <dt>0.01</dt>
+    <saveper>1</saveper>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="S">
+        <eqn>999</eqn>
+        <outflow name="Vaccination"/>
+        <outflow name="Infection"/>
+      </stock>
+      <stock name="I">
+        <eqn>1</eqn>
+        <inflow name="Infection"/>
+        <outflow name="Recovery"/>
+      </stock>
+      <stock name="R">
+        <eqn>0</eqn>
+        <inflow name="Vaccination"/>
+        <inflow name="Recovery"/>
+      </stock>
+      <flow name="Vaccination">
+        <eqn>PULSE(200, 20)</eqn>
+      </flow>
+      <flow name="Infection">
+        <eqn>Beta * S * I / N</eqn>
+      </flow>
+      <flow name="Recovery">
+        <eqn>Gamma * I</eqn>
+      </flow>
+      <aux name="Beta">
+        <eqn>0.4</eqn>
+      </aux>
+      <aux name="Gamma">
+        <eqn>0.1</eqn>
+      </aux>
+      <aux name="N">
+        <eqn>1000</eqn>
+      </aux>
+    </variables>
+  </model>
+</xmile>

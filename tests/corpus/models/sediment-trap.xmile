@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmile version="1.0">
+  <header>
+    <name>Reservoir Sediment Trapping</name>
+    <vendor>SourceSink</vendor>
+    <product version="0.1.0">SourceSink</product>
+  </header>
+  <sim_specs method="Euler" time_units="year">
+    <start>0</start>
+    <stop>60</stop>
+    <dt>0.5</dt>
+    <saveper>1</saveper>
+  </sim_specs>
+  <model>
+    <variables>
+      <stock name="Sediment">
+        <eqn>0</eqn>
+        <inflow name="Trapped"/>
+        <outflow name="Dredging"/>
+      </stock>
+      <flow name="Trapped">
+        <eqn>Upstream * MAX(0, 1 - Sediment / Capacity)</eqn>
+      </flow>
+      <flow name="Dredging">
+        <eqn>STEP(2000, 25)</eqn>
+      </flow>
+      <aux name="Upstream">
+        <eqn>3000</eqn>
+      </aux>
+      <aux name="Capacity">
+        <eqn>100000</eqn>
+      </aux>
+    </variables>
+  </model>
+</xmile>
